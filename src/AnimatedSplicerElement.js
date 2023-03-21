@@ -7,9 +7,25 @@ export default class AnimatedSplicerElement extends SplicerElement {
 
         this.animationActionController = AnimationActionController.fromAnimationName(
             splicer, animationName);
+        this.dependencies = {};
+    }
+
+    get animationState() {
+        return this.animationActionController.state;
+    }
+
+    checkDependencies(splicer) {
+        for (const dependency in this.dependencies) {
+            const state = splicer.elements[dependency].animationState;
+            if (state != this.dependencies[dependency]) return false;
+        }
+
+        return true;
     }
 
     onClick(splicer, event) {
-        this.animationActionController.toggle();
+        if (this.checkDependencies(splicer)) {
+            this.animationActionController.toggle();
+        }
     }
 };

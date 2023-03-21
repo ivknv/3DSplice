@@ -23,6 +23,9 @@ module.exports = {
             directory: path.join(__dirname, "static")
         },
         compress: true,
-        port: 8000
+        port: 8000,
+        devMiddleware: {
+            writeToDisk: false
+        }
     }
 };

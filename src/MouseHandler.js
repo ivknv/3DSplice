@@ -3,7 +3,7 @@ import * as THREE from "three";
 const DRAG_THRESHOLD = 2048;
 
 export default class MouseHandler {
-    constructor(rootElement) {
+    constructor(splicer, rootElement) {
         this.position = new THREE.Vector2(Infinity, Infinity);
         this.mouseDownPosition = this.position.clone();
         this.mouseDownSelection = null;
@@ -11,17 +11,17 @@ export default class MouseHandler {
         this.hoveredElement = null;
         this.raycaster = new THREE.Raycaster();
 
-        rootElement.addEventListener("pointermove", event => {
+        this.root.addEventListener("pointermove", event => {
             this.position.x = event.clientX / this.root.width * 2 - 1;
             this.position.y = -event.clientY / this.root.height * 2 + 1;
         });
 
-        rootElement.addEventListener("mousedown", event => {
+        this.root.addEventListener("mousedown", event => {
             this.mouseDownSelection = this.hoveredElement;
             this.mouseDownPosition.copy(this.position);
         });
 
-        rootElement.addEventListener("mouseup", event => {
+        this.root.addEventListener("mouseup", event => {
             const selection = this.hoveredElement;
 
             if (selection === null) return;
@@ -31,7 +31,7 @@ export default class MouseHandler {
 
             if (offset > DRAG_THRESHOLD) return;
 
-            selection.onClick(this, event);
+            selection.onClick(splicer, event);
         });
     }
 

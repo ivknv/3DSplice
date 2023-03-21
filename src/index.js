@@ -11,9 +11,17 @@ async function main() {
     renderer.toneMappingExposure = 0.8;
     renderer.physicallyCorrectLights = true;
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.logarithmicDepthBuffer = true;
 
     document.body.appendChild(renderer.domElement);
+
+    window.addEventListener("resize", function() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        renderer.setSize(w, h);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+    })
 
     scene.add(new THREE.AmbientLight("white", 3));
 
