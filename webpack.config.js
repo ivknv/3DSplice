@@ -15,6 +15,18 @@ module.exports = {
             {
                 test: /\.glb$/i,
                 type: "asset/resource"
+            },
+            {
+                test: /\.js$/i,
+                exclude: /node_modules/,
+                use: {
+                    loader: "babel-loader",
+                    options: {
+                        presets: [
+                            ["@babel/preset-env", {targets: "> 0.25%, not dead"}]
+                        ]
+                    }
+                }
             }
         ]
     },
