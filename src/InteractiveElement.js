@@ -1,10 +1,10 @@
-export default class SplicerElement {
-    constructor(splicer, objectNames) {
+export default class InteractiveElement {
+    constructor(model, objectNames) {
         this.objects = {};
         this._originalMaterials = {};
 
         for (const name of objectNames) {
-            this.objects[name] = splicer.model.getObjectByName(name);
+            this.objects[name] = model.getObjectByName(name);
         }
     }
 
@@ -37,7 +37,6 @@ export default class SplicerElement {
         }
     }
 
-    onClick(splicer, event) {
-        return;
-    }
+    onClick(application, event) {}
+    onFocusLoss(application) {}
 }

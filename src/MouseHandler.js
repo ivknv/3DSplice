@@ -3,12 +3,13 @@ import * as THREE from "three";
 const DRAG_THRESHOLD = 2048;
 
 export default class MouseHandler {
-    constructor(splicer, rootElement) {
+    constructor(application) {
         this.position = new THREE.Vector2(Infinity, Infinity);
         this.mouseDownPosition = this.position.clone();
         this.mouseDownSelection = null;
-        this.root = rootElement;
+        this.root = application.renderer.domElement;
         this.hoveredElement = null;
+        this.focusedElement = null;
         this.raycaster = new THREE.Raycaster();
 
         this.root.addEventListener("pointermove", event => {
@@ -24,14 +25,25 @@ export default class MouseHandler {
         this.root.addEventListener("mouseup", event => {
             const selection = this.hoveredElement;
 
-            if (selection === null) return;
+            if (selection === null) {
+                if (this.focusedElement) {
+                    this.focusedElement.onFocusLoss(this);
+                    this.focusedElement = null;
+                }
+                return;
+            }
 
             const resolution = this.root.width * this.root.width + this.root.height * this.root.height;
             const offset = this.position.distanceToSquared(this.mouseDownPosition) * resolution;
 
             if (offset > DRAG_THRESHOLD) return;
 
-            selection.onClick(splicer, event);
+            selection.onClick(application, event);
+
+            if (selection !== this.focusedElement && this.focusedElement) {
+                this.focusedElement.onFocusLoss(this);
+            }
+            this.focusedElement = selection;
         });
     }
 
@@ -43,12 +55,12 @@ export default class MouseHandler {
         return element === this.hoveredElement;
     }
 
-    updateHover(splicer) {
-        this.raycaster.setFromCamera(this.position, splicer.camera);
+    updateHover(application) {
+        this.raycaster.setFromCamera(this.position, application.camera);
 
-        const intersection = this.raycaster.intersectObjects(splicer.model.children);
+        const intersection = this.raycaster.intersectObjects(application.models);
         const obj = intersection.length ? intersection[0].object : null;
-        const element = splicer.getElementByObjectName(obj?.name);
+        const element = application.getElementByObject(obj);
 
         if (this.isCurrentlyHovered(element)) return;
 
@@ -63,8 +75,8 @@ export default class MouseHandler {
         }
     }
 
-    update(splicer)
+    update(application)
     {
-        this.updateHover(splicer);
+        this.updateHover(application);
     }
 }

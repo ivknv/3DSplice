@@ -1,13 +1,16 @@
 import * as THREE from "three";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader";
 import AnimatedSplicerElement from "./AnimatedSplicerElement";
-import SplicerElement from "./SplicerElement";
-import MouseHandler from "./MouseHandler";
-import Model from "./Model.js";
+import InteractiveElement from "./InteractiveElement";
+import Model from "./Model";
 
 class LidElement extends AnimatedSplicerElement {
     constructor(splicer) {
-        super(splicer, ["Splice_Lid", "Cube057", "Cube058", "Cube059"], "Open Lid");
+        super(
+            splicer.model,
+            splicer.animations,
+            splicer.mixer,
+            ["Splice_Lid", "Cube057", "Cube058", "Cube059"], "Open Lid");
 
         this.dependencies = {
             clampBars: "initial",
@@ -19,10 +22,15 @@ class LidElement extends AnimatedSplicerElement {
 
 class ClampBarsElement extends AnimatedSplicerElement {
     constructor(splicer) {
-        super(splicer, [
-            "Fiber_Clamp_Bar", "Fiber_Clamp_Handle", "Fiber_Clamp_Bar_End",
-            "Fiber_Clamp_Presser_Leg", "Cube068", "Cube068_1", "Screw010"
-        ], "Lift Up Clamp Bar");
+        super(
+            splicer.model,
+            splicer.animations,
+            splicer.mixer,
+            [
+                "Fiber_Clamp_Bar", "Fiber_Clamp_Handle", "Fiber_Clamp_Bar_End",
+                "Fiber_Clamp_Presser_Leg", "Cube068", "Cube068_1", "Screw010"
+            ],
+            "Lift Up Clamp Bar");
 
         this.dependencies = {
             lid: "completed",
@@ -33,9 +41,14 @@ class ClampBarsElement extends AnimatedSplicerElement {
 
 class FiberClampsElement extends AnimatedSplicerElement {
     constructor(splicer) {
-        super(splicer, [
-            "Cube054_1", "Cube054_2", "Fiber_Cladding_Clamp_(outer)",
-        ], "Lift Up Clamp");
+        super(
+            splicer.model,
+            splicer.animations,
+            splicer.mixer,
+            [
+                "Cube054_1", "Cube054_2", "Fiber_Cladding_Clamp_(outer)",
+            ],
+            "Lift Up Clamp");
 
         this.dependencies = {
             lid: "completed",
@@ -46,7 +59,7 @@ class FiberClampsElement extends AnimatedSplicerElement {
 
 class ScreenElement extends AnimatedSplicerElement {
     constructor(splicer) {
-        super(splicer, ["Screen"], "Rotate Screen");
+        super(splicer.model, splicer.animations, splicer.mixer, ["Screen"], "Rotate Screen");
 
         this.dependencies = {
             screenBearing: "initial"
@@ -56,7 +69,12 @@ class ScreenElement extends AnimatedSplicerElement {
 
 class ScreenBearingElement extends AnimatedSplicerElement {
     constructor(splicer) {
-        super(splicer, ["Cube108", "Cube108_1", "Screen_Hinge", "Screen_Hinge001"], "Rotate Screen Bearing");
+        super(
+            splicer.model,
+            splicer.animations,
+            splicer.mixer,
+            ["Cube108", "Cube108_1", "Screen_Hinge", "Screen_Hinge001"],
+            "Rotate Screen Bearing");
 
         this.dependencies = {
             screen: "completed",
@@ -67,54 +85,51 @@ class ScreenBearingElement extends AnimatedSplicerElement {
 
 class HeaterMainLidElement extends AnimatedSplicerElement {
     constructor(splicer) {
-        super(splicer, ["Heater_Lid", "Cube014"], "Open Heating Chamber Lid");
+        super(
+            splicer.model,
+            splicer.animations,
+            splicer.mixer,
+            ["Heater_Lid", "Cube014"],
+            "Open Heating Chamber Lid");
     }
 }
 
 class HeaterSideLidsElement extends AnimatedSplicerElement {
     constructor(splicer) {
-        super(splicer, ["Cube016"], "Lift Up Heating Chamber Side Lid");
+        super(
+            splicer.model,
+            splicer.animations,
+            splicer.mixer,
+            ["Cube016"],
+            "Lift Up Heating Chamber Side Lid");
     }
 }
 
-class SetButtonElement extends SplicerElement {
+class SetButtonElement extends InteractiveElement {
     constructor(splicer) {
-        super(splicer, ["Cube135", "Cube135_1"]);
+        super(splicer.model, ["Cube135", "Cube135_1"]);
     }
-};
+}
 
-class ResetButtonElement extends SplicerElement {
+class ResetButtonElement extends InteractiveElement {
     constructor(splicer) {
-        super(splicer, ["Cube136", "Cube136_1"]);
+        super(splicer.model, ["Cube136", "Cube136_1"]);
     }
-};
+}
 
-class HeatButtonElement extends SplicerElement {
+class HeatButtonElement extends InteractiveElement {
     constructor(splicer) {
-        super(splicer, ["Cube137", "Cube137_1"]);
+        super(splicer.model, ["Cube137", "Cube137_1"]);
     }
-};
+}
 
 export default class Splicer {
-    constructor(camera, rootElement) {
+    constructor() {
         this.model = null;
         this.animations = null;
         this.mixer = null;
         this.loader = new GLTFLoader();
-        this.camera = camera;
         this.elements = {};
-
-        this.mouseHandler = new MouseHandler(this, rootElement);
-    }
-
-    getElementByObjectName(objectName) {
-        for (const elementName in this.elements) {
-            const element = this.elements[elementName];
-
-            if (objectName in element.objects) return element;
-        }
-
-        return null;
     }
 
     load() {
@@ -135,13 +150,21 @@ export default class Splicer {
                     resetButton: new ResetButtonElement(this),
                     heatButton: new HeatButtonElement(this)
                 };
+
                 resolve();
             }, reject);
         });
     }
 
+    addToApplication(application) {
+        application.addModel(this.model);
+
+        for (const element in this.elements) {
+            application.addElement(this.elements[element]);
+        }
+    }
+
     update() {
-        this.mouseHandler.update(this);
         this.mixer.update(1 / 10.0);
     }
 }

@@ -19,10 +19,10 @@ export default class AnimationActionController {
         });
     }
 
-    static fromAnimationName(splicer, name) {
-        const animation = THREE.AnimationClip.findByName(splicer.animations, name);
+    static fromAnimationName(animations, mixer, name) {
+        const animation = THREE.AnimationClip.findByName(animations, name);
 
-        return new AnimationActionController(splicer.mixer, animation);
+        return new AnimationActionController(mixer, animation);
     }
 
     toggle() {

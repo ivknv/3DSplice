@@ -1,12 +1,12 @@
-import SplicerElement from "./SplicerElement";
+import InteractiveElement from "./InteractiveElement";
 import AnimationActionController from "./AnimationActionController";
 
-export default class AnimatedSplicerElement extends SplicerElement {
-    constructor(splicer, objectNames, animationName) {
-        super(splicer, objectNames);
+export default class AnimatedInteractiveElement extends InteractiveElement {
+    constructor(model, animations, mixer, objectNames, animationName) {
+        super(model, objectNames);
 
         this.animationActionController = AnimationActionController.fromAnimationName(
-            splicer, animationName);
+            animations, mixer, animationName);
         this.dependencies = {};
     }
 
@@ -14,17 +14,17 @@ export default class AnimatedSplicerElement extends SplicerElement {
         return this.animationActionController.state;
     }
 
-    checkDependencies(splicer) {
+    checkDependencies(application) {
         for (const dependency in this.dependencies) {
-            const state = splicer.elements[dependency].animationState;
+            const state = application.splicer.elements[dependency].animationState;
             if (state != this.dependencies[dependency]) return false;
         }
 
         return true;
     }
 
-    onClick(splicer, event) {
-        if (this.checkDependencies(splicer)) {
+    onClick(application, event) {
+        if (this.checkDependencies(application)) {
             this.animationActionController.toggle();
         }
     }
