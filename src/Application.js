@@ -33,6 +33,12 @@ export default class Application {
 
         const hashParameters = parseURLHashParameters();
 
+        this.statsEnabled = hashParameters["stats"] === "true";
+
+        if (!this.statsEnabled) {
+            this.stats.domElement.style.display = "none";
+        }
+
         const rendererParameters = {
             antialias: hashParameters["antialias"] !== "false",
             depth: hashParameters["depth"] !== "false",
@@ -54,6 +60,7 @@ export default class Application {
         this.renderer.toneMapping = THREE.ReinhardToneMapping;
         this.renderer.toneMappingExposure = 0.8;
         this.renderer.physicallyCorrectLights = hashParameters["physicallyCorrectLights"] !== "false";
+        this.renderer.localClippingEnabled = hashParameters["localClippingEnabled"] !== "true";
         this.renderer.setPixelRatio(clamp(pixelRatio, 0.1, 1));
         this.renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -66,7 +73,9 @@ export default class Application {
             this.camera.updateProjectionMatrix();
         });
 
-        this.setupLights();
+        const enabledLights = (hashParameters["lights"] || "left,right,back,front").split(",");
+
+        this.setupLights(enabledLights);
 
         this.state = "initial";
 
@@ -177,29 +186,34 @@ export default class Application {
         return null;
     }
 
-    setupLights() {
+    setupLights(enabledLights) {
         this.scene.add(new THREE.AmbientLight("white", 3));
 
-        const directionalLights = [
-            {
+        enabledLights = enabledLights || ["back", "front", "left", "right"];
+
+        const directionalLights = {
+            back: {
                 position: new THREE.Vector3(0, 100, -100),
                 intensity: 10
             }, // back
-            {
+            right: {
                 position: new THREE.Vector3(100, 100, -100),
                 intensity: 10
             }, // right
-            {
+            left: {
                 position: new THREE.Vector3(-100, 100, -100),
                 intensity: 10
             }, // left
-            {
+            front: {
                 position: new THREE.Vector3(0, 20, 100),
                 intensity: 10
-            }, // front
-        ];
+            } // front
+        };
 
-        for (const directionalLight of directionalLights) {
+        for (const direction of enabledLights) {
+            const directionalLight = directionalLights[direction];
+            if (!directionalLight) continue;
+
             const light = new THREE.DirectionalLight("white", directionalLight.intensity);
             light.position.copy(directionalLight.position);
 
