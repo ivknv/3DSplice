@@ -5,7 +5,20 @@ module.exports = {
     entry: "./src/index.js",
     output: {
         filename: "main.js",
-        path: path.resolve(__dirname, "dist")
+        path: path.resolve(__dirname, "dist"),
+        environment: {
+            arrowFunction: false,
+            bigIntLiteral: false,
+            const: false,
+            destructuring: false,
+            dynamicImport: false,
+            forOf: false,
+            module: false
+        }
+    },
+    performance: {
+        maxEntrypointSize: 5000000,
+        maxAssetSize: 5000000
     },
     plugins: [
         new HtmlWebpackPlugin({template: "./src/index.html"})
@@ -18,12 +31,23 @@ module.exports = {
             },
             {
                 test: /\.js$/i,
-                exclude: /node_modules/,
+                //exclude: /node_modules/,
                 use: {
                     loader: "babel-loader",
                     options: {
+                        compact: true,
                         presets: [
-                            ["@babel/preset-env", {targets: "> 0.25%, not dead"}]
+                            [
+                                "@babel/preset-env",
+                                {
+                                    useBuiltIns: "entry",
+                                    targets: {browsers: [">0.25%, not dead"]},
+                                    corejs: {
+                                        version: 3,
+                                        proposals: true
+                                    }
+                                }
+                            ]
                         ]
                     }
                 }
