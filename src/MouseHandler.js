@@ -13,8 +13,11 @@ export default class MouseHandler {
         this.raycaster = new THREE.Raycaster();
 
         this.root.addEventListener("pointermove", event => {
-            this.position.x = event.clientX / this.root.width * 2 - 1;
-            this.position.y = -event.clientY / this.root.height * 2 + 1;
+            const ratio = application.renderer.getPixelRatio();
+            const w = this.root.width / ratio;
+            const h = this.root.height / ratio;
+            this.position.x = event.clientX / w * 2 - 1;
+            this.position.y = -event.clientY / h * 2 + 1;
         });
 
         this.root.addEventListener("mousedown", event => {

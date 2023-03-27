@@ -8,16 +8,53 @@ import SpliceProtectionCaseModel from "./SpliceProtectionCaseModel";
 import Model from "./Model";
 import FiberModel from "./FiberModel";
 import {parseGLTF} from "./gltf";
+import {clamp} from "./common";
+import Stats from "stats.js";
+
+function parseURLHashParameters() {
+    const q = window.location.hash.substring(1);
+    const keyValuePairs = q.split(";");
+
+    const parameters = new Map();
+
+    for (const keyValuePair of keyValuePairs) {
+        const [key, value] = keyValuePair.split(":");
+        parameters[key] = value;
+    }
+
+    return parameters;
+}
 
 export default class Application {
     constructor() {
+        this.stats = new Stats();
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(20, window.innerWidth / window.innerHeight, 0.025, 1000);
 
-        this.renderer = new THREE.WebGLRenderer({antialias: true});
+        const hashParameters = parseURLHashParameters();
+
+        const rendererParameters = {
+            antialias: hashParameters["antialias"] !== "false",
+            depth: hashParameters["depth"] !== "false",
+            stencil: hashParameters["stencil"] !== "false",
+            preserveDrawingBuffer: hashParameters["preserveDrawingBuffer"] !== "false"
+        };
+
+        if (["highp", "mediump", "lowp"].indexOf(hashParameters["precision"]) !== -1) {
+            rendererParameters.precision = hashParameters["precision"];
+        }
+
+        if (["high-performance", "low-power", "default"].indexOf(hashParameters["powerPreference"]) !== -1) {
+            rendererParameters.powerPreference = hashParameters["powerPreference"];
+        }
+
+        const pixelRatio = parseFloat(hashParameters["pixelRatio"] || "1.0");
+
+        this.renderer = new THREE.WebGLRenderer(rendererParameters);
         this.renderer.toneMapping = THREE.ReinhardToneMapping;
         this.renderer.toneMappingExposure = 0.8;
-        this.renderer.physicallyCorrectLights = true;
+        this.renderer.physicallyCorrectLights = hashParameters["physicallyCorrectLights"] !== "false";
+        this.renderer.setPixelRatio(clamp(pixelRatio, 0.1, 1));
         this.renderer.setSize(window.innerWidth, window.innerHeight);
 
         window.addEventListener("resize", () => {
@@ -115,6 +152,8 @@ export default class Application {
         this.rightFiber.addToApplication(this);
         this.leftFiber.addToApplication(this);
         this.spliceProtectionCase.addToApplication(this);
+
+        this.stats.showPanel(0);
     }
 
     getElementByObject(obj) {
@@ -181,8 +220,13 @@ export default class Application {
     animate() {
         // We do it this way to keep `this` bound
         const animateFunc = () => {
+            this.stats.begin();
+
             this.update();
             this.renderer.render(this.scene, this.camera);
+
+            this.stats.end();
+
             requestAnimationFrame(animateFunc);
         };
 
