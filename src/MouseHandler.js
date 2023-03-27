@@ -23,11 +23,13 @@ export default class MouseHandler {
         });
 
         this.root.addEventListener("mouseup", event => {
-            const selection = this.hoveredElement;
+            let selection = this.hoveredElement;
 
             if (selection === null) {
                 if (this.focusedElement) {
-                    this.focusedElement.onFocusLoss(this);
+                    if (this.focusedElement.active) {
+                        this.focusedElement.onFocusLoss(this);
+                    }
                     this.focusedElement = null;
                 }
                 return;
@@ -38,10 +40,18 @@ export default class MouseHandler {
 
             if (offset > DRAG_THRESHOLD) return;
 
-            selection.onClick(application, event);
+            if (!selection.active) {
+                selection = null;
+            }
+
+            if (selection) {
+                selection.onClick(application, event);
+            }
 
             if (selection !== this.focusedElement && this.focusedElement) {
-                this.focusedElement.onFocusLoss(this);
+                if (this.focusedElement.active) {
+                    this.focusedElement.onFocusLoss(this);
+                }
             }
             this.focusedElement = selection;
         });
@@ -60,23 +70,44 @@ export default class MouseHandler {
 
         const intersection = this.raycaster.intersectObjects(application.models);
         const obj = intersection.length ? intersection[0].object : null;
-        const element = application.getElementByObject(obj);
+        let element = application.getElementByObject(obj);
 
-        if (this.isCurrentlyHovered(element)) return;
+        if (this.isCurrentlyHovered(element)) {
+            if (element && !element.active) {
+                element.clearHighlight();
+                this.root.style.cursor = "auto";
+                this.hoveredElement = null;
+            }
+            return;
+        }
 
         if (this.isHovering()) {
             this.hoveredElement.clearHighlight();
+            this.root.style.cursor = "auto";
+        }
+
+        if (element && !element.active) {
+            element = null;
         }
 
         this.hoveredElement = element;
 
         if (element !== null) {
             element.highlight();
+            this.root.style.cursor = "pointer";
         }
     }
 
     update(application)
     {
         this.updateHover(application);
+    }
+
+    addToApplication(application) {
+        application.addObject(this);
+    }
+
+    removeFromApplication(application) {
+        application.removeObject(this);
     }
 }

@@ -3,8 +3,11 @@ import Application from "./Application";
 async function main() {
     const application = new Application();
 
-    document.body.appendChild(application.renderer.domElement);
+    document.querySelector("#main").appendChild(application.renderer.domElement);
     await application.initialize();
+
+    application.renderer.domElement.style.position = "absolute";
+    application.renderer.domElement.style.zIndex = "1";
 
     application.animate();
 }

@@ -16,7 +16,7 @@ export default class AnimatedInteractiveElement extends InteractiveElement {
 
     checkDependencies(application) {
         for (const dependency in this.dependencies) {
-            const state = application.splicer.elements[dependency].animationState;
+            const state = application.splicer.children[dependency].animationState;
             if (state != this.dependencies[dependency]) return false;
         }
 

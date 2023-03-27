@@ -1,8 +1,7 @@
 import * as THREE from "three";
-import {GLTFLoader} from "three/addons/loaders/GLTFLoader";
 import AnimatedSplicerElement from "./AnimatedSplicerElement";
 import InteractiveElement from "./InteractiveElement";
-import Model from "./Model";
+import FusedFiber from "./FusedFiber";
 
 class LidElement extends AnimatedSplicerElement {
     constructor(splicer) {
@@ -109,6 +108,36 @@ class SetButtonElement extends InteractiveElement {
     constructor(splicer) {
         super(splicer.model, ["Cube135", "Cube135_1"]);
     }
+
+    onClick(application, event) {
+        // Don't do anything until the lid is closed
+        if (application.splicer.children.lid.animationState != "initial") return;
+
+        const leftFiber = application.leftFiber;
+        const rightFiber = application.rightFiber;
+
+        // Check that the distances between the fibers are small enough
+        if (Math.abs(leftFiber.getTipPosition().x - leftFiber.maxX) > 0.0015) return;
+        if (Math.abs(rightFiber.getTipPosition().x - rightFiber.minX) > 0.0015) return;
+
+        // Move fibers together (and fuse them)
+        leftFiber.setTipPosition(0.0003);
+        rightFiber.setTipPosition(-0.0003);
+
+        leftFiber.removeFromApplication(application);
+        rightFiber.removeFromApplication(application);
+
+        leftFiber.active = false;
+        rightFiber.active = false;
+
+        const fiber = new FusedFiber(leftFiber, rightFiber);
+
+        application.addElement(fiber);
+        application.addModel(fiber.model);
+        application.fusedFiber = fiber;
+
+        application.state = "splice_completed"
+    }
 }
 
 class ResetButtonElement extends InteractiveElement {
@@ -123,48 +152,28 @@ class HeatButtonElement extends InteractiveElement {
     }
 }
 
-export default class Splicer {
-    constructor() {
-        this.model = null;
-        this.animations = null;
-        this.mixer = null;
-        this.loader = new GLTFLoader();
-        this.elements = {};
+export default class Splicer extends InteractiveElement {
+    constructor(model, animations) {
+        super(model, []);
+
+        this.animations = animations;
+        this.mixer = new THREE.AnimationMixer(this.model);
+        this.children = {
+            lid: new LidElement(this),
+            clampBars: new ClampBarsElement(this),
+            fiberClamps: new FiberClampsElement(this),
+            screen: new ScreenElement(this),
+            screenBearing: new ScreenBearingElement(this),
+            mainHeaterLid: new HeaterMainLidElement(this),
+            heaterSideLids: new HeaterSideLidsElement(this),
+            setButton: new SetButtonElement(this),
+            resetButton: new ResetButtonElement(this),
+            heatButton: new HeatButtonElement(this)
+        };
     }
 
-    load() {
-        return new Promise((resolve, reject) => {
-            this.loader.parse(Model, "", gltf => {
-                this.model = gltf.scene.children[0];
-                this.animations = gltf.animations;
-                this.mixer = new THREE.AnimationMixer(this.model);
-                this.elements = {
-                    lid: new LidElement(this),
-                    clampBars: new ClampBarsElement(this),
-                    fiberClamps: new FiberClampsElement(this),
-                    screen: new ScreenElement(this),
-                    screenBearing: new ScreenBearingElement(this),
-                    mainHeaterLid: new HeaterMainLidElement(this),
-                    heaterSideLids: new HeaterSideLidsElement(this),
-                    setButton: new SetButtonElement(this),
-                    resetButton: new ResetButtonElement(this),
-                    heatButton: new HeatButtonElement(this)
-                };
-
-                resolve();
-            }, reject);
-        });
-    }
-
-    addToApplication(application) {
-        application.addModel(this.model);
-
-        for (const element in this.elements) {
-            application.addElement(this.elements[element]);
-        }
-    }
-
-    update() {
+    update(application) {
+        super.update(application);
         this.mixer.update(1 / 10.0);
     }
 }
