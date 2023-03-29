@@ -25,7 +25,7 @@ function parseURLHashParameters() {
     return parameters;
 }
 
-export default class Application {
+export class ApplicationClass {
     constructor() {
         this.stats = new Stats();
         this.scene = new THREE.Scene();
@@ -64,6 +64,9 @@ export default class Application {
         this.renderer.setPixelRatio(clamp(pixelRatio, 0.1, 1));
         this.renderer.setSize(window.innerWidth, window.innerHeight);
 
+        this.clock = new THREE.Clock();
+        this.clockDelta = 0;
+
         window.addEventListener("resize", () => {
             const w = window.innerWidth;
             const h = window.innerHeight;
@@ -78,6 +81,11 @@ export default class Application {
         this.setupLights(enabledLights);
 
         this.state = "initial";
+        this.leftFiberPlaced = false;
+        this.rightFiberPlaced = false;
+        this.spliceCompleted = false;
+        this.spliceProtectionPlaced = false;
+        this.heatingCompleted = false;
 
         this.splicerAnimations = null;
         this.splicerModel = null;
@@ -97,15 +105,20 @@ export default class Application {
 
         this.elements = [];
         this.models = [];
-        this.mouseHandler = new MouseHandler(this);
+        this.mouseHandler = null;
 
         this.spliceProtectionCase = null;
         this.fusedFiber = null;
 
+        this.instructionsElement = document.querySelector("#instructions");
+
         this.objects = [];
 
-        this.addObject(this.mouseHandler);
-        this.addObject(this.controls);
+        this.tooltipElement = null;
+    }
+
+    get fibersPlaced() {
+        return this.leftFiberPlaced && this.rightFiberPlaced;
     }
 
     addObject(object) {
@@ -138,7 +151,16 @@ export default class Application {
         this.scene.remove(model);
     }
 
+    setInstructionText(text) {
+        this.instructionsElement.innerText = text;
+    }
+
     async initialize() {
+        this.mouseHandler = new MouseHandler();
+
+        this.addObject(this.mouseHandler);
+        this.addObject(this.controls);
+
         const splicerGLTF = await parseGLTF(Model);
         this.splicerModel = splicerGLTF.scene.children[0];
         this.splicerAnimations = splicerGLTF.animations;
@@ -157,12 +179,59 @@ export default class Application {
 
         this.splicer.model.position.y = -0.07;
 
-        this.splicer.addToApplication(this);
-        this.rightFiber.addToApplication(this);
-        this.leftFiber.addToApplication(this);
-        this.spliceProtectionCase.addToApplication(this);
+        this.splicer.addToApplication();
+        this.rightFiber.addToApplication();
+        this.leftFiber.addToApplication();
+        this.spliceProtectionCase.addToApplication();
 
         this.stats.showPanel(0);
+
+        this.tooltipElement = document.querySelector("#tooltip");
+
+        this.setInstructionText("Откройте крышку сварочного аппарата");
+
+        this.splicer.children.lid.onOpened = () => {
+            if (this.state === "initial" || this.state === "splice_completed") {
+                this.setInstructionText("Поднимите зажимы для волокна");
+            }
+        };
+
+        this.splicer.children.lid.onClosed = () => {
+            if (this.state === "initial" && this.fibersPlaced) {
+                this.setInstructionText("Нажмите кнопку SET");
+            } else if (this.state === "initial" || this.state === "splice_completed") {
+                this.setInstructionText("Откройте крышку сварочного аппарата");
+            }
+        };
+
+        this.splicer.children.fiberClamps.onLifted = () => {
+            if (this.state === "initial") {
+                this.setInstructionText("Поместите волокна в сварочный аппарат");
+            } else if (this.state === "splice_completed") {
+                this.setInstructionText("Расположите гильзу КДЗС в центре места сварки");
+            }
+        };
+
+        this.splicer.children.fiberClamps.onLowered = () => {
+            if (this.state === "initial") {
+                this.setInstructionText("Опустите зажимы");
+            }
+        };
+
+        this.splicer.children.clampBars.onLowered = () => {
+            if (this.state === "initial") {
+                this.setInstructionText("Закройте крышку сварочного аппарата");
+            }
+        };
+    }
+
+    changeState(newState) {
+        if (newState === this.state) return;
+
+        const oldState = this.state;
+
+        this.state = newState;
+        this.onStateChanged(oldState, newState);
     }
 
     getElementByObject(obj) {
@@ -235,6 +304,7 @@ export default class Application {
         // We do it this way to keep `this` bound
         const animateFunc = () => {
             this.stats.begin();
+            this.clockDelta = this.clock.getDelta();
 
             this.update();
             this.renderer.render(this.scene, this.camera);
@@ -247,3 +317,6 @@ export default class Application {
         animateFunc();
     }
 }
+
+const Application = new ApplicationClass();
+export default Application;

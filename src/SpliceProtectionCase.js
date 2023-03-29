@@ -1,16 +1,29 @@
-import {Vector3, Raycaster} from "three";
+import * as THREE from "three";
 import InteractiveElement from "./InteractiveElement";
+import AnimationActionController from "./AnimationActionController";
+import Application from "./Application";
 import {clamp} from "./common";
 
 export default class SpliceProtectionCase extends InteractiveElement {
     constructor(model) {
         super(model, ["Cube", "Cylinder001"]);
 
-        this.originalPosition = new Vector3();
-        this.mouseDownPoint = new Vector3();
+        this.originalPosition = new THREE.Vector3();
+        this.mouseDownPoint = new THREE.Vector3();
         this.held = false;
-        this.raycaster = new Raycaster();
+        this.raycaster = new THREE.Raycaster();
         this.delta = 0;
+
+        const plasticCase = this.model.getObjectByName("Cube");
+        this.metalRod = this.model.getObjectByName("Cylinder001");
+
+        this.mixer = new THREE.AnimationMixer(plasticCase);
+        this.keyframes = new THREE.VectorKeyframeTrack(
+            ".scale", [0, 15], [1, 1, 1, 5/6, 2/3, 2/3], THREE.InterpolateSmooth);
+        this.animationClip = new THREE.AnimationClip("Shrink", 15, [this.keyframes]);
+        this.animationActionController = new AnimationActionController(this.mixer, this.animationClip, this);
+
+        this.tooltip = "Переместить гильзу КДЗС";
     }
 
     setPosition(x, y, z) {
@@ -18,16 +31,33 @@ export default class SpliceProtectionCase extends InteractiveElement {
         this.originalPosition.set(x, y, z);
     }
 
-    onClick(application, event) {
+    isCentered() {
+        return Math.abs(this.model.position.x) < 0.005;
+    }
+
+    checkPlacement() {
+        const placed = this.isCentered();
+
+        if (Application.spliceProtectionPlaced !== placed && placed) {
+            Application.setInstructionText("Поместите волокно с КДЗС в нагреватель");
+        } else if (!placed) {
+            Application.setInstructionText("Расположите гильзу КДЗС в центре места сварки");
+        }
+
+        Application.spliceProtectionPlaced = placed;
+    }
+
+    onClick(event) {
         if (!this.held) {
-            if (application.splicer.children.fiberClamps.animationState != "completed") {
-                if (application.state === "initial") return;
-            }
+            if (Application.splicer.children.fiberClamps.animationState != "completed") return;
+            if (Application.state !== "splice_completed") return;
 
             this.originalPosition.copy(this.model.position);
 
             this.mouseDownPoint = this.projectMouseOntoModel(
-                application.mouseHandler.mouseDownPosition, application.camera);
+                Application.mouseHandler.mouseDownPosition, Application.camera);
+        } else {
+            this.checkPlacement();
         }
 
         this.held = !this.held;
@@ -47,34 +77,44 @@ export default class SpliceProtectionCase extends InteractiveElement {
         return projected;
     }
 
-    updateRotation(application) {
-        const x = -this.delta - (this.originalPosition.x - application.rightFiber.model.position.x);
-        const maxX = application.state === "initial" ? 
-            -application.rightFiber.getTipPosition().x + application.rightFiber.model.position.x - 0.03 :
-            -application.rightFiber.getTipPosition().x + application.rightFiber.model.position.x + 0.1;
+    updateRotation() {
+        const x = -this.delta - (this.originalPosition.x - Application.rightFiber.model.position.x);
+        const maxX = Application.state === "initial" ? 
+            -Application.rightFiber.getTipPosition().x + Application.rightFiber.model.position.x - 0.03 :
+            -Application.rightFiber.getTipPosition().x + Application.rightFiber.model.position.x + 0.1;
         const minX = 0.07;
-        const newPosition = new Vector3(0, clamp(x, minX, maxX, 0));
-        newPosition.applyAxisAngle(new Vector3(0, 0, 1), application.rightFiber.model.rotation.z);
-        this.model.rotation.z = -Math.PI * 0.5 + application.rightFiber.model.rotation.z;
-        this.model.position.x = newPosition.x + application.rightFiber.model.position.x;
-        this.model.position.y = newPosition.y + 0.001 + application.rightFiber.model.position.y;
-        this.model.position.z = newPosition.z + application.rightFiber.model.position.z;
+        const newPosition = new THREE.Vector3(0, clamp(x, minX, maxX, 0));
+        newPosition.applyAxisAngle(new THREE.Vector3(0, 0, 1), Application.rightFiber.model.rotation.z);
+        this.model.rotation.z = -Math.PI * 0.5 + Application.rightFiber.model.rotation.z;
+        this.model.position.x = newPosition.x + Application.rightFiber.model.position.x;
+        this.model.position.y = newPosition.y + 0.001 + Application.rightFiber.model.position.y;
+        this.model.position.z = newPosition.z + Application.rightFiber.model.position.z;
     }
 
-    update(application) {
+    update() {
+        this.mixer.update(Application.clockDelta);
+        const scale = (5/6) / this.model.scale.x;
+        this.metalRod.scale.x = scale;
+        this.metalRod.scale.y = scale;
+        this.metalRod.scale.z = scale;
         if (!this.held) {
-            this.updateRotation(application);
+            this.updateRotation();
             return;
         }
 
         const projected = this.projectMouseOntoModel(
-            application.mouseHandler.position, application.camera);
+            Application.mouseHandler.position, Application.camera);
 
         this.delta = projected.x - this.mouseDownPoint.x;
-        this.updateRotation(application);
+        this.updateRotation();
     }
 
-    onFocusLoss(application) {
+    onFocusLoss() {
+        this.checkPlacement();
         this.held = false;
+    }
+
+    shrink() {
+        this.animationActionController.playForward();
     }
 }

@@ -1,23 +1,34 @@
 import * as THREE from "three";
+import Application from "./Application";
 
 const DRAG_THRESHOLD = 2048;
 
 export default class MouseHandler {
-    constructor(application) {
+    constructor() {
+        // Position in Three.js space
         this.position = new THREE.Vector2(Infinity, Infinity);
+
+        // Position in pixels based purely on event.clientX and event.clientY
+        this.positionPx = this.position.clone();
+
         this.mouseDownPosition = this.position.clone();
         this.mouseDownSelection = null;
-        this.root = application.renderer.domElement;
+        this.root = Application.renderer.domElement;
         this.hoveredElement = null;
         this.focusedElement = null;
         this.raycaster = new THREE.Raycaster();
 
         this.root.addEventListener("pointermove", event => {
-            const ratio = application.renderer.getPixelRatio();
+            const ratio = Application.renderer.getPixelRatio();
             const w = this.root.width / ratio;
             const h = this.root.height / ratio;
-            this.position.x = event.clientX / w * 2 - 1;
-            this.position.y = -event.clientY / h * 2 + 1;
+            const x = event.clientX;
+            const y = event.clientY;
+
+            this.position.x = x / w * 2 - 1;
+            this.position.y = -y / h * 2 + 1;
+            this.positionPx.x = x;
+            this.positionPx.y = y;
         });
 
         this.root.addEventListener("mousedown", event => {
@@ -31,7 +42,7 @@ export default class MouseHandler {
             if (selection === null) {
                 if (this.focusedElement) {
                     if (this.focusedElement.active) {
-                        this.focusedElement.onFocusLoss(this);
+                        this.focusedElement.onFocusLoss();
                     }
                     this.focusedElement = null;
                 }
@@ -48,12 +59,12 @@ export default class MouseHandler {
             }
 
             if (selection) {
-                selection.onClick(application, event);
+                selection.onClick(event);
             }
 
             if (selection !== this.focusedElement && this.focusedElement) {
                 if (this.focusedElement.active) {
-                    this.focusedElement.onFocusLoss(this);
+                    this.focusedElement.onFocusLoss();
                 }
             }
             this.focusedElement = selection;
@@ -68,12 +79,12 @@ export default class MouseHandler {
         return element === this.hoveredElement;
     }
 
-    updateHover(application) {
-        this.raycaster.setFromCamera(this.position, application.camera);
+    updateHover() {
+        this.raycaster.setFromCamera(this.position, Application.camera);
 
-        const intersection = this.raycaster.intersectObjects(application.models);
+        const intersection = this.raycaster.intersectObjects(Application.models);
         const obj = intersection.length ? intersection[0].object : null;
-        let element = application.getElementByObject(obj);
+        let element = Application.getElementByObject(obj);
 
         if (this.isCurrentlyHovered(element)) {
             if (element && !element.active) {
@@ -99,18 +110,35 @@ export default class MouseHandler {
             element.highlight();
             this.root.style.cursor = "pointer";
         }
+
+        this.updateTooltip();
     }
 
-    update(application)
+    updateTooltip() {
+        const tooltip = Application.tooltipElement;
+        const element = this.hoveredElement;
+
+        if (element !== null && element.tooltip) {
+            tooltip.innerText = element.tooltip;
+            tooltip.style.display = "inline-block";
+            tooltip.style.opacity = 1;
+            tooltip.style.left = Math.floor(this.positionPx.x + 16) + "px";
+            tooltip.style.top = Math.floor(this.positionPx.y + 16) + "px";
+        } else {
+            tooltip.style.opacity = 0;
+        }
+    }
+
+    update()
     {
-        this.updateHover(application);
+        this.updateHover();
     }
 
-    addToApplication(application) {
-        application.addObject(this);
+    addToApplication() {
+        Application.addObject(this);
     }
 
-    removeFromApplication(application) {
-        application.removeObject(this);
+    removeFromApplication() {
+        Application.removeObject(this);
     }
 }

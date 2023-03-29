@@ -1,28 +1,32 @@
 import * as THREE from "three";
 
 export default class AnimationActionController {
-    constructor(mixer, animation) {
+    constructor(mixer, animation, interactiveElement) {
         this.state = "initial";
         this.animation = animation;
         this.action = mixer.clipAction(this.animation);
         this.action.clampWhenFinished = true;
         this.action.loop = THREE.LoopOnce;
+        this.onCompleted = function() {}
+        this.onReset = function() {}
 
         mixer.addEventListener("finished", (event) => {
             if (event.action !== this.action) return;
 
             if (this.state == "playing_forward") {
                 this.state = "completed";
+                this.onCompleted();
             } else if (this.state == "playing_back") {
                 this.state = "initial";
+                this.onReset();
             }
         });
     }
 
-    static fromAnimationName(animations, mixer, name) {
+    static fromAnimationName(animations, mixer, name, interactiveElement) {
         const animation = THREE.AnimationClip.findByName(animations, name);
 
-        return new AnimationActionController(mixer, animation);
+        return new AnimationActionController(mixer, animation, interactiveElement);
     }
 
     toggle() {

@@ -2,6 +2,7 @@ import * as THREE from "three";
 import AnimatedSplicerElement from "./AnimatedSplicerElement";
 import InteractiveElement from "./InteractiveElement";
 import FusedFiber from "./FusedFiber";
+import Application from "./Application";
 
 class LidElement extends AnimatedSplicerElement {
     constructor(splicer) {
@@ -15,7 +16,39 @@ class LidElement extends AnimatedSplicerElement {
             clampBars: "initial",
             fiberClamps: "initial",
             screenBearing: "initial"
-        }
+        };
+
+        this.onOpened = function() {};
+        this.onClosed = function() {};
+
+        this.animationActionController.onCompleted = () => {
+            this.onOpened();
+        };
+
+        this.animationActionController.onReset = () => {
+            this.onClosed();
+        };
+    }
+
+    isOpen() {
+        return this.animationState === "completed";
+    }
+
+    isClosed() {
+        return this.animationState === "initial";
+    }
+
+    onClick(event) {
+        super.onClick(event);
+        Application.mouseHandler.updateTooltip();
+    }
+
+    get tooltip() {
+        return this.animationState == "initial" ? "Открыть крышку" : "Закрыть крышку";
+    }
+
+    set tooltip(value) {
+        return;
     }
 }
 
@@ -34,7 +67,38 @@ class ClampBarsElement extends AnimatedSplicerElement {
         this.dependencies = {
             lid: "completed",
             fiberClamps: "initial"
-        }
+        };
+
+        this.onLifted = function() {};
+        this.onLowered = function() {};
+
+        this.animationActionController.onCompleted = () => {
+            this.onLifted();
+        };
+        this.animationActionController.onReset = () => {
+            this.onLowered();
+        };
+    }
+
+    isUp() {
+        return this.animationState === "completed";
+    }
+
+    isDown() {
+        return this.animationState === "initial";
+    }
+
+    onClick(event) {
+        super.onClick(event);
+        Application.mouseHandler.updateTooltip();
+    }
+
+    get tooltip() {
+        return this.isDown() ? "Поднять зажимы" : "Опустить зажимы";
+    }
+
+    set tooltip(value) {
+        return;
     }
 }
 
@@ -52,7 +116,42 @@ class FiberClampsElement extends AnimatedSplicerElement {
         this.dependencies = {
             lid: "completed",
             clampBars: "completed"
-        }
+        };
+
+        this.onLifted = function() {};
+        this.onLowered = function() {};
+    }
+
+    isUp() {
+        return this.animationState === "completed";
+    }
+
+    isDown() {
+        return this.animationState === "initial";
+    }
+
+    onAnimationCompleted() {
+        this.onLifted();
+        if (!Application.fusedFiber) return;
+        Application.fusedFiber.animationActionControllerLeft.toggle();
+        Application.fusedFiber.animationActionControllerRight.toggle();
+    }
+
+    onAnimationReset() {
+        this.onLowered();
+    }
+s
+    onClick(event) {
+        super.onClick(event);
+        Application.mouseHandler.updateTooltip();
+    }
+
+    get tooltip() {
+        return this.isDown() ? "Поднять зажимы" : "Опустить зажимы";
+    }
+
+    set tooltip(value) {
+        return;
     }
 }
 
@@ -62,7 +161,9 @@ class ScreenElement extends AnimatedSplicerElement {
 
         this.dependencies = {
             screenBearing: "initial"
-        }
+        };
+
+        this.tooltip = "Повернуть экран";
     }
 }
 
@@ -78,7 +179,20 @@ class ScreenBearingElement extends AnimatedSplicerElement {
         this.dependencies = {
             screen: "completed",
             lid: "initial"
-        }
+        };
+    }
+
+    onClick(event) {
+        super.onClick(event);
+        Application.mouseHandler.updateTooltip();
+    }
+
+    get tooltip() {
+        return this.animationState == "initial" ? "Сложить экран" : "Вернуть экран";
+    }
+
+    set tooltip(value) {
+        return;
     }
 }
 
@@ -91,6 +205,36 @@ class HeaterMainLidElement extends AnimatedSplicerElement {
             ["Heater_Lid", "Cube014"],
             "Open Heating Chamber Lid");
     }
+
+    checkDependencies() {
+        if (!super.checkDependencies()) return false;
+        if (Application.state === "heating_in_progress") return false;
+
+        if (Application.leftFiber.model.position.z < 0.05) return true;
+
+        return Application.leftFiber.model.position.y < 0.041 || Application.leftFiber.model.position.y > 0.068;
+    }
+
+    isOpen() {
+        return this.animationState === "completed";
+    }
+
+    isClosed() {
+        return this.animationState === "initial";
+    }
+
+    onClick(event) {
+        super.onClick(event);
+        Application.mouseHandler.updateTooltip();
+    }
+
+    get tooltip() {
+        return this.isClosed() ? "Открыть крышку нагревателя" : "Закрыть крышку нагревателя";
+    }
+
+    set tooltip(value) {
+        return;
+    }
 }
 
 class HeaterSideLidsElement extends AnimatedSplicerElement {
@@ -102,41 +246,83 @@ class HeaterSideLidsElement extends AnimatedSplicerElement {
             ["Cube016"],
             "Lift Up Heating Chamber Side Lid");
     }
+
+    checkDependencies() {
+        if (!super.checkDependencies()) return false;
+        if (Application.state === "heating_in_progress") return false;
+
+        if (Application.leftFiber.model.position.z < 0.05) return true;
+
+        return Application.leftFiber.model.position.y < 0.041 || Application.leftFiber.model.position.y > 0.068;
+    }
+
+    isOpen() {
+        return this.animationState === "completed";
+    }
+
+    isClosed() {
+        return this.animationState === "initial";
+    }
+
+    onClick(event) {
+        super.onClick(event);
+        Application.mouseHandler.updateTooltip();
+    }
+
+    get tooltip() {
+        return this.isClosed() ? "Открыть крышку нагревателя" : "Закрыть крышку нагревателя";
+    }
+
+    set tooltip(value) {
+        return;
+    }
 }
 
 class SetButtonElement extends InteractiveElement {
     constructor(splicer) {
         super(splicer.model, ["Cube135", "Cube135_1"]);
+
+        this.tooltip = "Произвести сварку";
     }
 
-    onClick(application, event) {
+    isClickable() {
         // Don't do anything until the lid is closed
-        if (application.splicer.children.lid.animationState != "initial") return;
+        if (Application.splicer.children.lid.animationState != "initial") return false;
 
-        const leftFiber = application.leftFiber;
-        const rightFiber = application.rightFiber;
+        // Check that the distance between the fibers is small enough
+        if (!Application.fibersPlaced) return false;
 
-        // Check that the distances between the fibers are small enough
-        if (Math.abs(leftFiber.getTipPosition().x - leftFiber.maxX) > 0.0015) return;
-        if (Math.abs(rightFiber.getTipPosition().x - rightFiber.minX) > 0.0015) return;
+        return true;
+    }
+
+    onClick(event) {
+        if (!this.isClickable()) return;
+
+        const leftFiber = Application.leftFiber;
+        const rightFiber = Application.rightFiber;
 
         // Move fibers together (and fuse them)
         leftFiber.setTipPosition(0.0003);
         rightFiber.setTipPosition(-0.0003);
 
-        leftFiber.removeFromApplication(application);
-        rightFiber.removeFromApplication(application);
+        leftFiber.removeFromApplication();
+        rightFiber.removeFromApplication();
 
         leftFiber.active = false;
         rightFiber.active = false;
 
         const fiber = new FusedFiber(leftFiber, rightFiber);
 
-        application.addElement(fiber);
-        application.addModel(fiber.model);
-        application.fusedFiber = fiber;
+        fiber.addToApplication();
+        Application.fusedFiber = fiber;
 
-        application.state = "splice_completed"
+        Application.state = "splice_completed";
+
+        // A simple hack to make sure spliceProtectionCase is always updated after the fibers
+        Application.spliceProtectionCase.removeFromApplication();
+        Application.spliceProtectionCase.addToApplication();
+
+        Application.setInstructionText("Достаньте волокно из сварочного аппарата");
     }
 }
 
@@ -149,6 +335,27 @@ class ResetButtonElement extends InteractiveElement {
 class HeatButtonElement extends InteractiveElement {
     constructor(splicer) {
         super(splicer.model, ["Cube137", "Cube137_1"]);
+
+        this.tooltip = "Включить нагреватель";
+    }
+
+    isClickable() {
+        if (Application.state != "splice_completed") return false;
+        if (Application.splicer.children.mainHeaterLid.isOpen()) return false;
+        if (Application.splicer.children.heaterSideLids.isOpen()) return false;
+
+        return true;
+    }
+
+    onClick(event) {
+        if (!this.isClickable()) return;
+
+        // TODO: replace spliceProtectionCase.model with the shrunk version
+        Application.spliceProtectionCase.animationActionController.onCompleted = () => {
+            Application.state = "heating_completed";
+        };
+        Application.state = "heating_in_progress";
+        Application.spliceProtectionCase.shrink();
     }
 }
 
@@ -172,8 +379,8 @@ export default class Splicer extends InteractiveElement {
         };
     }
 
-    update(application) {
-        super.update(application);
-        this.mixer.update(1 / 10.0);
+    update() {
+        super.update();
+        this.mixer.update(Application.clockDelta * 6);
     }
 }

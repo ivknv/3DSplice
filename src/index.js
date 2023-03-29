@@ -1,16 +1,14 @@
 import Application from "./Application";
 
 async function main() {
-    const application = new Application();
+    document.querySelector("#main").appendChild(Application.renderer.domElement);
+    document.querySelector("#main").appendChild(Application.stats.domElement);
+    await Application.initialize();
 
-    document.querySelector("#main").appendChild(application.renderer.domElement);
-    document.querySelector("#main").appendChild(application.stats.domElement);
-    await application.initialize();
+    Application.renderer.domElement.style.position = "absolute";
+    Application.renderer.domElement.style.zIndex = "1";
 
-    application.renderer.domElement.style.position = "absolute";
-    application.renderer.domElement.style.zIndex = "1";
-
-    application.animate();
+    Application.animate();
 }
 
 main();

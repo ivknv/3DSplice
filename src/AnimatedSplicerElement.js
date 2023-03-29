@@ -1,31 +1,19 @@
-import InteractiveElement from "./InteractiveElement";
-import AnimationActionController from "./AnimationActionController";
+import AnimatedInteractiveElement from "./AnimatedInteractiveElement";
+import Application from "./Application";
 
-export default class AnimatedInteractiveElement extends InteractiveElement {
+export default class AnimatedSplicerElement extends AnimatedInteractiveElement {
     constructor(model, animations, mixer, objectNames, animationName) {
-        super(model, objectNames);
+        super(model, animations, mixer, objectNames, animationName);
 
-        this.animationActionController = AnimationActionController.fromAnimationName(
-            animations, mixer, animationName);
         this.dependencies = {};
     }
 
-    get animationState() {
-        return this.animationActionController.state;
-    }
-
-    checkDependencies(application) {
+    checkDependencies() {
         for (const dependency in this.dependencies) {
-            const state = application.splicer.children[dependency].animationState;
+            const state = Application.splicer.children[dependency].animationState;
             if (state != this.dependencies[dependency]) return false;
         }
 
         return true;
-    }
-
-    onClick(application, event) {
-        if (this.checkDependencies(application)) {
-            this.animationActionController.toggle();
-        }
     }
 };

@@ -1,5 +1,6 @@
 import {Vector3, Raycaster, Box3} from "three";
 import InteractiveElement from "./InteractiveElement";
+import Application from "./Application";
 import {clamp} from "./common";
 
 export default class Fiber extends InteractiveElement {
@@ -17,6 +18,8 @@ export default class Fiber extends InteractiveElement {
         this.boundingBox = new Box3().setFromObject(this.model);
 
         this.setDirection(direction);
+
+        this.tooltip = "Переместить волокно";
     }
 
     setDirection(direction) {
@@ -35,16 +38,37 @@ export default class Fiber extends InteractiveElement {
         return this;
     }
 
-    onClick(application, event) {
+    checkPlacement() {
+        const oldValue = Application.fibersPlaced;
+        const tolerance = 0.0015;
+
+        if (this.direction === "left") {
+            Application.leftFiberPlaced = Math.abs(this.getTipPosition().x - this.maxX) < tolerance;
+        } else {
+            Application.rightFiberPlaced = Math.abs(this.getTipPosition().x - this.minX) < tolerance;
+        }
+
+        if (Application.fibersPlaced !== oldValue && !oldValue) {
+            Application.setInstructionText("Опустите зажимы");
+        } else {
+            Application.setInstructionText("Поместите волокна в сварочный аппарат");
+        }
+    }
+
+    isClickable() {
+        return Application.splicer.children.fiberClamps.isUp();
+    }
+
+    onClick(event) {
         if (!this.held) {
-            if (application.splicer.children.fiberClamps.animationState != "completed") {
-                return;
-            }
+            if (!this.isClickable()) return;
 
             this.originalPosition.copy(this.getTipPosition());
 
             this.mouseDownPoint = this.projectMouseOntoFiber(
-                application.mouseHandler.mouseDownPosition, application.camera);
+                Application.mouseHandler.mouseDownPosition, Application.camera);
+        } else {
+            this.checkPlacement();
         }
 
         this.held = !this.held;
@@ -73,7 +97,7 @@ export default class Fiber extends InteractiveElement {
         this.model.rotation.z = (90 + 3 * t) * (Math.PI / 180);
     }
 
-    update(application) {
+    update() {
         if (!this.active) return;
 
         if (!this.held) {
@@ -82,7 +106,7 @@ export default class Fiber extends InteractiveElement {
         }
 
         const projected = this.projectMouseOntoFiber(
-            application.mouseHandler.position, application.camera);
+            Application.mouseHandler.position, Application.camera);
 
         const delta = projected.x - this.mouseDownPoint.x;
 
@@ -93,7 +117,8 @@ export default class Fiber extends InteractiveElement {
         this.updateRotation();
     }
 
-    onFocusLoss(application) {
+    onFocusLoss() {
+        this.checkPlacement();
         this.held = false;
     }
 

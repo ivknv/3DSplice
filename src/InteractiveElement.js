@@ -1,3 +1,5 @@
+import Application from "./Application";
+
 export default class InteractiveElement {
     constructor(model, objectNames) {
         this.active = true;
@@ -5,6 +7,7 @@ export default class InteractiveElement {
         this._originalMaterials = {};
         this.children = {};
         this.model = model;
+        this.tooltip = "";
 
         for (const name of objectNames) {
             const objects = model.getObjectsByProperty("name", name);
@@ -44,12 +47,12 @@ export default class InteractiveElement {
         }
     }
 
-    onClick(application, event) {}
-    onFocusLoss(application) {}
+    onClick(event) {}
+    onFocusLoss() {}
 
-    update(application) {
+    update() {
         for (const elementName in this.children) {
-            this.children[elementName].update(application);
+            this.children[elementName].update(Application);
         }
     }
 
@@ -66,13 +69,13 @@ export default class InteractiveElement {
         return null;
     }
 
-    addToApplication(application) {
-        application.addElement(this);
-        if (this.model) application.addModel(this.model);
+    addToApplication() {
+        Application.addElement(this);
+        if (this.model) Application.addModel(this.model);
     }
 
-    removeFromApplication(application) {
-        if (this.model) application.removeModel(this.model);
-        application.removeElement(this);
+    removeFromApplication() {
+        if (this.model) Application.removeModel(this.model);
+        Application.removeElement(this);
     }
 }

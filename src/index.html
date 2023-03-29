@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        <title>Three.js Test</title>
+        <title>Симулятор сварочного аппарата</title>
         <style>
             body {
                 margin: 0;
@@ -11,9 +11,37 @@
             #main {
                 position: relative;
             }
+
+            #instructions {
+                position: absolute;
+                z-index: 10;
+                right: 5px;
+                color: #666;
+                font-size: 20px;
+                font-family: Arial;
+            }
+
+            #tooltip {
+                position: absolute;
+                display: none;
+                opacity: 0;
+                transition: opacity 0.3s;
+                z-index: 15;
+                background-color: #555;
+                color: #fefefe;
+                text-align: center;
+                font-size: 12px;
+                font-family: Arial;
+                padding: 5px;
+                border-radius: 3px;
+                pointer-events: none;
+            }
         </style>
     </head>
     <body>
-        <section id="main"></section>
+        <section id="main">
+            <section id="instructions"></section>
+            <span id="tooltip">Example</span>
+        </section>
     </body>
 </html>
