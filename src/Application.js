@@ -60,7 +60,7 @@ export class ApplicationClass {
         this.renderer.toneMapping = THREE.ReinhardToneMapping;
         this.renderer.toneMappingExposure = 0.8;
         this.renderer.physicallyCorrectLights = hashParameters["physicallyCorrectLights"] !== "false";
-        this.renderer.localClippingEnabled = hashParameters["localClippingEnabled"] !== "true";
+        this.renderer.localClippingEnabled = hashParameters["localClippingEnabled"] === "true";
         this.renderer.setPixelRatio(clamp(pixelRatio, 0.1, window.devicePixelRatio));
         this.renderer.setSize(window.innerWidth, window.innerHeight);
 
