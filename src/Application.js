@@ -54,14 +54,14 @@ export class ApplicationClass {
             rendererParameters.powerPreference = hashParameters["powerPreference"];
         }
 
-        const pixelRatio = parseFloat(hashParameters["pixelRatio"] || "1.0");
+        const pixelRatio = parseFloat(hashParameters["pixelRatio"] || window.devicePixelRatio);
 
         this.renderer = new THREE.WebGLRenderer(rendererParameters);
         this.renderer.toneMapping = THREE.ReinhardToneMapping;
         this.renderer.toneMappingExposure = 0.8;
         this.renderer.physicallyCorrectLights = hashParameters["physicallyCorrectLights"] !== "false";
         this.renderer.localClippingEnabled = hashParameters["localClippingEnabled"] !== "true";
-        this.renderer.setPixelRatio(clamp(pixelRatio, 0.1, 1));
+        this.renderer.setPixelRatio(clamp(pixelRatio, 0.1, window.devicePixelRatio));
         this.renderer.setSize(window.innerWidth, window.innerHeight);
 
         this.clock = new THREE.Clock();
