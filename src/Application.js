@@ -239,8 +239,8 @@ export class ApplicationClass {
 
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
-        this.addObject(this.mouseHandler);
         this.addObject(this.controls);
+        this.addObject(this.mouseHandler);
 
         const Model = (await import("./Model")).default;
         const FiberModel = (await import("./FiberModel")).default;
