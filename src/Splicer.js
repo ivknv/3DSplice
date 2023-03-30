@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import AnimatedSplicerElement from "./AnimatedSplicerElement";
 import InteractiveElement from "./InteractiveElement";
-import FusedFiber from "./FusedFiber";
 import Application from "./Application";
 
 class LidElement extends AnimatedSplicerElement {
@@ -18,15 +17,12 @@ class LidElement extends AnimatedSplicerElement {
             screenBearing: "initial"
         };
 
-        this.onOpened = function() {};
-        this.onClosed = function() {};
-
         this.animationActionController.onCompleted = () => {
-            this.onOpened();
+            Application.state.onLidOpened();
         };
 
         this.animationActionController.onReset = () => {
-            this.onClosed();
+            Application.state.onLidClosed();
         };
     }
 
@@ -39,17 +35,19 @@ class LidElement extends AnimatedSplicerElement {
     }
 
     onClick(event) {
-        super.onClick(event);
+        if ((this.isClosed() && Application.state.canOpenLid()) ||
+            (this.isOpen() && Application.state.canCloseLid())) {
+            super.onClick(event);
+        }
+
         Application.mouseHandler.updateTooltip();
     }
 
     get tooltip() {
-        return this.animationState == "initial" ? "Открыть крышку" : "Закрыть крышку";
+        return this.isClosed() ? "Открыть крышку" : "Закрыть крышку";
     }
 
-    set tooltip(value) {
-        return;
-    }
+    set tooltip(value) {}
 }
 
 class ClampBarsElement extends AnimatedSplicerElement {
@@ -69,15 +67,13 @@ class ClampBarsElement extends AnimatedSplicerElement {
             fiberClamps: "initial"
         };
 
-        this.onLifted = function() {};
-        this.onLowered = function() {};
-
         this.animationActionController.onCompleted = () => {
-            this.onLifted();
+            Application.state.onClampBarsUp();
         };
+
         this.animationActionController.onReset = () => {
-            this.onLowered();
-        };
+            Application.state.onClampBarsDown();
+        }
     }
 
     isUp() {
@@ -117,9 +113,6 @@ class FiberClampsElement extends AnimatedSplicerElement {
             lid: "completed",
             clampBars: "completed"
         };
-
-        this.onLifted = function() {};
-        this.onLowered = function() {};
     }
 
     isUp() {
@@ -131,14 +124,11 @@ class FiberClampsElement extends AnimatedSplicerElement {
     }
 
     onAnimationCompleted() {
-        this.onLifted();
-        if (!Application.fusedFiber) return;
-        Application.fusedFiber.animationActionControllerLeft.toggle();
-        Application.fusedFiber.animationActionControllerRight.toggle();
+        Application.state.onFiberClampsUp();
     }
 
     onAnimationReset() {
-        this.onLowered();
+        Application.state.onFiberClampsDown();
     }
 s
     onClick(event) {
@@ -165,6 +155,9 @@ class ScreenElement extends AnimatedSplicerElement {
 
         this.tooltip = "Повернуть экран";
     }
+
+    setInitialScreen() {}
+    startSpliceAnimation() {}
 }
 
 class ScreenBearingElement extends AnimatedSplicerElement {
@@ -204,15 +197,26 @@ class HeaterMainLidElement extends AnimatedSplicerElement {
             splicer.mixer,
             ["Heater_Lid", "Cube014"],
             "Open Heating Chamber Lid");
+
+        this.animationActionController.onCompleted = () => {
+            Application.state.onMainHeaterLidOpened();
+        };
+
+        this.animationActionController.onReset = () => {
+            Application.state.onMainHeaterLidClosed();
+        };
     }
 
     checkDependencies() {
         if (!super.checkDependencies()) return false;
-        if (Application.state === "heating_in_progress") return false;
 
-        if (Application.leftFiber.model.position.z < 0.05) return true;
+        if (this.isClosed()) {
+            return Application.state.canOpenMainHeaterLid();
+        } else if (this.isOpen()) {
+            return Application.state.canCloseMainHeaterLid();
+        }
 
-        return Application.leftFiber.model.position.y < 0.041 || Application.leftFiber.model.position.y > 0.068;
+        return false;
     }
 
     isOpen() {
@@ -245,15 +249,26 @@ class HeaterSideLidsElement extends AnimatedSplicerElement {
             splicer.mixer,
             ["Cube016"],
             "Lift Up Heating Chamber Side Lid");
+
+        this.animationActionController.onCompleted = () => {
+            Application.state.onHeaterSideLidsOpened();
+        };
+
+        this.animationActionController.onReset = () => {
+            Application.state.onHeaterSideLidsClosed();
+        };
     }
 
     checkDependencies() {
         if (!super.checkDependencies()) return false;
-        if (Application.state === "heating_in_progress") return false;
 
-        if (Application.leftFiber.model.position.z < 0.05) return true;
+        if (this.isClosed()) {
+            return Application.state.canOpenHeaterSideLids();
+        } else if (this.isOpen()) {
+            return Application.state.canCloseHeaterSideLids();
+        }
 
-        return Application.leftFiber.model.position.y < 0.041 || Application.leftFiber.model.position.y > 0.068;
+        return false;
     }
 
     isOpen() {
@@ -285,44 +300,8 @@ class SetButtonElement extends InteractiveElement {
         this.tooltip = "Произвести сварку";
     }
 
-    isClickable() {
-        // Don't do anything until the lid is closed
-        if (Application.splicer.children.lid.animationState != "initial") return false;
-
-        // Check that the distance between the fibers is small enough
-        if (!Application.fibersPlaced) return false;
-
-        return true;
-    }
-
     onClick(event) {
-        if (!this.isClickable()) return;
-
-        const leftFiber = Application.leftFiber;
-        const rightFiber = Application.rightFiber;
-
-        // Move fibers together (and fuse them)
-        leftFiber.setTipPosition(0.0003);
-        rightFiber.setTipPosition(-0.0003);
-
-        leftFiber.removeFromApplication();
-        rightFiber.removeFromApplication();
-
-        leftFiber.active = false;
-        rightFiber.active = false;
-
-        const fiber = new FusedFiber(leftFiber, rightFiber);
-
-        fiber.addToApplication();
-        Application.fusedFiber = fiber;
-
-        Application.state = "splice_completed";
-
-        // A simple hack to make sure spliceProtectionCase is always updated after the fibers
-        Application.spliceProtectionCase.removeFromApplication();
-        Application.spliceProtectionCase.addToApplication();
-
-        Application.setInstructionText("Достаньте волокно из сварочного аппарата");
+        Application.state.onSetPressed();
     }
 }
 
@@ -339,23 +318,8 @@ class HeatButtonElement extends InteractiveElement {
         this.tooltip = "Включить нагреватель";
     }
 
-    isClickable() {
-        if (Application.state != "splice_completed") return false;
-        if (Application.splicer.children.mainHeaterLid.isOpen()) return false;
-        if (Application.splicer.children.heaterSideLids.isOpen()) return false;
-
-        return true;
-    }
-
     onClick(event) {
-        if (!this.isClickable()) return;
-
-        // TODO: replace spliceProtectionCase.model with the shrunk version
-        Application.spliceProtectionCase.animationActionController.onCompleted = () => {
-            Application.state = "heating_completed";
-        };
-        Application.state = "heating_in_progress";
-        Application.spliceProtectionCase.shrink();
+        Application.state.onHeatPressed();
     }
 }
 

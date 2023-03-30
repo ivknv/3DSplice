@@ -2,6 +2,7 @@ import {Vector3, Raycaster, Box3} from "three";
 import InteractiveElement from "./InteractiveElement";
 import Application from "./Application";
 import {clamp} from "./common";
+import * as Colors from "./colors";
 
 export default class Fiber extends InteractiveElement {
     constructor(model, direction) {
@@ -39,19 +40,12 @@ export default class Fiber extends InteractiveElement {
     }
 
     checkPlacement() {
-        const oldValue = Application.fibersPlaced;
         const tolerance = 0.0015;
 
         if (this.direction === "left") {
             Application.leftFiberPlaced = Math.abs(this.getTipPosition().x - this.maxX) < tolerance;
         } else {
             Application.rightFiberPlaced = Math.abs(this.getTipPosition().x - this.minX) < tolerance;
-        }
-
-        if (Application.fibersPlaced !== oldValue && !oldValue) {
-            Application.setInstructionText("Опустите зажимы");
-        } else {
-            Application.setInstructionText("Поместите волокна в сварочный аппарат");
         }
     }
 
@@ -63,12 +57,20 @@ export default class Fiber extends InteractiveElement {
         if (!this.held) {
             if (!this.isClickable()) return;
 
+            this.highlightColor = Colors.HIGHLIGHT_ACTIVE;
+
+            Application.mouseHandler.setHoverFilter(element => {
+                return element === this;
+            });
+
             this.originalPosition.copy(this.getTipPosition());
 
             this.mouseDownPoint = this.projectMouseOntoFiber(
                 Application.mouseHandler.mouseDownPosition, Application.camera);
         } else {
+            Application.mouseHandler.resetHoverFilter();
             this.checkPlacement();
+            this.highlightColor = Colors.HIGHLIGHT;
         }
 
         this.held = !this.held;
@@ -118,6 +120,8 @@ export default class Fiber extends InteractiveElement {
     }
 
     onFocusLoss() {
+        Application.mouseHandler.resetHoverFilter();
+        this.highlightColor = Colors.HIGHLIGHT;
         this.checkPlacement();
         this.held = false;
     }

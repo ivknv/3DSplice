@@ -18,6 +18,9 @@ export default class MouseHandler {
         this.focusedElement = null;
         this.raycaster = new THREE.Raycaster();
 
+        // Used to determine what elements can be hovered
+        this.hoverFilter = function(element) { return true; };
+
         this.root.addEventListener("pointermove", event => {
             const ratio = Application.renderer.getPixelRatio();
             const w = this.root.width / ratio;
@@ -71,6 +74,14 @@ export default class MouseHandler {
         });
     }
 
+    setHoverFilter(filter) {
+        this.hoverFilter = filter;
+    }
+
+    resetHoverFilter() {
+        this.hoverFilter = function(element) { return true; };
+    }
+
     isHovering() {
         return this.hoveredElement !== null;
     }
@@ -100,7 +111,7 @@ export default class MouseHandler {
             this.root.style.cursor = "auto";
         }
 
-        if (element && !element.active) {
+        if (element && !element.active || !this.hoverFilter(element)) {
             element = null;
         }
 

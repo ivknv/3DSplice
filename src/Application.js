@@ -10,6 +10,8 @@ import FiberModel from "./FiberModel";
 import {parseGLTF} from "./gltf";
 import {clamp} from "./common";
 import Stats from "stats.js";
+import {InitialState} from "./ApplicationState";
+import * as Colors from "./colors";
 
 function parseURLHashParameters() {
     const q = window.location.hash.substring(1);
@@ -80,12 +82,11 @@ export class ApplicationClass {
 
         this.setupLights(enabledLights);
 
-        this.state = "initial";
-        this.leftFiberPlaced = false;
-        this.rightFiberPlaced = false;
-        this.spliceCompleted = false;
-        this.spliceProtectionPlaced = false;
-        this.heatingCompleted = false;
+        this.state = new InitialState();
+
+        this._leftFiberPlaced = false;
+        this._rightFiberPlaced = false;
+        this._spliceProtectionPlaced = false;
 
         this.splicerAnimations = null;
         this.splicerModel = null;
@@ -101,7 +102,7 @@ export class ApplicationClass {
         this.camera.position.y = 1;
         this.camera.position.z = 0.5;
 
-        this.renderer.setClearColor(0xe0e0e0, 1);
+        this.renderer.setClearColor(Colors.CLEAR, 1);
 
         this.elements = [];
         this.models = [];
@@ -110,15 +111,73 @@ export class ApplicationClass {
         this.spliceProtectionCase = null;
         this.fusedFiber = null;
 
-        this.instructionsElement = document.querySelector("#instructions");
+        this.instructionsElement = null;
+        this.tooltipElement = null;
 
         this.objects = [];
+    }
 
-        this.tooltipElement = null;
+    get leftFiberPlaced() {
+        return this._leftFiberPlaced;
+    }
+
+    set leftFiberPlaced(value) {
+        const oldValue = this._leftFiberPlaced;
+
+        if (oldValue !== value) {
+            this._leftFiberPlaced = value;
+
+            if (this.fibersPlaced) {
+                this.state.onFibersPlaced();
+            } else {
+                this.state.onFibersRemoved();
+            }
+        }
+    }
+
+    get rightFiberPlaced() {
+        return this._rightFiberPlaced;
+    }
+
+    set rightFiberPlaced(value) {
+        const oldValue = this._rightFiberPlaced;
+
+        if (oldValue !== value) {
+            this._rightFiberPlaced = value;
+
+            if (this.fibersPlaced) {
+                this.state.onFibersPlaced();
+            } else {
+                this.state.onFibersRemoved();
+            }
+        }
     }
 
     get fibersPlaced() {
         return this.leftFiberPlaced && this.rightFiberPlaced;
+    }
+
+    get spliceProtectionPlaced() {
+        return this._spliceProtectionPlaced;
+    }
+
+    set spliceProtectionPlaced(value) {
+        const oldValue = this._spliceProtectionPlaced;
+
+        if (oldValue !== value) {
+            this._spliceProtectionPlaced = value;
+
+            if (value) {
+                this.state.onSpliceProtectionPlaced();
+            } else {
+                this.state.onSpliceProtectionRemoved();
+            }
+        }
+    }
+
+    changeState(newState) {
+        console.log("Changing state: " + this.state.name + " -> " + newState.name);
+        this.state = newState;
     }
 
     addObject(object) {
@@ -158,6 +217,12 @@ export class ApplicationClass {
     async initialize() {
         this.mouseHandler = new MouseHandler();
 
+        this.instructionsElement = document.querySelector("#instructions");
+        this.tooltipElement = document.querySelector("#tooltip");
+
+        this.videoElement = document.querySelector("#screen-video");
+        this.videoTexture = new THREE.VideoTexture(this.videoElement);
+
         this.addObject(this.mouseHandler);
         this.addObject(this.controls);
 
@@ -186,52 +251,7 @@ export class ApplicationClass {
 
         this.stats.showPanel(0);
 
-        this.tooltipElement = document.querySelector("#tooltip");
-
         this.setInstructionText("Откройте крышку сварочного аппарата");
-
-        this.splicer.children.lid.onOpened = () => {
-            if (this.state === "initial" || this.state === "splice_completed") {
-                this.setInstructionText("Поднимите зажимы для волокна");
-            }
-        };
-
-        this.splicer.children.lid.onClosed = () => {
-            if (this.state === "initial" && this.fibersPlaced) {
-                this.setInstructionText("Нажмите кнопку SET");
-            } else if (this.state === "initial" || this.state === "splice_completed") {
-                this.setInstructionText("Откройте крышку сварочного аппарата");
-            }
-        };
-
-        this.splicer.children.fiberClamps.onLifted = () => {
-            if (this.state === "initial") {
-                this.setInstructionText("Поместите волокна в сварочный аппарат");
-            } else if (this.state === "splice_completed") {
-                this.setInstructionText("Расположите гильзу КДЗС в центре места сварки");
-            }
-        };
-
-        this.splicer.children.fiberClamps.onLowered = () => {
-            if (this.state === "initial") {
-                this.setInstructionText("Опустите зажимы");
-            }
-        };
-
-        this.splicer.children.clampBars.onLowered = () => {
-            if (this.state === "initial") {
-                this.setInstructionText("Закройте крышку сварочного аппарата");
-            }
-        };
-    }
-
-    changeState(newState) {
-        if (newState === this.state) return;
-
-        const oldState = this.state;
-
-        this.state = newState;
-        this.onStateChanged(oldState, newState);
     }
 
     getElementByObject(obj) {

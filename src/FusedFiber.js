@@ -3,6 +3,7 @@ import * as THREE from "three";
 import {clamp} from "./common";
 import AnimationActionController from "./AnimationActionController";
 import Application from "./Application";
+import * as Colors from "./colors";
 
 function makeKeyframeTracks(model, offsetY, offsetZ, targetAngle) {
     const targetQuaternion = new THREE.Quaternion().setFromAxisAngle(
@@ -70,24 +71,45 @@ export default class FusedFiber extends InteractiveElement {
 
         this.minY = 0.04;
         this.maxY = 0.17;
+
+        this.animationActionControllerLeft.onCompleted = () => {
+            Application.leftFiberPlaced = false;
+            Application.rightFiberPlaced = false;
+        };
+
+        this.animationActionControllerRight.onCompleted = () => {
+            Application.rightFiberPlaced = false;
+        };
     }
 
-    isClickable() {
-        if (!Application.splicer.children.mainHeaterLid.isOpen()) return false;
-        if (!Application.splicer.children.heaterSideLids.isOpen()) return false;
-        if (!Application.spliceProtectionCase.isCentered()) return false;
+    checkPlacement() {
+        const placed = this.left.position.y > 0.0399 && this.left.position.y < 0.043;
 
-        return true;
+        Application.leftFiberPlaced = placed;
+        Application.rightFiberPlaced = placed;
     }
 
     onClick(event) {
         if (!this.held) {
-            if (!this.isClickable()) return;
+            if (this.animationActionControllerLeft.state !== "completed") return;
+            if (this.animationActionControllerRight.state !== "completed") return;
+
+            if (!Application.state.canPlaceFiberInHeater()) return;
+
+            this.highlightColor = Colors.HIGHLIGHT_ACTIVE;
+
+            Application.mouseHandler.setHoverFilter(element => {
+                return element === this;
+            });
 
             this.originalPosition.copy(this.left.position);
 
             this.mouseDownPoint = this.projectMouseOntoFiber(
                 Application.mouseHandler.mouseDownPosition, Application.camera);
+        } else {
+            this.highlightColor = Colors.HIGHLIGHT;
+            Application.mouseHandler.resetHoverFilter();
+            this.checkPlacement();
         }
 
         this.held = !this.held;
@@ -124,6 +146,9 @@ export default class FusedFiber extends InteractiveElement {
     }
 
     onFocusLoss() {
+        this.highlightColor = Colors.HIGHLIGHT;
+        Application.mouseHandler.resetHoverFilter();
+        this.checkPlacement();
         this.held = false;
     }
 }

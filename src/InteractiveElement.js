@@ -1,4 +1,5 @@
 import Application from "./Application";
+import * as Colors from "./colors";
 
 export default class InteractiveElement {
     constructor(model, objectNames) {
@@ -9,6 +10,8 @@ export default class InteractiveElement {
         this.model = model;
         this.tooltip = "";
 
+        this._highlightColor = Colors.HIGHLIGHT;
+
         for (const name of objectNames) {
             const objects = model.getObjectsByProperty("name", name);
 
@@ -18,10 +21,41 @@ export default class InteractiveElement {
         }
     }
 
+    get highlightColor() {
+        return this._highlightColor;
+    }
+
+    set highlightColor(value) {
+        this._highlightColor = value;
+        this.updateHighlightColor();
+    }
+
+    updateHighlightColor() {
+        for (const uuid in this.objects) {
+            // Skip if already highlighted
+            if (!this.isObjectHighlighted(uuid)) continue;
+
+            const obj = this.objects[uuid];
+            obj.material.color.set(this.highlightColor);
+        }
+    }
+
+    isObjectHighlighted(uuid) {
+        return uuid in this._originalMaterials;
+    }
+
+    isHighlighted() {
+        for (const uuid in this.objects) {
+            if (this.isObjectHighlighted()) return true;
+        }
+
+        return false;
+    }
+
     highlight() {
         for (const uuid in this.objects) {
             // Skip if already highlighted
-            if (uuid in this._originalMaterials) continue;
+            if (this.isObjectHighlighted(uuid)) continue;
 
             const obj = this.objects[uuid];
 
@@ -29,14 +63,14 @@ export default class InteractiveElement {
             obj.material = obj.material.clone();
             obj.material.metalness = 0.0;
             obj.material.roughness = 1.0;
-            obj.material.color.set(0xc14919);
+            obj.material.color.set(this.highlightColor);
         }
     }
 
     clearHighlight() {
         for (const uuid in this.objects) {
             // Skip if not highlighted
-            if (!(uuid in this._originalMaterials)) continue;
+            if (!this.isObjectHighlighted(uuid)) continue;
 
             const obj = this.objects[uuid];
             const highlightMaterial = obj.material;

@@ -15,8 +15,8 @@
             #instructions {
                 position: absolute;
                 z-index: 10;
-                right: 5px;
-                color: #666;
+                left: 3px;
+                color: #f5f5f5;
                 font-size: 20px;
                 font-family: Arial;
             }
@@ -36,12 +36,17 @@
                 border-radius: 3px;
                 pointer-events: none;
             }
+
+            #screen-video {
+                display: none;
+            }
         </style>
     </head>
     <body>
         <section id="main">
             <section id="instructions"></section>
             <span id="tooltip">Example</span>
+            <video id="screen-video" src="./video.mp4" muted="true"/>
         </section>
     </body>
 </html>

@@ -3,6 +3,7 @@ import InteractiveElement from "./InteractiveElement";
 import AnimationActionController from "./AnimationActionController";
 import Application from "./Application";
 import {clamp} from "./common";
+import * as Colors from "./colors";
 
 export default class SpliceProtectionCase extends InteractiveElement {
     constructor(model) {
@@ -24,6 +25,10 @@ export default class SpliceProtectionCase extends InteractiveElement {
         this.animationActionController = new AnimationActionController(this.mixer, this.animationClip, this);
 
         this.tooltip = "Переместить гильзу КДЗС";
+
+        this.animationActionController.onCompleted = () => {
+            Application.state.onHeatingCompleted();
+        };
     }
 
     setPosition(x, y, z) {
@@ -36,27 +41,26 @@ export default class SpliceProtectionCase extends InteractiveElement {
     }
 
     checkPlacement() {
-        const placed = this.isCentered();
-
-        if (Application.spliceProtectionPlaced !== placed && placed) {
-            Application.setInstructionText("Поместите волокно с КДЗС в нагреватель");
-        } else if (!placed) {
-            Application.setInstructionText("Расположите гильзу КДЗС в центре места сварки");
-        }
-
-        Application.spliceProtectionPlaced = placed;
+        Application.spliceProtectionPlaced = this.isCentered();
     }
 
     onClick(event) {
         if (!this.held) {
-            if (Application.splicer.children.fiberClamps.animationState != "completed") return;
-            if (Application.state !== "splice_completed") return;
+            if (!Application.state.canPlaceSpliceProtection()) return;
+
+            this.highlightColor = Colors.HIGHLIGHT_ACTIVE;
+
+            Application.mouseHandler.setHoverFilter(element => {
+                return element === this;
+            });
 
             this.originalPosition.copy(this.model.position);
 
             this.mouseDownPoint = this.projectMouseOntoModel(
                 Application.mouseHandler.mouseDownPosition, Application.camera);
         } else {
+            this.highlightColor = Colors.HIGHLIGHT;
+            Application.mouseHandler.resetHoverFilter();
             this.checkPlacement();
         }
 
@@ -110,6 +114,8 @@ export default class SpliceProtectionCase extends InteractiveElement {
     }
 
     onFocusLoss() {
+        this.highlightColor = Colors.HIGHLIGHT;
+        Application.mouseHandler.resetHoverFilter();
         this.checkPlacement();
         this.held = false;
     }
