@@ -4,9 +4,6 @@ import MouseHandler from "./MouseHandler";
 import Splicer from "./Splicer";
 import Fiber from "./Fiber";
 import SpliceProtectionCase from "./SpliceProtectionCase";
-import SpliceProtectionCaseModel from "./SpliceProtectionCaseModel";
-import Model from "./Model";
-import FiberModel from "./FiberModel";
 import {parseGLTF} from "./gltf";
 import {clamp} from "./common";
 import Stats from "stats.js";
@@ -94,7 +91,7 @@ export class ApplicationClass {
         this.spliceProtectionCaseModel = null;
 
         this.splicer = null;
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls = null;
         this.rightFiber = null;
         this.leftFiber = null;
 
@@ -111,23 +108,11 @@ export class ApplicationClass {
         this.spliceProtectionCase = null;
         this.fusedFiber = null;
 
-        this.instructionsElement = document.querySelector("#instructions");
-        this.tooltipElement = document.querySelector("#tooltip");
-
-        this.videoElement = document.querySelector("#screen-video");
+        this.instructionsElement = null;
+        this.tooltipElement = null;
+        this.videoElement = null;
 
         this.objects = [];
-
-        document.querySelector("#start-button").addEventListener("click", () => {
-            this.instructionsElement.style.display = "block";
-            const facade = document.querySelector("#facade");
-            const splashScreen = document.querySelector("#splash-screen");
-
-            facade.style.pointerEvents = "none";
-            facade.style.opacity = 0;
-            splashScreen.style.opacity = 0;
-            splashScreen.style.pointerEvents = "none";
-        });
     }
 
     get leftFiberPlaced() {
@@ -228,13 +213,35 @@ export class ApplicationClass {
     }
 
     async initialize() {
+        this.instructionsElement = document.querySelector("#instructions");
+        this.tooltipElement = document.querySelector("#tooltip");
+
+        this.videoElement = document.querySelector("#screen-video");
+
+        document.querySelector("#start-button").addEventListener("click", () => {
+            this.instructionsElement.style.display = "block";
+            const facade = document.querySelector("#facade");
+            const splashScreen = document.querySelector("#splash-screen");
+
+            facade.style.pointerEvents = "none";
+            facade.style.opacity = 0;
+            splashScreen.style.opacity = 0;
+            splashScreen.style.pointerEvents = "none";
+        });
+
         this.mouseHandler = new MouseHandler();
 
         this.videoTexture = new THREE.VideoTexture(this.videoElement);
         this.videoTexture.flipY = false;
 
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+
         this.addObject(this.mouseHandler);
         this.addObject(this.controls);
+
+        const Model = (await import("./Model")).default;
+        const FiberModel = (await import("./FiberModel")).default;
+        const SpliceProtectionCaseModel = (await import("./SpliceProtectionCaseModel")).default;
 
         const splicerGLTF = await parseGLTF(Model);
         this.splicerModel = splicerGLTF.scene.children[0];
