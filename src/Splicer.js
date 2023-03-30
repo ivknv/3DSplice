@@ -156,8 +156,20 @@ class ScreenElement extends AnimatedSplicerElement {
         this.tooltip = "Повернуть экран";
     }
 
-    setInitialScreen() {}
-    startSpliceAnimation() {}
+    setVideo(texture) {
+        const screenObject = Object.values(this.objects).find(x => { return x.name === "Cube113_1"; });
+
+        screenObject.material.map = texture;
+        screenObject.material.color.set(0xFFFFFF);
+    }
+
+    setInitialScreen() {
+        Application.videoElement.currentTime = 0;
+    }
+
+    startSpliceAnimation() {
+        Application.videoElement.play();
+    }
 }
 
 class ScreenBearingElement extends AnimatedSplicerElement {

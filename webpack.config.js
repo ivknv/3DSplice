@@ -56,7 +56,7 @@ module.exports = {
     },
     devServer: {
         static: {
-            directory: path.join(__dirname, "static")
+            directory: path.join(__dirname, "src", "static")
         },
         compress: true,
         port: 8000,

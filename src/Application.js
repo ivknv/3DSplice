@@ -222,6 +222,7 @@ export class ApplicationClass {
 
         this.videoElement = document.querySelector("#screen-video");
         this.videoTexture = new THREE.VideoTexture(this.videoElement);
+        this.videoTexture.flipY = false;
 
         this.addObject(this.mouseHandler);
         this.addObject(this.controls);
@@ -252,6 +253,8 @@ export class ApplicationClass {
         this.stats.showPanel(0);
 
         this.setInstructionText("Откройте крышку сварочного аппарата");
+
+        this.splicer.children.screen.setVideo(this.videoTexture);
     }
 
     getElementByObject(obj) {
