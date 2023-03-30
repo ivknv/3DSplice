@@ -113,6 +113,9 @@ export class ApplicationClass {
         this.videoElement = null;
 
         this.objects = [];
+
+        this.renderer.domElement.style.opacity = 0;
+        this.renderer.domElement.style.transition = "opacity 1.5s";
     }
 
     get leftFiberPlaced() {
@@ -248,6 +251,8 @@ export class ApplicationClass {
         this.splicerAnimations = splicerGLTF.animations;
         this.fiberModel = (await parseGLTF(FiberModel)).scene.children[0];
         this.spliceProtectionCaseModel = (await parseGLTF(SpliceProtectionCaseModel)).scene.children[0];
+
+        this.renderer.domElement.style.opacity = 1;
 
         this.splicer = new Splicer(this.splicerModel, this.splicerAnimations);
         this.leftFiber = new Fiber(this.fiberModel.clone(), "left");
