@@ -5,39 +5,19 @@ import AnimationActionController from "./AnimationActionController";
 import Application from "./Application";
 import * as Colors from "./colors";
 
-function makeKeyframeTracks(model, offsetY, offsetZ, targetAngle) {
-    const targetQuaternion = new THREE.Quaternion().setFromAxisAngle(
-        new THREE.Vector3(0, 0, 1), targetAngle);
-
-    return [
-        new THREE.VectorKeyframeTrack(
-            ".position",
-            [0, 2],
-            [
-                model.position.x,
-                model.position.y,
-                model.position.z,
-                model.position.x,
-                model.position.y + offsetY,
-                model.position.z + offsetZ
-            ],
-            THREE.InterpolateLinear),
-        new THREE.QuaternionKeyframeTrack(
-            ".quaternion",
-            [0, 2],
-            [
-                model.quaternion.x,
-                model.quaternion.y,
-                model.quaternion.z,
-                model.quaternion.w,
-                targetQuaternion.x,
-                targetQuaternion.y,
-                targetQuaternion.z,
-                targetQuaternion.w,
-
-            ],
-            THREE.InterpolateLinear)
-    ];
+function makeKeyframeTrack(model, offsetY, offsetZ) {
+    return new THREE.VectorKeyframeTrack(
+        ".position",
+        [0, 2],
+        [
+            model.position.x,
+            model.position.y,
+            model.position.z,
+            model.position.x,
+            model.position.y + offsetY,
+            model.position.z + offsetZ
+        ],
+        THREE.InterpolateLinear);
 }
 
 export default class FusedFiber extends InteractiveElement {
@@ -58,23 +38,25 @@ export default class FusedFiber extends InteractiveElement {
         this.mixerLeft = new THREE.AnimationMixer(this.left);
         this.mixerRight = new THREE.AnimationMixer(this.right);
 
-        const keyframesLeft = makeKeyframeTracks(this.left, 0.1, 0.0525, -0.5 * Math.PI);
-        const keyframesRight = makeKeyframeTracks(this.right, 0.1, 0.0525, 0.5 * Math.PI);
+        const keyframesLeft = makeKeyframeTrack(this.left, 0.1, 0.0525);
+        const keyframesRight = makeKeyframeTrack(this.right, 0.1, 0.0525);
 
-        this.liftAnimationLeft = new THREE.AnimationClip("Lift Fiber", 2, keyframesLeft);
-        this.liftAnimationRight = new THREE.AnimationClip("Lift Fiber", 2, keyframesRight);
+        this.liftAnimationLeft = new THREE.AnimationClip("Lift Fiber", 2, [keyframesLeft]);
+        this.liftAnimationRight = new THREE.AnimationClip("Lift Fiber", 2, [keyframesRight]);
 
-        this.animationActionControllerLeft = new AnimationActionController(this.mixerLeft, this.liftAnimationLeft, this);
-        this.animationActionControllerRight = new AnimationActionController(this.mixerRight, this.liftAnimationRight, this);
+        this.animationActionControllerLeft = new AnimationActionController(this.mixerLeft, this.liftAnimationLeft);
+        this.animationActionControllerRight = new AnimationActionController(this.mixerRight, this.liftAnimationRight);
 
         this.tooltip = "Переместить волокно";
+
+        this.initialAngleLeft = this.left.rotation.z;
+        this.initialAngleRight = this.right.rotation.z;
 
         this.minY = 0.04;
         this.maxY = 0.17;
 
         this.animationActionControllerLeft.onCompleted = () => {
             Application.leftFiberPlaced = false;
-            Application.rightFiberPlaced = false;
         };
 
         this.animationActionControllerRight.onCompleted = () => {
@@ -130,9 +112,21 @@ export default class FusedFiber extends InteractiveElement {
         return projected;
     }
 
+    updateRotation() {
+        const t = this.animationActionControllerLeft.action.time / this.liftAnimationLeft.duration;
+
+        const deltaLeft = this.initialAngleLeft - 0.5 * Math.PI;
+        const deltaRight = this.initialAngleRight - 0.5 * Math.PI;
+
+        this.left.rotation.z = this.initialAngleLeft - deltaLeft * t;
+        this.right.rotation.z = this.initialAngleRight - deltaRight * t;
+    }
+
     update() {
         this.mixerLeft.update(Application.clockDelta);
         this.mixerRight.update(Application.clockDelta);
+
+        this.updateRotation();
 
         if (!this.held) return;
 

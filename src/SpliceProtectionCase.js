@@ -22,7 +22,7 @@ export default class SpliceProtectionCase extends InteractiveElement {
         this.keyframes = new THREE.VectorKeyframeTrack(
             ".scale", [0, 15], [1, 1, 1, 5/6, 2/3, 2/3], THREE.InterpolateSmooth);
         this.animationClip = new THREE.AnimationClip("Shrink", 15, [this.keyframes]);
-        this.animationActionController = new AnimationActionController(this.mixer, this.animationClip, this);
+        this.animationActionController = new AnimationActionController(this.mixer, this.animationClip);
 
         this.tooltip = "Переместить гильзу КДЗС";
 
@@ -83,7 +83,7 @@ export default class SpliceProtectionCase extends InteractiveElement {
 
     updateRotation() {
         const x = -this.delta - (this.originalPosition.x - Application.rightFiber.model.position.x);
-        const maxX = Application.state === "initial" ? 
+        const maxX = Application.state === "initial" ?
             -Application.rightFiber.getTipPosition().x + Application.rightFiber.model.position.x - 0.03 :
             -Application.rightFiber.getTipPosition().x + Application.rightFiber.model.position.x + 0.1;
         const minX = 0.07;

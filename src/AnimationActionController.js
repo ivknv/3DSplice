@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 export default class AnimationActionController {
-    constructor(mixer, animation, interactiveElement) {
+    constructor(mixer, animation) {
         this.state = "initial";
         this.animation = animation;
         this.action = mixer.clipAction(this.animation);
