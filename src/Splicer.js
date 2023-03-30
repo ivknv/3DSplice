@@ -147,7 +147,7 @@ s
 
 class ScreenElement extends AnimatedSplicerElement {
     constructor(splicer) {
-        super(splicer.model, splicer.animations, splicer.mixer, ["Screen"], "Rotate Screen");
+        super(splicer.model, splicer.animations, splicer.mixer, ["Cube113", "Cube113_1"], "Rotate Screen");
 
         this.dependencies = {
             screenBearing: "initial"
