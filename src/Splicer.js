@@ -335,6 +335,28 @@ class HeatButtonElement extends InteractiveElement {
     }
 }
 
+class PowerSwitchElement extends AnimatedSplicerElement {
+    constructor(splicer) {
+        super(splicer.model, splicer.animations, splicer.mixer, ["Cube050"], "Power On (DC)");
+    }
+
+    isOn() {
+        return this.animationState === "completed";
+    }
+
+    isOff() {
+        return this.animationState === "initial";
+    }
+
+    get tooltip() {
+        return this.isOn() ? "Выключить сварочный аппарат" : "Включить сварочный аппарат";
+    }
+
+    set tooltip(value) {
+        return;
+    }
+}
+
 export default class Splicer extends InteractiveElement {
     constructor(model, animations) {
         super(model, []);
@@ -351,7 +373,8 @@ export default class Splicer extends InteractiveElement {
             heaterSideLids: new HeaterSideLidsElement(this),
             setButton: new SetButtonElement(this),
             resetButton: new ResetButtonElement(this),
-            heatButton: new HeatButtonElement(this)
+            heatButton: new HeatButtonElement(this),
+            powerSwitch: new PowerSwitchElement(this)
         };
     }
 
