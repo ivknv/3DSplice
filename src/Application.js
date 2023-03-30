@@ -111,10 +111,23 @@ export class ApplicationClass {
         this.spliceProtectionCase = null;
         this.fusedFiber = null;
 
-        this.instructionsElement = null;
-        this.tooltipElement = null;
+        this.instructionsElement = document.querySelector("#instructions");
+        this.tooltipElement = document.querySelector("#tooltip");
+
+        this.videoElement = document.querySelector("#screen-video");
 
         this.objects = [];
+
+        document.querySelector("#start-button").addEventListener("click", () => {
+            this.instructionsElement.style.display = "block";
+            const facade = document.querySelector("#facade");
+            const splashScreen = document.querySelector("#splash-screen");
+
+            facade.style.pointerEvents = "none";
+            facade.style.opacity = 0;
+            splashScreen.style.opacity = 0;
+            splashScreen.style.pointerEvents = "none";
+        });
     }
 
     get leftFiberPlaced() {
@@ -217,10 +230,6 @@ export class ApplicationClass {
     async initialize() {
         this.mouseHandler = new MouseHandler();
 
-        this.instructionsElement = document.querySelector("#instructions");
-        this.tooltipElement = document.querySelector("#tooltip");
-
-        this.videoElement = document.querySelector("#screen-video");
         this.videoTexture = new THREE.VideoTexture(this.videoElement);
         this.videoTexture.flipY = false;
 
@@ -255,6 +264,12 @@ export class ApplicationClass {
         this.setInstructionText("Откройте крышку сварочного аппарата");
 
         this.splicer.children.screen.setVideo(this.videoTexture);
+
+        Application.stats.domElement.style.right = "0px";
+        Application.stats.domElement.style.removeProperty("left");
+
+        Application.renderer.domElement.style.position = "absolute";
+        Application.renderer.domElement.style.zIndex = "1";
     }
 
     getElementByObject(obj) {
