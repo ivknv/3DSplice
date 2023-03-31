@@ -146,6 +146,7 @@
     cursor: pointer;
     color: #f7f7f7;
     line-height: 1;
+    transition: background-color 0.5s;
 }
 
 #help-button:hover {
