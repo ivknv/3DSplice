@@ -22,19 +22,12 @@ export default class MouseHandler {
         this.hoverFilter = function(element) { return true; };
 
         this.root.addEventListener("pointermove", event => {
-            const ratio = Application.renderer.getPixelRatio();
-            const w = this.root.width / ratio;
-            const h = this.root.height / ratio;
-            const x = event.clientX;
-            const y = event.clientY;
-
-            this.position.x = x / w * 2 - 1;
-            this.position.y = -y / h * 2 + 1;
-            this.positionPx.x = x;
-            this.positionPx.y = y;
+            this.updateMousePosition(event.clientX, event.clientY);
         });
 
         this.root.addEventListener("mousedown", event => {
+            this.updateMousePosition(event.clientX, event.clientY);
+            this.updateHover();
             this.mouseDownSelection = this.hoveredElement;
             this.mouseDownPosition.copy(this.position);
         });
@@ -72,6 +65,17 @@ export default class MouseHandler {
             }
             this.focusedElement = selection;
         });
+    }
+
+    updateMousePosition(x, y) {
+        const ratio = Application.renderer.getPixelRatio();
+        const w = this.root.width / ratio;
+        const h = this.root.height / ratio;
+
+        this.position.x = x / w * 2 - 1;
+        this.position.y = -y / h * 2 + 1;
+        this.positionPx.x = x;
+        this.positionPx.y = y;
     }
 
     setHoverFilter(filter) {

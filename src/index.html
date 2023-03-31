@@ -3,101 +3,10 @@
     <head>
         <meta charset="utf-8" />
         <title>Симулятор сварочного аппарата</title>
-        <style>
-            body {
-                margin: 0;
-                background-color: #222;
-                overflow: hidden;
-            }
-
-            #main {
-                position: relative;
-            }
-
-            #instructions {
-                display: none;
-                position: absolute;
-                z-index: 10;
-                left: 6px;
-                top: 6px;
-                color: #f5f5f5;
-                font-size: 17px;
-                font-weight: bold;
-                font-family: Helvetica, sans-serif, Arial;
-            }
-
-            #tooltip {
-                position: absolute;
-                display: none;
-                opacity: 0;
-                transition: opacity 0.3s;
-                z-index: 15;
-                background-color: #555;
-                color: #fefefe;
-                text-align: center;
-                font-size: 12px;
-                font-family: Helvetica, sans-serif, Arial;
-                padding: 5px;
-                border-radius: 3px;
-                pointer-events: none;
-            }
-
-            #screen-video {
-                display: none;
-            }
-
-            #facade {
-                position: fixed;
-                background-color: #111;
-                opacity: 0.8;
-                width: 100%;
-                height: 100%;
-                z-index: 20;
-                transition: opacity 0.5s;
-            }
-
-            #start-button {
-                display: block;
-                margin: auto;
-                max-width: 100%;
-                padding: 10px 24px;
-                border-radius: 30px;
-                background-color: #2571ff;
-                border: 2px solid #1031bf;
-                color: #fafafa;
-                cursor: pointer;
-                font-size: 16px;
-                font-family: Helvetica, sans-serif, Arial;
-                transition: background-color 0.5s;
-            }
-
-            #start-button:hover {
-                background-color: #3983ff;
-            }
-
-            #splash-screen {
-                position: fixed;
-                left: 0;
-                top: 0;
-                right: 0;
-                bottom: 0;
-                margin: auto;
-                max-width: 100%;
-                max-height: 400px;
-                z-index: 25;
-                transition: 0.5s opacity;
-            }
-
-            #splash-screen h1 {
-                color: #fafafa;
-                font-family: Helvetica, Arial;
-                font-size: 36px;
-                text-align: center;
-            }
-        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     </head>
-    <body>
-        <section id="main">
+    <body style="margin: 0; background-color: #222;">
+        <section id="main" style="display: none;">
             <div id="facade"></div>
             <section id="splash-screen">
                 <h1>
@@ -107,9 +16,27 @@
                 <button id="start-button">Начать</button>
             </section>
 
+            <section id="help" class="help-hidden">
+                <h1>Как пользоваться?</h1>
+                <h3>Взаимодействие с 3D-объектами</h3>
+                <p>Наведите на нужный элемент сварочного аппарата и нажмите на него чтобы выполнить действие.</p>
+                <p>При наведении объект будет подсвечен и появится подсказка рядом с курсором, показывающая, что произойдет при нажатии.</p>
+                <p>Некоторые элементы можно перемещать после нажатия. Для того чтобы отпустить их, нажмите еще раз в любое место.</p>
+                <p>В верхнем левом углу отображается, какое действие нужно совершить дальше.</p>
+                <p>Если при нажатии на объект ничего не происходит, значит это действие сейчас нельзя совершить.</p>
+                <h3>Управление камерой</h3>
+                <p>
+                    Для вращения, зажмите левую кнопку мыши и перемещайте курсор.<br/>
+                    Для перемещения, зажмите правую кнопку мыши и перемещайте курсор.<br/>
+                    Чтобы приблизить/отдалить, используйте колёсико мыши.
+                </p>
+                <button id="hide-help-button">Продолжить</button>
+            </section>
+
             <section id="instructions"></section>
             <span id="tooltip"></span>
-            <video id="screen-video" src="./video.mp4" muted="true"></video>
+            <button id="help-button" title="Помощь">?</button>
+            <video id="screen-video" src="./video.mp4" muted="true" style="display: none;"></video>
         </section>
     </body>
 </html>

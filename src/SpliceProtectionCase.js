@@ -7,7 +7,9 @@ import * as Colors from "./colors";
 
 export default class SpliceProtectionCase extends InteractiveElement {
     constructor(model) {
-        super(model, ["Cube", "Cylinder001"]);
+        const group = new THREE.Group();
+        group.add(model);
+        super(group, ["Cube", "Cylinder001"]);
 
         this.originalPosition = new THREE.Vector3();
         this.mouseDownPoint = new THREE.Vector3();
@@ -29,6 +31,16 @@ export default class SpliceProtectionCase extends InteractiveElement {
         this.animationActionController.onCompleted = () => {
             Application.state.onHeatingCompleted();
         };
+
+        this.padding = model.getObjectByName("Cube").clone();
+        this.padding.visible = false;
+        this.padding.scale.x = 1;
+        this.padding.scale.y = 3;
+        this.padding.scale.z = 6;
+
+        this.objects[this.padding.uuid] = this.padding;
+
+        group.add(this.padding);
     }
 
     setPosition(x, y, z) {
@@ -61,6 +73,8 @@ export default class SpliceProtectionCase extends InteractiveElement {
         } else {
             this.highlightColor = Colors.HIGHLIGHT;
             Application.mouseHandler.resetHoverFilter();
+            this.syncWithMouse();
+            this.updateRotation();
             this.checkPlacement();
         }
 
@@ -95,28 +109,34 @@ export default class SpliceProtectionCase extends InteractiveElement {
         this.model.position.z = newPosition.z + Application.rightFiber.model.position.z;
     }
 
+    syncWithMouse() {
+        const projected = this.projectMouseOntoModel(
+            Application.mouseHandler.position, Application.camera);
+
+        this.delta = projected.x - this.mouseDownPoint.x;
+    }
+
     update() {
         this.mixer.update(Application.clockDelta);
         const scale = (5/6) / this.model.scale.x;
         this.metalRod.scale.x = scale;
         this.metalRod.scale.y = scale;
         this.metalRod.scale.z = scale;
-        if (!this.held) {
-            this.updateRotation();
-            return;
-        }
 
-        const projected = this.projectMouseOntoModel(
-            Application.mouseHandler.position, Application.camera);
-
-        this.delta = projected.x - this.mouseDownPoint.x;
+        if (this.held) this.syncWithMouse();
         this.updateRotation();
     }
 
     onFocusLoss() {
         this.highlightColor = Colors.HIGHLIGHT;
         Application.mouseHandler.resetHoverFilter();
-        this.checkPlacement();
+
+        if (this.held) {
+            this.syncWithMouse();
+            this.updateRotation();
+            this.checkPlacement();
+        }
+
         this.held = false;
     }
 

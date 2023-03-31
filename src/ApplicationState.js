@@ -208,6 +208,7 @@ export class ReadyToPlaceSpliceProtection extends ApplicationState {
 
     onSpliceProtectionPlaced() {
         Application.setInstructionText("Поместите волокно с КДЗС в нагреватель");
+        Application.fusedFiber.addPadding();
 
         if (Application.splicer.children.mainHeaterLid.isOpen() && Application.splicer.children.heaterSideLids.isOpen()) {
             Application.changeState(new ReadyToPlaceFiberInHeaterState());

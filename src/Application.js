@@ -26,42 +26,17 @@ function parseURLHashParameters() {
 
 export class ApplicationClass {
     constructor() {
-        this.stats = new Stats();
         this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(20, window.innerWidth / window.innerHeight, 0.025, 1000);
+        this.camera = null;
+        this.renderer = null;
+        this.stats = null;
 
-        const hashParameters = parseURLHashParameters();
+        this.hashParameters = parseURLHashParameters();
 
-        this.statsEnabled = hashParameters["stats"] === "true";
-
-        if (!this.statsEnabled) {
-            this.stats.domElement.style.display = "none";
-        }
-
-        const rendererParameters = {
-            antialias: hashParameters["antialias"] !== "false",
-            depth: hashParameters["depth"] !== "false",
-            stencil: hashParameters["stencil"] !== "false",
-            preserveDrawingBuffer: hashParameters["preserveDrawingBuffer"] !== "false"
-        };
-
-        if (["highp", "mediump", "lowp"].indexOf(hashParameters["precision"]) !== -1) {
-            rendererParameters.precision = hashParameters["precision"];
-        }
-
-        if (["high-performance", "low-power", "default"].indexOf(hashParameters["powerPreference"]) !== -1) {
-            rendererParameters.powerPreference = hashParameters["powerPreference"];
-        }
-
-        const pixelRatio = parseFloat(hashParameters["pixelRatio"] || window.devicePixelRatio);
-
-        this.renderer = new THREE.WebGLRenderer(rendererParameters);
-        this.renderer.toneMapping = THREE.ReinhardToneMapping;
-        this.renderer.toneMappingExposure = 0.8;
-        this.renderer.physicallyCorrectLights = hashParameters["physicallyCorrectLights"] !== "false";
-        this.renderer.localClippingEnabled = hashParameters["localClippingEnabled"] === "true";
-        this.renderer.setPixelRatio(clamp(pixelRatio, 0.1, window.devicePixelRatio));
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.setupCamera();
+        this.setupStats();
+        this.setupRenderer();
+        this.setupLights();
 
         this.clock = new THREE.Clock();
         this.clockDelta = 0;
@@ -74,10 +49,6 @@ export class ApplicationClass {
             this.camera.aspect = w / h;
             this.camera.updateProjectionMatrix();
         });
-
-        const enabledLights = (hashParameters["lights"] || "left,right,back,front").split(",");
-
-        this.setupLights(enabledLights);
 
         this.state = new InitialState();
 
@@ -95,14 +66,9 @@ export class ApplicationClass {
         this.rightFiber = null;
         this.leftFiber = null;
 
-        this.camera.position.x = 0.5;
-        this.camera.position.y = 1;
-        this.camera.position.z = 0.5;
-
-        this.renderer.setClearColor(Colors.CLEAR, 1);
-
         this.elements = [];
         this.models = [];
+        this.objects = [];
         this.mouseHandler = null;
 
         this.spliceProtectionCase = null;
@@ -111,11 +77,54 @@ export class ApplicationClass {
         this.instructionsElement = null;
         this.tooltipElement = null;
         this.videoElement = null;
+    }
 
-        this.objects = [];
+    setupRenderer() {
+        const rendererParameters = {
+            antialias: this.hashParameters["antialias"] !== "false",
+            depth: this.hashParameters["depth"] !== "false",
+            stencil: this.hashParameters["stencil"] !== "false",
+            preserveDrawingBuffer: this.hashParameters["preserveDrawingBuffer"] !== "false"
+        };
+
+        if (["highp", "mediump", "lowp"].indexOf(this.hashParameters["precision"]) !== -1) {
+            rendererParameters.precision = this.hashParameters["precision"];
+        }
+
+        if (["high-performance", "low-power", "default"].indexOf(this.hashParameters["powerPreference"]) !== -1) {
+            rendererParameters.powerPreference = this.hashParameters["powerPreference"];
+        }
+
+        const pixelRatio = parseFloat(this.hashParameters["pixelRatio"] || window.devicePixelRatio);
+
+        this.renderer = new THREE.WebGLRenderer(rendererParameters);
+        this.renderer.toneMapping = THREE.ReinhardToneMapping;
+        this.renderer.toneMappingExposure = 0.8;
+        this.renderer.physicallyCorrectLights = this.hashParameters["physicallyCorrectLights"] !== "false";
+        this.renderer.localClippingEnabled = this.hashParameters["localClippingEnabled"] === "true";
+        this.renderer.setPixelRatio(clamp(pixelRatio, 0.1, window.devicePixelRatio));
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
 
         this.renderer.domElement.style.opacity = 0;
         this.renderer.domElement.style.transition = "opacity 1.5s";
+
+        this.renderer.setClearColor(Colors.CLEAR, 1);
+    }
+
+    setupCamera() {
+        this.camera = new THREE.PerspectiveCamera(20, window.innerWidth / window.innerHeight, 0.025, 1000);
+        this.camera.position.x = 0.5;
+        this.camera.position.y = 1;
+        this.camera.position.z = 0.5;
+    }
+
+    setupStats() {
+        this.stats = new Stats();
+        this.statsEnabled = this.hashParameters["stats"] === "true";
+
+        if (!this.statsEnabled) {
+            this.stats.domElement.style.display = "none";
+        }
     }
 
     get leftFiberPlaced() {
@@ -215,33 +224,38 @@ export class ApplicationClass {
         this.instructionsElement.innerText = text;
     }
 
-    async initialize() {
-        this.instructionsElement = document.querySelector("#instructions");
-        this.tooltipElement = document.querySelector("#tooltip");
+    hideFacade() {
+        document.querySelector("#facade").classList.add("facade-hidden");
+    }
 
-        this.videoElement = document.querySelector("#screen-video");
+    showFacade() {
+        document.querySelector("#facade").classList.remove("facade-hidden");
+    }
 
-        document.querySelector("#start-button").addEventListener("click", () => {
-            this.instructionsElement.style.display = "block";
-            const facade = document.querySelector("#facade");
-            const splashScreen = document.querySelector("#splash-screen");
+    hideSplashScreen() {
+        document.querySelector("#splash-screen").classList.add("splash-screen-hidden");
+    }
 
-            facade.style.pointerEvents = "none";
-            facade.style.opacity = 0;
-            splashScreen.style.opacity = 0;
-            splashScreen.style.pointerEvents = "none";
-        });
+    showHelp() {
+        this.showFacade();
 
-        this.mouseHandler = new MouseHandler();
+        document.querySelector("#splash-screen").classList.add("splash-screen-obscured");
+        document.querySelector("#help-button").classList.add("help-button-hidden");
+        document.querySelector("#help").classList.remove("help-hidden");
+    }
 
-        this.videoTexture = new THREE.VideoTexture(this.videoElement);
-        this.videoTexture.flipY = false;
+    hideHelp() {
+        const splashScreen = document.querySelector("#splash-screen")
+        document.querySelector("#help").classList.add("help-hidden");
+        splashScreen.classList.remove("splash-screen-obscured");
+        document.querySelector("#help-button").classList.remove("help-button-hidden");
 
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        if (splashScreen.classList.contains("splash-screen-hidden")) {
+            this.hideFacade();
+        }
+    }
 
-        this.addObject(this.controls);
-        this.addObject(this.mouseHandler);
-
+    async loadModels() {
         const Model = (await import("./Model")).default;
         const FiberModel = (await import("./FiberModel")).default;
         const SpliceProtectionCaseModel = (await import("./SpliceProtectionCaseModel")).default;
@@ -251,9 +265,9 @@ export class ApplicationClass {
         this.splicerAnimations = splicerGLTF.animations;
         this.fiberModel = (await parseGLTF(FiberModel)).scene.children[0];
         this.spliceProtectionCaseModel = (await parseGLTF(SpliceProtectionCaseModel)).scene.children[0];
+    }
 
-        this.renderer.domElement.style.opacity = 1;
-
+    setupInteractiveElements() {
         this.splicer = new Splicer(this.splicerModel, this.splicerAnimations);
         this.leftFiber = new Fiber(this.fiberModel.clone(), "left");
         this.rightFiber = new Fiber(this.fiberModel.clone(), "right");
@@ -271,11 +285,48 @@ export class ApplicationClass {
         this.leftFiber.addToApplication();
         this.spliceProtectionCase.addToApplication();
 
+        this.splicer.children.screen.setVideo(this.videoTexture);
+    }
+
+    async initialize() {
+        this.instructionsElement = document.querySelector("#instructions");
+        this.tooltipElement = document.querySelector("#tooltip");
+        this.videoElement = document.querySelector("#screen-video");
+
+        document.querySelector("#start-button").addEventListener("click", () => {
+            this.instructionsElement.style.display = "block";
+
+            this.hideFacade();
+            this.hideSplashScreen();
+        });
+
+        document.querySelector("#help-button").addEventListener("click", () => {
+            this.showHelp();
+        });
+
+        document.querySelector("#hide-help-button").addEventListener("click", () => {
+            this.hideHelp();
+        });
+
+        this.mouseHandler = new MouseHandler();
+
+        this.videoTexture = new THREE.VideoTexture(this.videoElement);
+        this.videoTexture.flipY = false;
+
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+
+        this.addObject(this.controls);
+        this.addObject(this.mouseHandler);
+
+        await this.loadModels();
+
+        this.renderer.domElement.style.opacity = 1;
+
+        this.setupInteractiveElements();
+
         this.stats.showPanel(0);
 
         this.setInstructionText("Откройте крышку сварочного аппарата");
-
-        this.splicer.children.screen.setVideo(this.videoTexture);
 
         Application.stats.domElement.style.right = "0px";
         Application.stats.domElement.style.removeProperty("left");
@@ -305,10 +356,11 @@ export class ApplicationClass {
         return null;
     }
 
-    setupLights(enabledLights) {
-        this.scene.add(new THREE.AmbientLight("white", 3));
-
+    setupLights() {
+        let enabledLights = (this.hashParameters["lights"] || "left,right,back,front").split(",");
         enabledLights = enabledLights || ["back", "front", "left", "right"];
+
+        this.scene.add(new THREE.AmbientLight("white", 3));
 
         const directionalLights = {
             back: {

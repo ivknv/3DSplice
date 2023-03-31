@@ -1,4 +1,4 @@
-import {Vector3, Raycaster, Box3} from "three";
+import {Vector3, Raycaster, Box3, Group} from "three";
 import InteractiveElement from "./InteractiveElement";
 import Application from "./Application";
 import {clamp} from "./common";
@@ -6,7 +6,11 @@ import * as Colors from "./colors";
 
 export default class Fiber extends InteractiveElement {
     constructor(model, direction) {
-        super(model, ["Cylinder_1", "Cylinder_2", "Cylinder_3"]);
+        const group = new Group();
+        group.add(model);
+        model.rotation.z = 0;
+
+        super(group, ["Cylinder_1", "Cylinder_2", "Cylinder_3"]);
 
         this.originalPosition = new Vector3();
         this.mouseDownPoint = new Vector3();
@@ -16,11 +20,31 @@ export default class Fiber extends InteractiveElement {
         this.minX = 0;
         this.maxX = 0;
 
+        // Create an invisible big cylinder to make it easier to click on the fiber
+        this.padding = model.getObjectByName("Cylinder_1").clone();
+        this.padding.visible = false;
+        this.padding.scale.x = 3;
+        this.padding.scale.y = 4;
+        this.padding.scale.z = 8;
+        this.model.rotation.z = -Math.PI * 0.5;
+
+        this.addPadding();
+
         this.boundingBox = new Box3().setFromObject(this.model);
 
         this.setDirection(direction);
 
         this.tooltip = "Переместить волокно";
+    }
+
+    addPadding() {
+        this.model.add(this.padding);
+        this.objects[this.padding.uuid] = this.padding;
+    }
+
+    removePadding() {
+        this.model.remove(this.padding);
+        delete this.objects[this.padding.uuid];
     }
 
     setDirection(direction) {
@@ -102,11 +126,12 @@ export default class Fiber extends InteractiveElement {
     update() {
         if (!this.active) return;
 
-        if (!this.held) {
-            this.updateRotation();
-            return;
-        }
+        if (this.held) this.syncWithMouse();
 
+        this.updateRotation();
+    }
+
+    syncWithMouse() {
         const projected = this.projectMouseOntoFiber(
             Application.mouseHandler.position, Application.camera);
 
@@ -116,13 +141,17 @@ export default class Fiber extends InteractiveElement {
             clamp(this.originalPosition.x + delta, this.minX, this.maxX),
             this.model.position.y,
             this.model.position.z);
-        this.updateRotation();
     }
 
     onFocusLoss() {
         Application.mouseHandler.resetHoverFilter();
         this.highlightColor = Colors.HIGHLIGHT;
-        this.checkPlacement();
+
+        if (this.held) {
+            this.syncWithMouse();
+            this.checkPlacement();
+        }
+
         this.held = false;
     }
 

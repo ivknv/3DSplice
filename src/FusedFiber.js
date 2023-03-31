@@ -25,12 +25,15 @@ export default class FusedFiber extends InteractiveElement {
         const model = new THREE.Group();
         model.add(leftFiber.model);
         model.add(rightFiber.model);
+
         super(model, ["Cylinder_1", "Cylinder_2", "Cylinder_3"]);
 
         this.held = false;
 
         this.left = leftFiber.model;
+        this.leftPadding = leftFiber.padding;
         this.right = rightFiber.model;
+        this.rightPadding = rightFiber.padding;
 
         this.originalPosition = new THREE.Vector3();
         this.mouseDownPoint = new THREE.Vector3();
@@ -69,6 +72,16 @@ export default class FusedFiber extends InteractiveElement {
 
         Application.leftFiberPlaced = placed;
         Application.rightFiberPlaced = placed;
+    }
+
+    addPadding() {
+        this.objects[this.leftPadding.uuid] = this.leftPadding;
+        this.objects[this.rightPadding.uuid] = this.rightPadding;
+    }
+
+    removePadding() {
+        delete this.objects[this.leftPadding.uuid];
+        delete this.objects[this.rightPadding.uuid];
     }
 
     onClick(event) {
@@ -122,14 +135,7 @@ export default class FusedFiber extends InteractiveElement {
         this.right.rotation.z = this.initialAngleRight - deltaRight * t;
     }
 
-    update() {
-        this.mixerLeft.update(Application.clockDelta);
-        this.mixerRight.update(Application.clockDelta);
-
-        this.updateRotation();
-
-        if (!this.held) return;
-
+    syncWithMouse() {
         const projected = this.projectMouseOntoFiber(
             Application.mouseHandler.position, Application.camera);
 
@@ -139,10 +145,23 @@ export default class FusedFiber extends InteractiveElement {
         this.right.position.y = position;
     }
 
+    update() {
+        this.mixerLeft.update(Application.clockDelta);
+        this.mixerRight.update(Application.clockDelta);
+
+        if (this.held) this.syncWithMouse();
+        this.updateRotation();
+    }
+
     onFocusLoss() {
         this.highlightColor = Colors.HIGHLIGHT;
         Application.mouseHandler.resetHoverFilter();
-        this.checkPlacement();
+
+        if (this.held) {
+            this.syncWithMouse();
+            this.checkPlacement();
+        }
+
         this.held = false;
     }
 }

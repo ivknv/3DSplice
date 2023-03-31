@@ -1,4 +1,5 @@
 import Application from "./Application";
+import "./style.css";
 
 async function main() {
     document.addEventListener("DOMContentLoaded", function() {

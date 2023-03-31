@@ -26,8 +26,8 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.glb$/i,
-                type: "asset/resource"
+                test: /\.css$/i,
+                use: ["style-loader", "css-loader"]
             },
             {
                 test: /\.js$/i,
