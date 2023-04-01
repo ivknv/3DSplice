@@ -520,6 +520,7 @@ export class ReadyToHeatState extends ApplicationState {
 
     onHeatPressed() {
         Application.setInstructionText("Дождитесь завершения работы нагревателя");
+        Application.splicer.heaterIndicator.startFlashing();
         Application.changeState(new HeatingInProgressState());
         Application.spliceProtectionCase.shrink();
     }
@@ -539,6 +540,7 @@ export class HeatingInProgressState extends ApplicationState {
     }
 
     onHeatingCompleted() {
+        Application.splicer.heaterIndicator.stopFlashing();
         Application.setInstructionText("Волокно можно извлечь");
         Application.changeState(new HeatingCompletedState());
     }

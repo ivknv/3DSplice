@@ -381,7 +381,7 @@ class ResetButtonElement extends InteractiveElement {
 
 class HeatButtonElement extends InteractiveElement {
     constructor(splicer) {
-        super(splicer.model, ["Cube137", "Cube137_1", "HeaterIndicator"]);
+        super(splicer.model, ["Cube137", "Cube137_1"]);
 
         this.tooltip = "Включить нагреватель";
     }
@@ -413,12 +413,39 @@ class PowerSwitchElement extends AnimatedSplicerElement {
     }
 }
 
+class HeaterIndicator {
+    constructor(model) {
+        this.model = model;
+        this.initialColor = model.material.color.clone();
+        this.activeColor = new THREE.Color("orange");
+        this.intervalId = null;
+        this.flashing = false;
+    }
+
+    startFlashing() {
+        if (this.intervalId !== null) this.stopFlashing();
+
+        this.intervalId = setInterval(() => {
+            const color = this.flashing ? this.initialColor : this.activeColor;
+            this.model.material.color.set(color);
+            this.flashing = !this.flashing;
+        }, 1000);
+    }
+
+    stopFlashing() {
+        clearInterval(this.intervalId);
+        this._intervalId = null;
+    }
+}
+
 export default class Splicer extends InteractiveElement {
     constructor(model, animations) {
         super(model, []);
 
         this.animations = animations;
         this.mixer = new THREE.AnimationMixer(this.model);
+        this.heaterIndicator = new HeaterIndicator(model.getObjectByName("HeaterIndicator"));
+
         this.children = {
             lid: new LidElement(this),
             leftClampBar: new LeftClampBarElement(this),
