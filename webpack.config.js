@@ -27,11 +27,20 @@ let config = {
         rules: [
             {
                 test: /\.css$/i,
+                exclude: /node_modules/,
                 use: ["style-loader", "css-loader"]
             },
             {
                 test: /\.(woff|woff2|eot|ttf|otf)$/i,
+                exclude: /node_modules/,
                 type: "asset/resource"
+            },
+            {
+                test: /\.gltf$/i,
+                exclude: /node_modules/,
+                use: {
+                    loader: path.resolve(__dirname, "loaders", "gltf-loader.js")
+                }
             },
             {
                 test: /\.js$/i,

@@ -168,6 +168,10 @@ export class ApplicationClass {
         return this.leftFiberPlaced && this.rightFiberPlaced;
     }
 
+    get fiberPlacedInHeater() {
+        return this._fiberPlacedInHeater;
+    }
+
     set fiberPlacedInHeater(value) {
         const oldValue = this._fiberPlacedInHeater;
 
@@ -271,9 +275,9 @@ export class ApplicationClass {
     }
 
     async loadModels() {
-        const Model = (await import("./Model")).default;
-        const FiberModel = (await import("./FiberModel")).default;
-        const SpliceProtectionCaseModel = (await import("./SpliceProtectionCaseModel")).default;
+        const Model = (await import("./models/fujikura_fsm-30s.gltf")).default;
+        const FiberModel = (await import("./models/fiber_optic_patch_cord.gltf")).default;
+        const SpliceProtectionCaseModel = (await import("./models/splice_protection_case.gltf")).default;
 
         const splicerGLTF = await parseGLTF(Model);
         this.splicerModel = splicerGLTF.scene.children[0];
