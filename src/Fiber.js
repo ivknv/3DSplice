@@ -74,7 +74,15 @@ export default class Fiber extends InteractiveElement {
     }
 
     isClickable() {
-        return Application.splicer.children.fiberClamps.isUp();
+        let clampElement = null;
+
+        if (this.direction === "left") {
+            clampElement = Application.splicer.children.leftFiberClamp;
+        } else {
+            clampElement = Application.splicer.children.rightFiberClamp;
+        }
+
+        return clampElement.isUp();
     }
 
     onClick(event) {

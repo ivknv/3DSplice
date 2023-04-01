@@ -1,7 +1,7 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
-module.exports = {
+let config = {
     entry: "./src/index.js",
     output: {
         filename: "[name].js",
@@ -69,3 +69,10 @@ module.exports = {
         }
     }
 };
+
+module.exports = (env, argv) => {
+    if (argv.mode === "development") {
+        config.module.rules.pop();
+    }
+    return config;
+}

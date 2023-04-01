@@ -54,6 +54,7 @@ export class ApplicationClass {
 
         this._leftFiberPlaced = false;
         this._rightFiberPlaced = false;
+        this._fiberPlacedInHeater = false;
         this._spliceProtectionPlaced = false;
 
         this.splicerAnimations = null;
@@ -137,10 +138,10 @@ export class ApplicationClass {
         if (oldValue !== value) {
             this._leftFiberPlaced = value;
 
-            if (this.fibersPlaced) {
-                this.state.onFibersPlaced();
+            if (value) {
+                this.state.onLeftFiberPlaced();
             } else {
-                this.state.onFibersRemoved();
+                this.state.onLeftFiberRemoved();
             }
         }
     }
@@ -155,16 +156,30 @@ export class ApplicationClass {
         if (oldValue !== value) {
             this._rightFiberPlaced = value;
 
-            if (this.fibersPlaced) {
-                this.state.onFibersPlaced();
+            if (value) {
+                this.state.onRightFiberPlaced();
             } else {
-                this.state.onFibersRemoved();
+                this.state.onRightFiberRemoved();
             }
         }
     }
 
     get fibersPlaced() {
         return this.leftFiberPlaced && this.rightFiberPlaced;
+    }
+
+    set fiberPlacedInHeater(value) {
+        const oldValue = this._fiberPlacedInHeater;
+
+        if (oldValue !== value) {
+            this._fiberPlacedInHeater = value;
+
+            if (value) {
+                this.state.onFiberPlacedInHeater();
+            } else {
+                this.state.onFiberRemovedFromHeater();
+            }
+        }
     }
 
     get spliceProtectionPlaced() {

@@ -59,19 +59,16 @@ export default class FusedFiber extends InteractiveElement {
         this.maxY = 0.17;
 
         this.animationActionControllerLeft.onCompleted = () => {
-            Application.leftFiberPlaced = false;
+            Application.state.onFiberRemoved();
         };
 
         this.animationActionControllerRight.onCompleted = () => {
-            Application.rightFiberPlaced = false;
+            Application.state.onFiberRemoved();
         };
     }
 
     checkPlacement() {
-        const placed = this.left.position.y > 0.0399 && this.left.position.y < 0.043;
-
-        Application.leftFiberPlaced = placed;
-        Application.rightFiberPlaced = placed;
+        Application.fiberPlacedInHeater = this.left.position.y > 0.0399 && this.left.position.y < 0.043;
     }
 
     addPadding() {

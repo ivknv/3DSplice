@@ -12,8 +12,10 @@ class LidElement extends AnimatedSplicerElement {
             ["Splice_Lid", "Cube057", "Cube058", "Cube059"], "Open Lid");
 
         this.dependencies = {
-            clampBars: "initial",
-            fiberClamps: "initial",
+            leftClampBar: "initial",
+            rightClampBar: "initial",
+            leftFiberClamp: "initial",
+            rightFiberClamp: "initial",
             screenBearing: "initial"
         };
 
@@ -50,30 +52,18 @@ class LidElement extends AnimatedSplicerElement {
     set tooltip(value) {}
 }
 
-class ClampBarsElement extends AnimatedSplicerElement {
-    constructor(splicer) {
+class ClampBarElement extends AnimatedSplicerElement {
+    constructor(splicer, objectNames, animationName) {
         super(
             splicer.model,
             splicer.animations,
             splicer.mixer,
-            [
-                "Fiber_Clamp_Bar", "Fiber_Clamp_Handle", "Fiber_Clamp_Bar_End",
-                "Fiber_Clamp_Presser_Leg", "Cube068", "Cube068_1", "Screw010"
-            ],
-            "Lift Up Clamp Bar");
+            objectNames,
+            animationName);
 
         this.dependencies = {
             lid: "completed",
-            fiberClamps: "initial"
         };
-
-        this.animationActionController.onCompleted = () => {
-            Application.state.onClampBarsUp();
-        };
-
-        this.animationActionController.onReset = () => {
-            Application.state.onClampBarsDown();
-        }
     }
 
     isUp() {
@@ -90,7 +80,7 @@ class ClampBarsElement extends AnimatedSplicerElement {
     }
 
     get tooltip() {
-        return this.isDown() ? "Поднять зажимы" : "Опустить зажимы";
+        return this.isDown() ? "Поднять зажим" : "Опустить зажим";
     }
 
     set tooltip(value) {
@@ -98,20 +88,56 @@ class ClampBarsElement extends AnimatedSplicerElement {
     }
 }
 
-class FiberClampsElement extends AnimatedSplicerElement {
+class LeftClampBarElement extends ClampBarElement {
     constructor(splicer) {
         super(
-            splicer.model,
-            splicer.animations,
-            splicer.mixer,
+            splicer,
             [
-                "Cube054_1", "Cube054_2", "Fiber_Cladding_Clamp_(outer)",
+                "Fiber_Clamp_Bar001", "Fiber_Clamp_Handle001", "Fiber_Clamp_Bar_End001",
+                "Fiber_Clamp_Presser_Leg001", "Cube068_2", "Cube017", "Screw004"
             ],
-            "Lift Up Clamp");
+            "Lift Up Left Fiber Clamp Bar");
+
+        this.dependencies.leftFiberClamp = "initial";
+
+        this.animationActionController.onCompleted = () => {
+            Application.state.onLeftClampBarUp();
+        };
+
+        this.animationActionController.onReset = () => {
+            Application.state.onLeftClampBarDown();
+        };
+    }
+}
+
+class RightClampBarElement extends ClampBarElement {
+    constructor(splicer) {
+        super(
+            splicer,
+            [
+                "Fiber_Clamp_Bar", "Fiber_Clamp_Handle", "Fiber_Clamp_Bar_End",
+                "Fiber_Clamp_Presser_Leg", "Cube068", "Cube068_1", "Screw010"
+            ],
+            "Lift Up Right Fiber Clamp Bar");
+
+        this.dependencies.rightFiberClamp = "initial";
+
+        this.animationActionController.onCompleted = () => {
+            Application.state.onRightClampBarUp();
+        };
+
+        this.animationActionController.onReset = () => {
+            Application.state.onRightClampBarDown();
+        };
+    }
+}
+
+class FiberClampElement extends AnimatedSplicerElement {
+    constructor(splicer, objectNames, animationName) {
+        super(splicer.model, splicer.animations, splicer.mixer, objectNames, animationName);
 
         this.dependencies = {
             lid: "completed",
-            clampBars: "completed"
         };
     }
 
@@ -123,25 +149,55 @@ class FiberClampsElement extends AnimatedSplicerElement {
         return this.animationState === "initial";
     }
 
-    onAnimationCompleted() {
-        Application.state.onFiberClampsUp();
-    }
-
-    onAnimationReset() {
-        Application.state.onFiberClampsDown();
-    }
-s
     onClick(event) {
         super.onClick(event);
         Application.mouseHandler.updateTooltip();
     }
 
     get tooltip() {
-        return this.isDown() ? "Поднять зажимы" : "Опустить зажимы";
+        return this.isDown() ? "Поднять зажим" : "Опустить зажим";
     }
 
     set tooltip(value) {
         return;
+    }
+}
+
+class LeftFiberClampElement extends FiberClampElement {
+    constructor(splicer) {
+        super(
+            splicer,
+            ["Cube019_1", "Cube019_2", "Fiber_Cladding_Clamp_(outer)001"],
+            "Lift Up Left Fiber Clamp");
+
+        this.dependencies.leftClampBar = "completed";
+
+        this.animationActionController.onCompleted = () => {
+            Application.state.onLeftFiberClampUp();
+        };
+
+        this.animationActionController.onReset = () => {
+            Application.state.onLeftFiberClampDown();
+        };
+    }
+}
+
+class RightFiberClampElement extends FiberClampElement {
+    constructor(splicer) {
+        super(
+            splicer,
+            ["Cube054_1", "Cube054_2", "Fiber_Cladding_Clamp_(outer)"],
+            "Lift Up Right Fiber Clamp");
+
+        this.dependencies.rightClampBar = "completed";
+
+        this.animationActionController.onCompleted = () => {
+            Application.state.onRightFiberClampUp();
+        };
+
+        this.animationActionController.onReset = () => {
+            Application.state.onRightFiberClampDown();
+        };
     }
 }
 
@@ -365,8 +421,10 @@ export default class Splicer extends InteractiveElement {
         this.mixer = new THREE.AnimationMixer(this.model);
         this.children = {
             lid: new LidElement(this),
-            clampBars: new ClampBarsElement(this),
-            fiberClamps: new FiberClampsElement(this),
+            leftClampBar: new LeftClampBarElement(this),
+            rightClampBar: new RightClampBarElement(this),
+            leftFiberClamp: new LeftFiberClampElement(this),
+            rightFiberClamp: new RightFiberClampElement(this),
             screen: new ScreenElement(this),
             screenBearing: new ScreenBearingElement(this),
             mainHeaterLid: new HeaterMainLidElement(this),
