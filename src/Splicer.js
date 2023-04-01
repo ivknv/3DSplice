@@ -381,7 +381,7 @@ class ResetButtonElement extends InteractiveElement {
 
 class HeatButtonElement extends InteractiveElement {
     constructor(splicer) {
-        super(splicer.model, ["Cube137", "Cube137_1"]);
+        super(splicer.model, ["Cube137", "Cube137_1", "HeaterIndicator"]);
 
         this.tooltip = "Включить нагреватель";
     }
