@@ -5,9 +5,7 @@ module.exports = (source) => {
     let output = JSON.stringify(gltf);
     output = output.replaceAll("\\", "\\\\").replaceAll("'", "\\'");
 
-    const variable = "Model";
-
-    output = "const " + variable + " = '" + output + "';\nexport default " + variable + ";";
+    output = "export default '" + output + "';";
 
     return output;
-}
+};

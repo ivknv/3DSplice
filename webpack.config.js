@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const HtmlInlineScriptPlugin = require("html-inline-script-webpack-plugin");
 
 let config = {
     entry: "./src/index.js",
@@ -14,14 +15,16 @@ let config = {
             dynamicImport: false,
             forOf: false,
             module: false
-        }
+        },
+        publicPath: ""
     },
     performance: {
         maxEntrypointSize: 5000000,
         maxAssetSize: 5000000
     },
     plugins: [
-        new HtmlWebpackPlugin({template: "./src/index.html"})
+        new HtmlWebpackPlugin({template: "./src/index.html"}),
+        new HtmlInlineScriptPlugin()
     ],
     module: {
         rules: [
@@ -33,7 +36,7 @@ let config = {
             {
                 test: /\.(woff|woff2|eot|ttf|otf)$/i,
                 exclude: /node_modules/,
-                type: "asset/resource"
+                type: "asset/inline"
             },
             {
                 test: /\.gltf$/i,
@@ -44,7 +47,6 @@ let config = {
             },
             {
                 test: /\.js$/i,
-                exclude: /node_modules/,
                 use: {
                     loader: "babel-loader",
                     options: {
