@@ -31,11 +31,11 @@ export default class ApplicationState {
     onRightFiberClampDown() {}
     onRightFiberClampUp() {}
 
-    onLeftClampBarDown() {}
-    onRightClampBarDown() {}
+    onLeftFiberCladdingClampDown() {}
+    onRightFiberCladdingClampDown() {}
 
-    onLeftClampBarUp() {}
-    onRightClampBarUp() {}
+    onLeftFiberCladdingClampUp() {}
+    onRightFiberCladdingClampUp() {}
 
     onSetPressed() {}
     onSpliceCompleted() {}
@@ -99,12 +99,12 @@ export class InitialState extends ApplicationState {
         }
     }
 
-    onLeftClampBarUp() { _instructToLiftClamps(); }
-    onRightClampBarUp() { _instructToLiftClamps(); }
+    onLeftFiberCladdingClampUp() { _instructToLiftClamps(); }
+    onRightFiberCladdingClampUp() { _instructToLiftClamps(); }
 
-    onLeftClampBarDown() {
+    onLeftFiberCladdingClampDown() {
         if (Application.fibersPlaced) {
-            if (Application.splicer.children.rightClampBar.isDown()) {
+            if (Application.splicer.children.rightFiberCladdingClamp.isDown()) {
                 Application.setInstructionText("Закройте крышку сварочного аппарата");
             } else {
                 Application.setInstructionText("Опустите зажимы с правой стороны");
@@ -114,9 +114,9 @@ export class InitialState extends ApplicationState {
         }
     }
 
-    onRightClampBarDown() {
+    onRightFiberCladdingClampDown() {
         if (Application.fibersPlaced) {
-            if (Application.splicer.children.leftClampBar.isDown()) {
+            if (Application.splicer.children.leftFiberCladdingClamp.isDown()) {
                 Application.setInstructionText("Закройте крышку сварочного аппарата");
             } else {
                 Application.setInstructionText("Опустите зажимы с левой стороны");
@@ -193,7 +193,7 @@ export class RightFiberPlacedState extends ApplicationState {
         Application.setInstructionText("Опустите зажимы с правой стороны");
     }
 
-    onRightClampBarDown() {
+    onRightFiberCladdingClampDown() {
         if (Application.fibersPlaced) {
             if (Application.splicer.children.lid.checkDependencies()) {
                 Application.setInstructionText("Закройте крышку сварочного аппарата");
@@ -222,7 +222,7 @@ export class LeftFiberPlacedState extends ApplicationState {
         Application.changeState(new CanPlaceLeftFiberState());
     }
 
-    onLeftClampBarDown() {
+    onLeftFiberCladdingClampDown() {
         if (Application.fibersPlaced) {
             if (Application.splicer.children.lid.checkDependencies()) {
                 Application.setInstructionText("Закройте крышку сварочного аппарата");
@@ -246,26 +246,26 @@ export class FibersPlacedState extends ApplicationState {
         super("fibers_placed");
     }
 
-    onLeftClampBarUp() {
+    onLeftFiberCladdingClampUp() {
         Application.setInstructionText("Опустите зажимы с левой стороны");
         Application.changeState(new LeftFiberPlacedState());
     }
 
-    onRightClampBarUp() {
+    onRightFiberCladdingClampUp() {
         Application.setInstructionText("Опустите зажимы с правой стороны");
         Application.changeState(new RightFiberPlacedState());
     }
 
-    onLeftClampBarDown() {
-        if (Application.splicer.children.rightClampBar.isDown()) {
+    onLeftFiberCladdingClampDown() {
+        if (Application.splicer.children.rightFiberCladdingClamp.isDown()) {
             Application.setInstructionText("Закройте крышку сварочного аппарата");
         } else {
             Application.setInstructionText("Опустите зажимы с правой стороны");
         }
     }
 
-    onRightClampBarDown() {
-        if (Application.splicer.children.leftClampBar.isDown()) {
+    onRightFiberCladdingClampDown() {
+        if (Application.splicer.children.leftFiberCladdingClamp.isDown()) {
             Application.setInstructionText("Закройте крышку сварочного аппарата");
         } else {
             Application.setInstructionText("Опустите зажимы с левой стороны");

@@ -12,8 +12,8 @@ class LidElement extends AnimatedSplicerElement {
             ["Splice_Lid", "Cube057", "Cube058", "Cube059"], "Open Lid");
 
         this.dependencies = {
-            leftClampBar: "initial",
-            rightClampBar: "initial",
+            leftFiberCladdingClamp: "initial",
+            rightFiberCladdingClamp: "initial",
             leftFiberClamp: "initial",
             rightFiberClamp: "initial",
             screenBearing: "initial"
@@ -52,7 +52,7 @@ class LidElement extends AnimatedSplicerElement {
     set tooltip(value) {}
 }
 
-class ClampBarElement extends AnimatedSplicerElement {
+class FiberCladdingClampElement extends AnimatedSplicerElement {
     constructor(splicer, objectNames, animationName) {
         super(
             splicer.model,
@@ -88,7 +88,7 @@ class ClampBarElement extends AnimatedSplicerElement {
     }
 }
 
-class LeftClampBarElement extends ClampBarElement {
+class LeftFiberCladdingClampElement extends FiberCladdingClampElement {
     constructor(splicer) {
         super(
             splicer,
@@ -101,16 +101,16 @@ class LeftClampBarElement extends ClampBarElement {
         this.dependencies.leftFiberClamp = "initial";
 
         this.animationActionController.onCompleted = () => {
-            Application.state.onLeftClampBarUp();
+            Application.state.onLeftFiberCladdingClampUp();
         };
 
         this.animationActionController.onReset = () => {
-            Application.state.onLeftClampBarDown();
+            Application.state.onLeftFiberCladdingClampDown();
         };
     }
 }
 
-class RightClampBarElement extends ClampBarElement {
+class RightFiberCladdingClampElement extends FiberCladdingClampElement {
     constructor(splicer) {
         super(
             splicer,
@@ -123,11 +123,11 @@ class RightClampBarElement extends ClampBarElement {
         this.dependencies.rightFiberClamp = "initial";
 
         this.animationActionController.onCompleted = () => {
-            Application.state.onRightClampBarUp();
+            Application.state.onRightFiberCladdingClampUp();
         };
 
         this.animationActionController.onReset = () => {
-            Application.state.onRightClampBarDown();
+            Application.state.onRightFiberCladdingClampDown();
         };
     }
 }
@@ -170,7 +170,7 @@ class LeftFiberClampElement extends FiberClampElement {
             ["Cube019_1", "Cube019_2", "Fiber_Cladding_Clamp_(outer)001"],
             "Lift Up Left Fiber Clamp");
 
-        this.dependencies.leftClampBar = "completed";
+        this.dependencies.leftFiberCladdingClamp = "completed";
 
         this.animationActionController.onCompleted = () => {
             Application.state.onLeftFiberClampUp();
@@ -189,7 +189,7 @@ class RightFiberClampElement extends FiberClampElement {
             ["Cube054_1", "Cube054_2", "Fiber_Cladding_Clamp_(outer)"],
             "Lift Up Right Fiber Clamp");
 
-        this.dependencies.rightClampBar = "completed";
+        this.dependencies.rightFiberCladdingClamp = "completed";
 
         this.animationActionController.onCompleted = () => {
             Application.state.onRightFiberClampUp();
@@ -448,8 +448,8 @@ export default class Splicer extends InteractiveElement {
 
         this.children = {
             lid: new LidElement(this),
-            leftClampBar: new LeftClampBarElement(this),
-            rightClampBar: new RightClampBarElement(this),
+            leftFiberCladdingClamp: new LeftFiberCladdingClampElement(this),
+            rightFiberCladdingClamp: new RightFiberCladdingClampElement(this),
             leftFiberClamp: new LeftFiberClampElement(this),
             rightFiberClamp: new RightFiberClampElement(this),
             screen: new ScreenElement(this),
