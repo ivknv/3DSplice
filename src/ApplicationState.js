@@ -1,113 +1,166 @@
 import Application from "./Application";
 import FusedFiber from "./FusedFiber";
 
+/**
+ * Данный класс позволяет определять поведение приложения в зависимости от текущего состояния.
+ * Каждое отдельное состояние приложения может быть представлено отдельным
+ * классом, наследующимся от ApplicationState.
+ */
 export default class ApplicationState {
+    /**
+     * Создает экземпляр ApplicationState
+     * @param {string} name - имя состояния
+     */
     constructor(name) {
         this.name = name;
     }
 
-    // Вызываются при правильном размещении волокон
+    /** Вызывается при правильном размещении левого волокна */
     onLeftFiberPlaced() {}
+
+    /** Вызывается при правильном размещении правого волокна */
     onRightFiberPlaced() {}
 
-    // Вызываются при извлечении волокон или если они расположены неправильно
+    /** Вызывается при извлечении левого волокна или если оно расположено неправильно */
     onLeftFiberRemoved() {}
+
+    /** Вызывается при извлечении правого волокна или если оно расположено неправильно */
     onRightFiberRemoved() {}
 
-    // Вызывается, когда сваренное волокно извлечено из сварочного аппарата
+    /** Вызывается, когда сваренное волокно извлечено из сварочного аппарата */
     onFiberRemoved() {}
 
-    // Вызываются, когда крышка сварочного аппарата открыта/закрыта
+    /** Вызывается, когда крышка сварочного аппарата открыта */
     onLidOpened() {}
+
+    /** Вызывается, когда крышка сварочного аппарата закрыта */
     onLidClosed() {}
 
-    // Позволяет контролировать, можно ли открывать крышку сварочного аппарата
+    /**
+     * Позволяет контролировать, можно ли открывать крышку сварочного аппарата
+     * @return {boolean} можно ли открыть крышку
+     */
     canOpenLid() {
         return Application.splicer.children.lid.isClosed();
     }
 
-    // Позволяет контролировать, можно ли закрывать крышку сварочного аппарата
+    /**
+     * Позволяет контролировать, можно ли закрывать крышку сварочного аппарата
+     * @return {boolean} можно ли закрыть крышку
+     */
     canCloseLid() {
         return Application.splicer.children.lid.isOpen();
     }
 
-    // Вызывается, когда левый зажим волокна опущен/поднят
+    /** Вызывается, когда левый зажим волокна опущен */
     onLeftFiberClampDown() {}
+
+    /** Вызывается, когда левый зажим волокна поднят */
     onLeftFiberClampUp() {}
 
-    // Вызывается, когда правый зажим волокна опущен/поднят
+    /** Вызывается, когда правый зажим волокна опущен */
     onRightFiberClampDown() {}
+
+    /** Вызывается, когда правый зажим волокна поднят */
     onRightFiberClampUp() {}
 
-    // Вызывается, когда левый зажим оболочки волокна опущен/поднят
+    /** Вызывается, когда левый зажим оболочки волокна опущен */
     onLeftFiberCladdingClampDown() {}
+
+    /** Вызывается, когда левый зажим оболочки волокна поднят */
     onLeftFiberCladdingClampUp() {}
 
-    // Вызывается, когда правый зажим оболочки волокна опущен/поднят
+    /** Вызывается, когда правый зажим оболочки волокна опущен */
     onRightFiberCladdingClampDown() {}
+
+    /** Вызывается, когда правый зажим оболочки волокна поднят */
     onRightFiberCladdingClampUp() {}
 
-    // Вызывается, когда нажата кнопка SET
+    /** Вызывается, когда нажата кнопка SET */
     onSetPressed() {}
 
-    // Вызывается после завершения процесса сварки
+    /** Вызывается после завершения процесса сварки */
     onSpliceCompleted() {}
 
-    // Вызывается после правильного размещения гильзы КДЗС
+    /** Вызывается после правильного размещения гильзы КДЗС */
     onSpliceProtectionPlaced() {}
 
-    // Вызывается, если гильза КДЗС была перемещена слишком далеко от центра
-    // сварного соединения
+    /**
+     * Вызывается, если гильза КДЗС была перемещена слишком далеко от центра
+     * сварного соединения
+     */
     onSpliceProtectionRemoved() {}
 
-    // Вызывается, когда ОВ помещено в нагреватель
+    /** Вызывается, когда ОВ помещено в нагреватель */
     onFiberPlacedInHeater() {}
 
-    // Вызывается, когда ОВ извлечено из нагревателя
+    /** Вызывается, когда ОВ извлечено из нагревателя */
     onFiberRemovedFromHeater() {}
 
-    // Вызывается, когда крышка нагревателя открыта/закрыта
+    /** Вызывается, когда крышка нагревателя открыта */
     onMainHeaterLidOpened() {}
+
+    /** Вызывается, когда крышка нагревателя закрыта */
     onMainHeaterLidClosed() {}
 
-    // Вызывается, когда зажимы нагревателя подняты/опущены
+    /** Вызывается, когда зажимы нагревателя подняты */
     onHeaterSideLidsOpened() {}
+
+    /** Вызывается, когда зажимы нагревателя опущены */
     onHeaterSideLidsClosed() {}
 
-    // Позволяет контролировать, можно ли перемещать гильзу КДЗС
+    /**
+     * Позволяет контролировать, можно ли перемещать гильзу КДЗС
+     * @return {boolean} можно ли перемещать гильзу КДЗС
+     */
     canPlaceSpliceProtection() {
         return false;
     }
 
-    // Позволяет контролировать, можно ли открывать крышку нагревателя
+    /**
+     * Позволяет контролировать, можно ли открывать крышку нагревателя
+     * @return {boolean} можно ли открывать крышку нагревателя
+     */
     canOpenMainHeaterLid() {
         return Application.splicer.children.mainHeaterLid.isClosed();
     }
 
-    // Позволяет контролировать, можно ли закрывать крышку нагревателя
+    /**
+     * Позволяет контролировать, можно ли закрывать крышку нагревателя
+     * @return {boolean} можно ли закрывать крышку нагревателя
+     * */
     canCloseMainHeaterLid() {
         return Application.splicer.children.mainHeaterLid.isOpen();
     }
 
-    // Позволяет контролировать, можно ли поднимать зажимы нагревателя
+    /**
+     * Позволяет контролировать, можно ли поднимать зажимы нагревателя
+     * @return {boolean} можно ли поднимать зажимы нагревателя
+     */
     canOpenHeaterSideLids() {
         return Application.splicer.children.heaterSideLids.isClosed();
     }
 
-    // Позволяет контролировать, можно ли опускать зажимы нагревателя
+    /**
+     * Позволяет контролировать, можно ли опускать зажимы нагревателя
+     * @return {boolean} можно ли опускать зажимы нагревателя
+     */
     canCloseHeaterSideLids() {
         return Application.splicer.children.heaterSideLids.isOpen();
     }
 
-    // Позволяет контролировать, можно ли помещать ОВ в нагреватель
+    /**
+     * Позволяет контролировать, можно ли помещать ОВ в нагреватель
+     * @return {boolean} можно ли помещать ОВ в нагреватель
+     */
     canPlaceFiberInHeater() {
         return false;
     }
 
-    // Вызывается при нажатии на кнопку HEAT
+    /** Вызывается при нажатии на кнопку HEAT */
     onHeatPressed() {}
 
-    // Вызывается после завершения процесса термоусадки гильзы КДЗС
+    /** Вызывается после завершения процесса термоусадки гильзы КДЗС */
     onHeatingCompleted() {}
 }
 
@@ -115,6 +168,7 @@ function _instructToLiftClamps() {
     Application.setInstructionText("Поднимите зажимы для волокна");
 }
 
+/** Исходное состояние */
 export class InitialState extends ApplicationState {
     constructor() {
         super("initial");
@@ -179,6 +233,7 @@ export class InitialState extends ApplicationState {
     }
 }
 
+/** Состояние, в котором можно разместить левое волокно */
 export class CanPlaceLeftFiberState extends ApplicationState {
     constructor() {
         super("can_place_left_fiber");
@@ -195,6 +250,7 @@ export class CanPlaceLeftFiberState extends ApplicationState {
     }
 }
 
+/** Состояние, в котором можно разместить правое волокно */
 export class CanPlaceRightFiberState extends ApplicationState {
     constructor() {
         super("can_place_right_fiber");
@@ -211,6 +267,7 @@ export class CanPlaceRightFiberState extends ApplicationState {
     }
 }
 
+/** Состояние, в котором правое волокно правильно расположено */
 export class RightFiberPlacedState extends ApplicationState {
     constructor() {
         super("right_fiber_placed");
@@ -244,6 +301,7 @@ export class RightFiberPlacedState extends ApplicationState {
     }
 }
 
+/** Состояние, в котором левое волокно правильно расположено */
 export class LeftFiberPlacedState extends ApplicationState {
     constructor() {
         super("left_fiber_placed");
@@ -273,6 +331,7 @@ export class LeftFiberPlacedState extends ApplicationState {
     }
 }
 
+/** Состояние, в котором оба волокна правильно расположены */
 export class FibersPlacedState extends ApplicationState {
     constructor() {
         super("fibers_placed");
@@ -310,6 +369,7 @@ export class FibersPlacedState extends ApplicationState {
     }
 }
 
+/** Состояние, в котором можно начать процесс сварки */
 export class ReadyToSpliceState extends ApplicationState {
     constructor() {
         super("ready_to_splice");
@@ -332,6 +392,7 @@ export class ReadyToSpliceState extends ApplicationState {
     }
 }
 
+/** Состояние, в котором производится сварка */
 export class SpliceInProgressState extends ApplicationState {
     constructor() {
         super("splice_in_progress");
@@ -369,6 +430,7 @@ export class SpliceInProgressState extends ApplicationState {
     }
 }
 
+/** Состояние, в котором сварка завершена */
 export class SpliceCompletedState extends ApplicationState {
     constructor() {
         super("splice_completed");
@@ -405,6 +467,7 @@ export class SpliceCompletedState extends ApplicationState {
     }
 }
 
+/** Состояние, в котором можно разместить гильзу КДЗС */
 export class ReadyToPlaceSpliceProtection extends ApplicationState {
     constructor() {
         super("ready_to_place_splice_protection");
@@ -434,6 +497,7 @@ function _instructToOpenHeater() {
     Application.setInstructionText("Откройте крышку нагревателя");
 }
 
+/** Состояние, в котором гильза КДЗС размещена в центре места сварки */
 export class SpliceProtectionPlacedState extends ApplicationState {
     constructor() {
         super("splice_protection_placed");
@@ -465,6 +529,7 @@ export class SpliceProtectionPlacedState extends ApplicationState {
     }
 }
 
+/** Состояние, в котором можно поместить волокно в нагреватель */
 export class ReadyToPlaceFiberInHeaterState extends ApplicationState {
     constructor() {
         super("ready_to_place_fiber_in_heater");
@@ -529,6 +594,7 @@ export class ReadyToPlaceFiberInHeaterState extends ApplicationState {
     }
 }
 
+/** Состояние, в котором можно включить нагреватель */
 export class ReadyToHeatState extends ApplicationState {
     constructor() {
         super("ready_to_heat");
@@ -555,6 +621,7 @@ export class ReadyToHeatState extends ApplicationState {
     }
 }
 
+/** Состояние, в котором нагреватель работает */
 export class HeatingInProgressState extends ApplicationState {
     constructor() {
         super("heating_in_progress");
@@ -575,6 +642,7 @@ export class HeatingInProgressState extends ApplicationState {
     }
 }
 
+/** Состояние, в котором нагреватель завершил работу */
 export class HeatingCompletedState extends ApplicationState {
     constructor() {
         super("heating_completed");
