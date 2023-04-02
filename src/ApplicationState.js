@@ -6,76 +6,108 @@ export default class ApplicationState {
         this.name = name;
     }
 
+    // Вызываются при правильном размещении волокон
     onLeftFiberPlaced() {}
     onRightFiberPlaced() {}
 
+    // Вызываются при извлечении волокон или если они расположены неправильно
     onLeftFiberRemoved() {}
     onRightFiberRemoved() {}
 
+    // Вызывается, когда сваренное волокно извлечено из сварочного аппарата
     onFiberRemoved() {}
 
+    // Вызываются, когда крышка сварочного аппарата открыта/закрыта
     onLidOpened() {}
     onLidClosed() {}
 
+    // Позволяет контролировать, можно ли открывать крышку сварочного аппарата
     canOpenLid() {
         return Application.splicer.children.lid.isClosed();
     }
 
+    // Позволяет контролировать, можно ли закрывать крышку сварочного аппарата
     canCloseLid() {
         return Application.splicer.children.lid.isOpen();
     }
 
+    // Вызывается, когда левый зажим волокна опущен/поднят
     onLeftFiberClampDown() {}
     onLeftFiberClampUp() {}
 
+    // Вызывается, когда правый зажим волокна опущен/поднят
     onRightFiberClampDown() {}
     onRightFiberClampUp() {}
 
+    // Вызывается, когда левый зажим оболочки волокна опущен/поднят
     onLeftFiberCladdingClampDown() {}
-    onRightFiberCladdingClampDown() {}
-
     onLeftFiberCladdingClampUp() {}
+
+    // Вызывается, когда правый зажим оболочки волокна опущен/поднят
+    onRightFiberCladdingClampDown() {}
     onRightFiberCladdingClampUp() {}
 
+    // Вызывается, когда нажата кнопка SET
     onSetPressed() {}
+
+    // Вызывается после завершения процесса сварки
     onSpliceCompleted() {}
+
+    // Вызывается после правильного размещения гильзы КДЗС
     onSpliceProtectionPlaced() {}
+
+    // Вызывается, если гильза КДЗС была перемещена слишком далеко от центра
+    // сварного соединения
     onSpliceProtectionRemoved() {}
 
+    // Вызывается, когда ОВ помещено в нагреватель
     onFiberPlacedInHeater() {}
+
+    // Вызывается, когда ОВ извлечено из нагревателя
     onFiberRemovedFromHeater() {}
 
+    // Вызывается, когда крышка нагревателя открыта/закрыта
     onMainHeaterLidOpened() {}
     onMainHeaterLidClosed() {}
 
+    // Вызывается, когда зажимы нагревателя подняты/опущены
     onHeaterSideLidsOpened() {}
     onHeaterSideLidsClosed() {}
 
+    // Позволяет контролировать, можно ли перемещать гильзу КДЗС
     canPlaceSpliceProtection() {
         return false;
     }
 
+    // Позволяет контролировать, можно ли открывать крышку нагревателя
     canOpenMainHeaterLid() {
         return Application.splicer.children.mainHeaterLid.isClosed();
     }
 
+    // Позволяет контролировать, можно ли закрывать крышку нагревателя
     canCloseMainHeaterLid() {
         return Application.splicer.children.mainHeaterLid.isOpen();
     }
 
+    // Позволяет контролировать, можно ли поднимать зажимы нагревателя
     canOpenHeaterSideLids() {
         return Application.splicer.children.heaterSideLids.isClosed();
     }
 
+    // Позволяет контролировать, можно ли опускать зажимы нагревателя
     canCloseHeaterSideLids() {
         return Application.splicer.children.heaterSideLids.isOpen();
     }
 
+    // Позволяет контролировать, можно ли помещать ОВ в нагреватель
     canPlaceFiberInHeater() {
         return false;
     }
 
+    // Вызывается при нажатии на кнопку HEAT
     onHeatPressed() {}
+
+    // Вызывается после завершения процесса термоусадки гильзы КДЗС
     onHeatingCompleted() {}
 }
 
