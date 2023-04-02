@@ -137,9 +137,6 @@ export class InitialState extends ApplicationState {
     }
 
     onRightFiberClampUp() {
-        Application.setInstructionText("Поместите правое волокно в сварочный аппарат");
-        Application.changeState(new CanPlaceRightFiberState());
-
         if (!Application.leftFiberPlaced) {
             Application.setInstructionText("Поместите правое волокно в сварочный аппарат");
             Application.changeState(new CanPlaceRightFiberState());
@@ -507,7 +504,7 @@ export class ReadyToHeatState extends ApplicationState {
 
     _onHeaterLidsOpened() {
         Application.setInstructionText("Закройте крышку нагревателя");
-        Application.changeState(new ReadyToHeatState());
+        Application.changeState(new ReadyToPlaceFiberInHeaterState());
     }
 
     onMainHeaterLidOpened() {
