@@ -20,7 +20,15 @@ function makeKeyframeTrack(model, offsetY, offsetZ) {
         THREE.InterpolateLinear);
 }
 
+/**
+ * Интерактивный элемент волокна, полученного в результате сварки.
+ */
 export default class FusedFiber extends InteractiveElement {
+    /**
+     * Создает объект FusedFiber.
+     * @param {Fiber} leftFiber  - Левое волокно
+     * @param {Fiber} rightFiber - Правое волокно
+     */
     constructor(leftFiber, rightFiber) {
         const model = new THREE.Group();
         model.add(leftFiber.model);

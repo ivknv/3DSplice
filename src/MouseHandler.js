@@ -3,7 +3,18 @@ import Application from "./Application";
 
 const DRAG_THRESHOLD = 2048;
 
+/**
+ * Класс, ответственный за отслеживание событий мыши (или сенсорного экрана).
+ * @property {THREE.Vector2}             position       - Текущие координаты мыши в пространстве Three.js
+ * @property {THREE.Vector2}             positionPx     - Текущие координаты мыши без преоьразования
+ * @property {(InteractiveElement|null)} hoveredElement - Текущий элемент под курсором мыши
+ * @property {(InteractiveElement|null)} focusedElement - Текущий выбранный элемент
+ * @property {function}                  hoverFilter    - Позволяет определить, какие элементы
+ *     могут реагировать на наведение. Функция должна принмать элемент и возвращать true, если
+ *     элемент может реагировать на наведение мыши, иначе - false
+ */
 export default class MouseHandler {
+    /** Создает экземпляр MouseHandler */
     constructor() {
         // Position in Three.js space
         this.position = new THREE.Vector2(Infinity, Infinity);
@@ -67,6 +78,11 @@ export default class MouseHandler {
         });
     }
 
+    /**
+     * Обновляет текущие координаты мыши
+     * @param {number} x - X-координата мыши в окне
+     * @param {number} y - Y-координата мыши в окне
+     */
     updateMousePosition(x, y) {
         const ratio = Application.renderer.getPixelRatio();
         const w = this.root.width / ratio;
@@ -78,22 +94,36 @@ export default class MouseHandler {
         this.positionPx.y = y;
     }
 
+    /**
+     * Задает hoverFilter.
+     * @param {function} filter - Фильтр наведения мыши
+     */
     setHoverFilter(filter) {
         this.hoverFilter = filter;
     }
 
+    /** Сбрасывает hoverFilter */
     resetHoverFilter() {
         this.hoverFilter = function(element) { return true; };
     }
 
+    /**
+     * Позволяет определить, если ли элемент под курсором мыши.
+     * @return {boolean}
+     */
     isHovering() {
         return this.hoveredElement !== null;
     }
 
+    /**
+     * Проверяет, находится ли элемент под курсором.
+     * @return {boolean}
+     */
     isCurrentlyHovered(element) {
         return element === this.hoveredElement;
     }
 
+    /** Обновляет текущий элемент под мышью */
     updateHover() {
         this.raycaster.setFromCamera(this.position, Application.camera);
 
@@ -129,6 +159,7 @@ export default class MouseHandler {
         this.updateTooltip();
     }
 
+    /** Обновляет текстовую подсказку над элементом */
     updateTooltip() {
         const tooltip = Application.tooltipElement;
         const element = this.hoveredElement;
@@ -144,6 +175,7 @@ export default class MouseHandler {
         }
     }
 
+    /** Обновляет состояние объекта */
     update()
     {
         this.updateHover();

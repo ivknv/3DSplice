@@ -1,7 +1,22 @@
 import Application from "./Application";
 import * as Colors from "./colors";
 
+/**
+ * Интерактивный элемент.Представляет собой набор 3D-объектов, с которыми
+ * может взаимодейстовать пользователь.
+ * @property {THREE.Object3D}  model    - 3D-модель
+ * @property {object}          objects  - 3D-объекты (отдельные составляющие модели)
+ * @property {object}          children - Дочерние интерактивные элементы
+ * @property {boolean}         active   - Позволяет деактивировать элемент
+ * @property {string}          tooltip  - Текст подсказки, который показывается при наведении на элемент
+ * @property {(number|string)} highlightColor - Цвет подсветки элемента
+ * */
 export default class InteractiveElement {
+    /**
+     * Создает экземпляр интерактивного элемента
+     * @param {THREE.Object3D} model       - 3D-модель
+     * @param {string[]}       objectNames - Список объектов (имен), являющихся частью данного элемента
+     */
     constructor(model, objectNames) {
         this.active = true;
         this.objects = {};
@@ -21,10 +36,15 @@ export default class InteractiveElement {
         }
     }
 
+    /**
+     * Цвет подсветки элемента
+     * @return {(number|string)} значение свойства
+     */
     get highlightColor() {
         return this._highlightColor;
     }
 
+    /** Задает цвет подсветки элемента */
     set highlightColor(value) {
         this._highlightColor = value;
         this.updateHighlightColor();
@@ -52,6 +72,7 @@ export default class InteractiveElement {
         return false;
     }
 
+    /** Подсветить интерактивный элемент */
     highlight() {
         for (const uuid in this.objects) {
             // Skip if already highlighted
@@ -67,6 +88,7 @@ export default class InteractiveElement {
         }
     }
 
+    /** Убрать подсветку интерактивного элемента */
     clearHighlight() {
         for (const uuid in this.objects) {
             // Skip if not highlighted
@@ -81,15 +103,29 @@ export default class InteractiveElement {
         }
     }
 
+    /**
+     * Вызывается при нажатии на интерактивный элемент
+     * @param {Event} event - объект события mousedown
+     */
     onClick(event) {}
+
+    /**
+     * Вызывается при нажатии мимо интерактивного элемента, если он до этого был выбран
+     */
     onFocusLoss() {}
 
+    /** Обновить состояние интерактивного элемента */
     update() {
         for (const elementName in this.children) {
-            this.children[elementName].update(Application);
+            this.children[elementName].update();
         }
     }
 
+    /**
+     * Находит дочерний элемент по предикату
+     * @param {function} predicate - предикат, должен принимать 1 параметр (элемент) и возвращать boolean
+     * @return {(InteractiveElement|null)} первый найденный элемент или null (если не найден)
+     */
     findElement(predicate) {
         for (const elementName in this.children) {
             let element = this.children[elementName];
@@ -103,11 +139,13 @@ export default class InteractiveElement {
         return null;
     }
 
+    /** Добавляет элемент в приложение */
     addToApplication() {
         Application.addElement(this);
         if (this.model) Application.addModel(this.model);
     }
 
+    /** Удаляет элемент в приложение */
     removeFromApplication() {
         if (this.model) Application.removeModel(this.model);
         Application.removeElement(this);

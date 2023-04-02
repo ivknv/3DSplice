@@ -5,6 +5,8 @@ import FusedFiber from "./FusedFiber";
  * Данный класс позволяет определять поведение приложения в зависимости от текущего состояния.
  * Каждое отдельное состояние приложения может быть представлено отдельным
  * классом, наследующимся от ApplicationState.
+ *
+ * @property {string} name - имя состояния
  */
 export default class ApplicationState {
     /**

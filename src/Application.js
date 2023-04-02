@@ -27,6 +27,26 @@ function parseURLHashParameters() {
     return parameters;
 }
 
+/**
+ * Класс приложения. Связывает все составляющие в одно целое.
+ *
+ * @property {THREE.Camera}         camera     - Камера Three.js
+ * @property {THREE.WebGLRenderer}  renderer   - Рендерер Three.js
+ * @property {Stats}                stats      - Объект для отслеживания производительности
+ * @property {number}               clockDelta - Продолжительность последнего кадра (в секундах)
+ * @property {ApplicationState}     state      - Текущее состояние приложения
+ * @property {Splicer}              splicer    - Сварочный аппарат
+ * @property {Fiber}                leftFiber  - Левое волокно
+ * @property {Fiber}                rightFiber - Правое волокно
+ * @property {FusedFiber}           fuseFiber  - Волокно, полученное в результате сварки
+ * @property {InteractiveElement[]} elements   - Массив всех интерактивных элементов
+ * @property {THREE.Object3D}       models     - Массив всех 3D-моделей
+ * @property {object[]}             objects    - Массив других объектов
+ * @property {MouseHandler}         mouseHandler - Объект, реализующий отслеживание событий мыши
+ * @property {HTMLElement}          instructionsElement - HTML-элемент инструкций
+ * @property {HTMLElement}          tooltipElement      - HTML-элемент текстовых подсказок
+ * @property {HTMLElement}          videoElement        - HTML-элемент видео для экрана сварочного аппарата
+ */
 export class ApplicationClass {
     constructor() {
         this.scene = new THREE.Scene();
@@ -207,6 +227,10 @@ export class ApplicationClass {
         }
     }
 
+    /**
+     * Изменить состояние приложения
+     * @param {ApplicationState} newState - новое состояние
+     */
     changeState(newState) {
         console.log("Changing state: " + this.state.name + " -> " + newState.name);
         this.state = newState;
@@ -242,6 +266,10 @@ export class ApplicationClass {
         this.scene.remove(model);
     }
 
+    /**
+     * Задать текст инструкций.
+     * @param {string} text - текст инструкций
+     */
     setInstructionText(text) {
         this.instructionsElement.innerText = text;
     }

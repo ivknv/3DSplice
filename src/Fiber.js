@@ -4,7 +4,16 @@ import Application from "./Application";
 import {clamp} from "./common";
 import * as Colors from "./colors";
 
+/**
+ * Интерактивный элемент волокна.
+ * @property {string} direction - Направление волокна: "left" или "right"
+ */
 export default class Fiber extends InteractiveElement {
+    /**
+     * Создает экземпляр Fiber
+     * @param {THREE.Object3D} model     - 3D-модель волокна
+     * @param {string}         direction - Направление волокна: "left" или "right"
+     */
     constructor(model, direction) {
         const group = new Group();
         group.add(model);

@@ -3,6 +3,7 @@ import AnimatedSplicerElement from "./AnimatedSplicerElement";
 import InteractiveElement from "./InteractiveElement";
 import Application from "./Application";
 
+/** Крышка сварочного аппарата */
 class LidElement extends AnimatedSplicerElement {
     constructor(splicer) {
         super(
@@ -52,6 +53,7 @@ class LidElement extends AnimatedSplicerElement {
     set tooltip(value) {}
 }
 
+/** Зажим оболочки волокна */
 class FiberCladdingClampElement extends AnimatedSplicerElement {
     constructor(splicer, objectNames, animationName) {
         super(
@@ -88,6 +90,7 @@ class FiberCladdingClampElement extends AnimatedSplicerElement {
     }
 }
 
+/** Левый зажим оболочки волокна */
 class LeftFiberCladdingClampElement extends FiberCladdingClampElement {
     constructor(splicer) {
         super(
@@ -110,6 +113,7 @@ class LeftFiberCladdingClampElement extends FiberCladdingClampElement {
     }
 }
 
+/** Правый зажим оболочки волокна */
 class RightFiberCladdingClampElement extends FiberCladdingClampElement {
     constructor(splicer) {
         super(
@@ -132,6 +136,7 @@ class RightFiberCladdingClampElement extends FiberCladdingClampElement {
     }
 }
 
+/** Зажим волокна */
 class FiberClampElement extends AnimatedSplicerElement {
     constructor(splicer, objectNames, animationName) {
         super(splicer.model, splicer.animations, splicer.mixer, objectNames, animationName);
@@ -163,6 +168,7 @@ class FiberClampElement extends AnimatedSplicerElement {
     }
 }
 
+/** Левый зажим волокна */
 class LeftFiberClampElement extends FiberClampElement {
     constructor(splicer) {
         super(
@@ -182,6 +188,7 @@ class LeftFiberClampElement extends FiberClampElement {
     }
 }
 
+/** Правый зажим волокна */
 class RightFiberClampElement extends FiberClampElement {
     constructor(splicer) {
         super(
@@ -201,6 +208,7 @@ class RightFiberClampElement extends FiberClampElement {
     }
 }
 
+/** Экран */
 class ScreenElement extends AnimatedSplicerElement {
     constructor(splicer) {
         super(splicer.model, splicer.animations, splicer.mixer, ["Cube113", "Cube113_1"], "Rotate Screen");
@@ -228,6 +236,7 @@ class ScreenElement extends AnimatedSplicerElement {
     }
 }
 
+/** Крепление экрана */
 class ScreenBearingElement extends AnimatedSplicerElement {
     constructor(splicer) {
         super(
@@ -257,6 +266,7 @@ class ScreenBearingElement extends AnimatedSplicerElement {
     }
 }
 
+/** Крышка нагревателя */
 class HeaterMainLidElement extends AnimatedSplicerElement {
     constructor(splicer) {
         super(
@@ -309,6 +319,7 @@ class HeaterMainLidElement extends AnimatedSplicerElement {
     }
 }
 
+/** Зажимы нагревателя */
 class HeaterSideLidsElement extends AnimatedSplicerElement {
     constructor(splicer) {
         super(
@@ -361,6 +372,7 @@ class HeaterSideLidsElement extends AnimatedSplicerElement {
     }
 }
 
+/** Кнопка SET */
 class SetButtonElement extends InteractiveElement {
     constructor(splicer) {
         super(splicer.model, ["Cube135", "Cube135_1"]);
@@ -373,12 +385,14 @@ class SetButtonElement extends InteractiveElement {
     }
 }
 
+/** Кнопка RESET */
 class ResetButtonElement extends InteractiveElement {
     constructor(splicer) {
         super(splicer.model, ["Cube136", "Cube136_1"]);
     }
 }
 
+/** Кнопка HEAT */
 class HeatButtonElement extends InteractiveElement {
     constructor(splicer) {
         super(splicer.model, ["Cube137", "Cube137_1"]);
@@ -391,6 +405,7 @@ class HeatButtonElement extends InteractiveElement {
     }
 }
 
+/** Переключатель питания */
 class PowerSwitchElement extends AnimatedSplicerElement {
     constructor(splicer) {
         super(splicer.model, splicer.animations, splicer.mixer, ["Cube050"], "Power On (DC)");
@@ -413,6 +428,7 @@ class PowerSwitchElement extends AnimatedSplicerElement {
     }
 }
 
+/** Индикатор нагревателя */
 class HeaterIndicator {
     constructor(model) {
         this.model = model;
@@ -422,6 +438,7 @@ class HeaterIndicator {
         this.flashing = false;
     }
 
+    /** Включить мигание */
     startFlashing() {
         if (this.intervalId !== null) this.stopFlashing();
 
@@ -432,12 +449,14 @@ class HeaterIndicator {
         }, 1000);
     }
 
+    /** Остановить мигание */
     stopFlashing() {
         clearInterval(this.intervalId);
         this._intervalId = null;
     }
 }
 
+/** Корневой интерактивый элемент сварочного аппарата */
 export default class Splicer extends InteractiveElement {
     constructor(model, animations) {
         super(model, []);

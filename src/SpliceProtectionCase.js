@@ -5,7 +5,12 @@ import Application from "./Application";
 import {clamp} from "./common";
 import * as Colors from "./colors";
 
+/** Интерактивный элемент гильзы КДЗС. */
 export default class SpliceProtectionCase extends InteractiveElement {
+    /**
+     * Создает экземпляр SpliceProtectionCase.
+     * @param {THREE.Object3D} model - 3D-модель гильзы КДЗС
+     */
     constructor(model) {
         const group = new THREE.Group();
         group.add(model);
@@ -140,6 +145,7 @@ export default class SpliceProtectionCase extends InteractiveElement {
         this.held = false;
     }
 
+    /** Запускает анимацию термоусадки */
     shrink() {
         this.animationActionController.playForward();
     }
