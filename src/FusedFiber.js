@@ -76,7 +76,7 @@ export default class FusedFiber extends InteractiveElement {
     }
 
     checkPlacement() {
-        Application.fiberPlacedInHeater = this.left.position.y > 0.0399 && this.left.position.y < 0.043;
+        Application.state.fiberPlacedInHeater = this.left.position.y > 0.0399 && this.left.position.y < 0.043;
     }
 
     addPadding() {
@@ -151,6 +151,8 @@ export default class FusedFiber extends InteractiveElement {
     }
 
     update() {
+        super.update();
+
         this.mixerLeft.update(Application.clockDelta);
         this.mixerRight.update(Application.clockDelta);
 

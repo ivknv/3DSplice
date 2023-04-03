@@ -29,10 +29,18 @@ class LidElement extends AnimatedSplicerElement {
         };
     }
 
+    /**
+     * Позволяет определить, открыта ли крышка
+     * @return {boolean} true, если крышка полностью открыта, иначе false
+     */
     isOpen() {
         return this.animationState === "completed";
     }
 
+    /**
+     * Позволяет определить, закрыта ли крышка
+     * @return {boolean} true, если крышка полностью закрыта, иначе false
+     */
     isClosed() {
         return this.animationState === "initial";
     }
@@ -68,10 +76,18 @@ class FiberCladdingClampElement extends AnimatedSplicerElement {
         };
     }
 
+    /**
+     * Позволяет определить, поднят ли зажим оболочки волокна
+     * @return {boolean} true, если зажим оболочки волокна полностью поднят, иначе false
+     */
     isUp() {
         return this.animationState === "completed";
     }
 
+    /**
+     * Позволяет определить, опущен ли зажим оболочки волокна
+     * @return {boolean} true, если зажим оболочки волокна полностью опущен, иначе false
+     */
     isDown() {
         return this.animationState === "initial";
     }
@@ -146,10 +162,18 @@ class FiberClampElement extends AnimatedSplicerElement {
         };
     }
 
+    /**
+     * Позволяет определить, поднят ли зажим волокна
+     * @return {boolean} true, если зажим волокна полностью поднят, иначе false
+     */
     isUp() {
         return this.animationState === "completed";
     }
 
+    /**
+     * Позволяет определить, опущен ли зажим волокна
+     * @return {boolean} true, если зажим волокна полностью опущен, иначе false
+     */
     isDown() {
         return this.animationState === "initial";
     }
@@ -220,6 +244,10 @@ class ScreenElement extends AnimatedSplicerElement {
         this.tooltip = "Повернуть экран";
     }
 
+    /**
+     * Задать видео, используемое в качестве текстуры экрана
+     * @param {THREE.VideoTexture} texture - Видео-текстура Three.js
+     */
     setVideo(texture) {
         const screenObject = Object.values(this.objects).find(x => { return x.name === "Cube113_1"; });
 
@@ -227,10 +255,16 @@ class ScreenElement extends AnimatedSplicerElement {
         screenObject.material.color.set(0xFFFFFF);
     }
 
+    /**
+     * Переводит экран в начальное состояние
+     */
     setInitialScreen() {
         Application.videoElement.currentTime = 0;
     }
 
+    /**
+     * Начинает показ фрагмента видео с процессом сварки
+     */
     startSpliceAnimation() {
         Application.videoElement.play();
     }
@@ -297,10 +331,18 @@ class HeaterMainLidElement extends AnimatedSplicerElement {
         return false;
     }
 
+    /**
+     * Позволяет определить, открыта ли крышка нагревателя
+     * @return {boolean} true, если крышка нагревателя полностью открыта, иначе false
+     */
     isOpen() {
         return this.animationState === "completed";
     }
 
+    /**
+     * Позволяет определить, закрыта ли крышка нагревателя
+     * @return {boolean} true, если крышка нагревателя полностью закрыта, иначе false
+     */
     isClosed() {
         return this.animationState === "initial";
     }
@@ -350,10 +392,18 @@ class HeaterSideLidsElement extends AnimatedSplicerElement {
         return false;
     }
 
+    /**
+     * Позволяет определить, открыты ли зажимы нагревателя
+     * @return {boolean} true, если зажимы нагревателя полностью открыты, иначе false
+     */
     isOpen() {
         return this.animationState === "completed";
     }
 
+    /**
+     * Позволяет определить, закрыты ли зажимы нагревателя
+     * @return {boolean} true, если зажимы нагревателя полностью закрыты, иначе false
+     */
     isClosed() {
         return this.animationState === "initial";
     }
@@ -411,10 +461,18 @@ class PowerSwitchElement extends AnimatedSplicerElement {
         super(splicer.model, splicer.animations, splicer.mixer, ["Cube050"], "Power On (DC)");
     }
 
+    /**
+     * Позволяет определить, находится ли переключатель в положении "Включено"
+     * @return {boolean} true, если "Включено", иначе false
+     */
     isOn() {
         return this.animationState === "completed";
     }
 
+    /**
+     * Позволяет определить, находится ли переключатель в положении "Выключено"
+     * @return {boolean} true, если "Выключено", иначе false
+     */
     isOff() {
         return this.animationState === "initial";
     }
@@ -453,11 +511,36 @@ class HeaterIndicator {
     stopFlashing() {
         clearInterval(this.intervalId);
         this._intervalId = null;
+        this.model.material.color.set(this.initialColor);
     }
 }
 
-/** Корневой интерактивый элемент сварочного аппарата */
+/**
+ * Корневой интерактивый элемент сварочного аппарата
+ *
+ * @property {THREE.AnimationClip[]}          animations - Набор анимаций сварочного аппарата
+ * @property {THREE.AnimationMixer}           mixer - Экземпляр THREE.AnimationMixer
+ * @property {HeaterIndicator}                heaterIndicator - Индикатор нагревателя
+ * @property {LidElement}                     children.lid - Крышка сварочного аппарата
+ * @property {LeftFiberCladdingClampElement}  children.leftFiberCladdingClamp - Левый зажим оболочки волокна
+ * @property {RightFiberCladdingClampElement} children.rightFiberCladdingClamp - Правый зажим оболочки волокна
+ * @property {LeftFiberClampElement}          children.leftFiberClamp - Левый зажим волокна
+ * @property {RightFiberClampElement}         children.rightFiberClamp - Правый зажим волокна
+ * @property {ScreenElement}                  children.Screen - Экран сварочного аппарата
+ * @property {ScreenBearingElement}           children.screenBearing - Крепление экрана
+ * @property {HeaterMainLidElement}           children.mainHeaterLid - Крышка нагревателя
+ * @property {HeaterSideLidsElement}          children.heaterSideLids - Зажимы нагревателя
+ * @property {SetButtonElement}               children.setButton - Кнопка SET
+ * @property {ResetButtonElement}             children.resetButton - Кнопка RESET
+ * @property {HeatButton}                     children.heatButton - Кнопка HEAT
+ * @property {PowerSwitchElement}             children.powerSwitch - Переключатель питания
+ */
 export default class Splicer extends InteractiveElement {
+    /**
+     * Создает экземпляр Splicer.
+     * @param {THREE.Object3D}        model      - 3D-модель сварочного аппарата
+     * @param {THREE.AnimationClip[]} animations - Набор анимаций сварочного аппарата
+     */
     constructor(model, animations) {
         super(model, []);
 

@@ -32,10 +32,12 @@ export default class MouseHandler {
         // Used to determine what elements can be hovered
         this.hoverFilter = function(element) { return true; };
 
+        // Обновлять координаты курсора мыши при его перемещении
         this.root.addEventListener("pointermove", event => {
             this.updateMousePosition(event.clientX, event.clientY);
         });
 
+        // Обработчик нажатия левой кнопки мыши
         this.root.addEventListener("mousedown", event => {
             this.updateMousePosition(event.clientX, event.clientY);
             this.updateHover();
@@ -43,6 +45,7 @@ export default class MouseHandler {
             this.mouseDownPosition.copy(this.position);
         });
 
+        // Обработчик отпускания левой кнопки мыши
         this.root.addEventListener("mouseup", event => {
             let selection = this.hoveredElement;
 
@@ -59,6 +62,7 @@ export default class MouseHandler {
             const resolution = this.root.width * this.root.width + this.root.height * this.root.height;
             const offset = this.position.distanceToSquared(this.mouseDownPosition) * resolution;
 
+            // Если координаты мыши изменились слишком сильно, не засчитывать клик
             if (offset > DRAG_THRESHOLD) return;
 
             if (!selection.active) {
@@ -181,10 +185,12 @@ export default class MouseHandler {
         this.updateHover();
     }
 
+    /** Добавляет обработчик событий мыши в приложение */
     addToApplication() {
         Application.addObject(this);
     }
 
+    /** Удаляет обработчик событий мыши из приложения */
     removeFromApplication() {
         Application.removeObject(this);
     }

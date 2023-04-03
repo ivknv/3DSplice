@@ -6,15 +6,102 @@ import FusedFiber from "./FusedFiber";
  * Каждое отдельное состояние приложения может быть представлено отдельным
  * классом, наследующимся от ApplicationState.
  *
- * @property {string} name - имя состояния
+ * @property {string} name - Имя состояния
+ * @property {boolean} leftFiberPlaced - Флаг, указывающий на то, что левое волокно было (правильно) размещено
+ * @property {boolean} rightFiberPlaced - Флаг, указывающий на то, что правое волокно было (правильно) размещено
+ * @property {boolean} fibersPlaced - Флаг, указывающий на то, что оба волокна были (правильно) размещены
+ * @property {boolean} fiberPlacedInHeater - Флаг, указывающий на то, что волокно было помещено в нагреватель
+ * @property {boolean} spliceProtectionPlaced - Флаг, указывающий на то, была размещена гильза КДЗС (в центре места сварки)
  */
 export default class ApplicationState {
     /**
      * Создает экземпляр ApplicationState
-     * @param {string} name - имя состояния
+     * @param {string} name - Имя состояния
+     * @param {ApplicationState} [previousState] - Предыдущее состояние
      */
-    constructor(name) {
+    constructor(name, previousState) {
         this.name = name;
+
+        this._leftFiberPlaced = previousState?.leftFiberPlaced || false;
+        this._rightFiberPlaced = previousState?.rightFiberPlaced || false;
+        this._fiberPlacedInHeater = previousState?.fiberPlacedInHeater || false;
+        this._spliceProtectionPlaced = previousState?.spliceProtectionPlaced || false;
+    }
+
+    get leftFiberPlaced() {
+        return this._leftFiberPlaced;
+    }
+
+    set leftFiberPlaced(value) {
+        const oldValue = this._leftFiberPlaced;
+
+        if (oldValue !== value) {
+            this._leftFiberPlaced = value;
+
+            if (value) {
+                this.onLeftFiberPlaced();
+            } else {
+                this.onLeftFiberRemoved();
+            }
+        }
+    }
+
+    get rightFiberPlaced() {
+        return this._rightFiberPlaced;
+    }
+
+    set rightFiberPlaced(value) {
+        const oldValue = this._rightFiberPlaced;
+
+        if (oldValue !== value) {
+            this._rightFiberPlaced = value;
+
+            if (value) {
+                this.onRightFiberPlaced();
+            } else {
+                this.onRightFiberRemoved();
+            }
+        }
+    }
+
+    get fibersPlaced() {
+        return this.leftFiberPlaced && this.rightFiberPlaced;
+    }
+
+    get fiberPlacedInHeater() {
+        return this._fiberPlacedInHeater;
+    }
+
+    set fiberPlacedInHeater(value) {
+        const oldValue = this._fiberPlacedInHeater;
+
+        if (oldValue !== value) {
+            this._fiberPlacedInHeater = value;
+
+            if (value) {
+                this.onFiberPlacedInHeater();
+            } else {
+                this.onFiberRemovedFromHeater();
+            }
+        }
+    }
+
+    get spliceProtectionPlaced() {
+        return this._spliceProtectionPlaced;
+    }
+
+    set spliceProtectionPlaced(value) {
+        const oldValue = this._spliceProtectionPlaced;
+
+        if (oldValue !== value) {
+            this._spliceProtectionPlaced = value;
+
+            if (value) {
+                this.onSpliceProtectionPlaced();
+            } else {
+                this.onSpliceProtectionRemoved();
+            }
+        }
     }
 
     /** Вызывается при правильном размещении левого волокна */
@@ -172,16 +259,20 @@ function _instructToLiftClamps() {
 
 /** Исходное состояние */
 export class InitialState extends ApplicationState {
-    constructor() {
-        super("initial");
+    /**
+     * Создает экземпляр InitialState.
+     * @param {ApplicationState} [previousState] - Предыдущее состояние приложения
+     */
+    constructor(previousState) {
+        super("initial", previousState);
     }
 
     onLidOpened() { _instructToLiftClamps(); }
 
     onLidClosed() {
-        if (Application.fibersPlaced) {
+        if (this.fibersPlaced) {
             Application.setInstructionText("Нажмите кнопку SET");
-            Application.changeState(new ReadyToSpliceState());
+            Application.changeState(new ReadyToSpliceState(this));
         } else {
             Application.setInstructionText("Откройте крышку сварочного аппарата");
         }
@@ -191,7 +282,7 @@ export class InitialState extends ApplicationState {
     onRightFiberCladdingClampUp() { _instructToLiftClamps(); }
 
     onLeftFiberCladdingClampDown() {
-        if (Application.fibersPlaced) {
+        if (this.fibersPlaced) {
             if (Application.splicer.children.rightFiberCladdingClamp.isDown()) {
                 Application.setInstructionText("Закройте крышку сварочного аппарата");
             } else {
@@ -203,7 +294,7 @@ export class InitialState extends ApplicationState {
     }
 
     onRightFiberCladdingClampDown() {
-        if (Application.fibersPlaced) {
+        if (this.fibersPlaced) {
             if (Application.splicer.children.leftFiberCladdingClamp.isDown()) {
                 Application.setInstructionText("Закройте крышку сварочного аппарата");
             } else {
@@ -215,69 +306,81 @@ export class InitialState extends ApplicationState {
     }
 
     onLeftFiberClampUp() {
-        if (!Application.leftFiberPlaced) {
+        if (!this.leftFiberPlaced) {
             Application.setInstructionText("Поместите левое волокно в сварочный аппарат");
-            Application.changeState(new CanPlaceLeftFiberState());
+            Application.changeState(new CanPlaceLeftFiberState(this));
         } else {
             Application.setInstructionText("Опустите зажимы с левой стороны");
-            Application.changeState(new LeftFiberPlacedState());
+            Application.changeState(new LeftFiberPlacedState(this));
         }
     }
 
     onRightFiberClampUp() {
-        if (!Application.leftFiberPlaced) {
+        if (!this.leftFiberPlaced) {
             Application.setInstructionText("Поместите правое волокно в сварочный аппарат");
-            Application.changeState(new CanPlaceRightFiberState());
+            Application.changeState(new CanPlaceRightFiberState(this));
         } else {
             Application.setInstructionText("Опустите зажимы с правой стороны");
-            Application.changeState(new RightFiberPlacedState());
+            Application.changeState(new RightFiberPlacedState(this));
         }
     }
 }
 
 /** Состояние, в котором можно разместить левое волокно */
 export class CanPlaceLeftFiberState extends ApplicationState {
-    constructor() {
-        super("can_place_left_fiber");
+    /**
+     * Создает экземпляр CanPlaceLeftFiberState.
+     * @param {ApplicationState} [previousState] - Предыдущее состояние приложения
+     */
+    constructor(previousState) {
+        super("can_place_left_fiber", previousState);
     }
 
     onLeftFiberPlaced() {
         Application.setInstructionText("Опустите зажимы с левой стороны");
-        Application.changeState(new LeftFiberPlacedState());
+        Application.changeState(new LeftFiberPlacedState(this));
     }
 
     onLeftFiberClampDown() {
         Application.setInstructionText("Поднимите зажимы для волокна");
-        Application.changeState(new InitialState());
+        Application.changeState(new InitialState(this));
     }
 }
 
 /** Состояние, в котором можно разместить правое волокно */
 export class CanPlaceRightFiberState extends ApplicationState {
-    constructor() {
-        super("can_place_right_fiber");
+    /**
+     * Создает экземпляр CanPlaceRightFiberState.
+     * @param {ApplicationState} [previousState] - Предыдущее состояние приложения
+     */
+    constructor(previousState) {
+        super("can_place_right_fiber", previousState);
     }
 
     onRightFiberPlaced() {
         Application.setInstructionText("Опустите зажимы с правой стороны");
-        Application.changeState(new RightFiberPlacedState());
+        Application.changeState(new RightFiberPlacedState(this));
     }
 
     onRightFiberClampDown() {
         Application.setInstructionText("Поднимите зажимы для волокна");
-        Application.changeState(new InitialState());
+        Application.changeState(new InitialState(this));
     }
 }
 
 /** Состояние, в котором правое волокно правильно расположено */
 export class RightFiberPlacedState extends ApplicationState {
-    constructor() {
-        super("right_fiber_placed");
+    /**
+     * Создает экземпляр RightFiberPlacedState.
+     * @param {ApplicationState} [previousState] - Предыдущее состояние приложения
+     */
+    constructor(previousState) {
+        super("right_fiber_placed", previousState);
     }
 
     onRightFiberRemoved() {
         Application.setInstructionText("Поместите правое волокно в сварочный аппарат");
-        Application.changeState(new CanPlaceRightFiberState());
+        Application.changeState(new CanPlaceRightFiberState(this));
     }
 
     onRightFiberClampDown() {
@@ -285,68 +388,76 @@ export class RightFiberPlacedState extends ApplicationState {
     }
 
     onRightFiberCladdingClampDown() {
-        if (Application.fibersPlaced) {
+        if (this.fibersPlaced) {
             if (Application.splicer.children.lid.checkDependencies()) {
                 Application.setInstructionText("Закройте крышку сварочного аппарата");
-                Application.changeState(new FibersPlacedState());
+                Application.changeState(new FibersPlacedState(this));
             } else {
                 Application.setInstructionText("Опустите зажимы с левой стороны");
-                Application.changeState(new LeftFiberPlacedState());
+                Application.changeState(new LeftFiberPlacedState(this));
             }
         } else if (Application.splicer.children.leftFiberClamp.isUp()) {
             Application.setInstructionText("Поместите левое волокно в сварочный аппарат");
-            Application.changeState(new CanPlaceLeftFiberState());
+            Application.changeState(new CanPlaceLeftFiberState(this));
         } else {
             Application.setInstructionText("Поднимите зажимы с левой стороны");
-            Application.changeState(new InitialState());
+            Application.changeState(new InitialState(this));
         }
     }
 }
 
 /** Состояние, в котором левое волокно правильно расположено */
 export class LeftFiberPlacedState extends ApplicationState {
-    constructor() {
-        super("left_fiber_placed");
+    /**
+     * Создает экземпляр LeftFiberPlacedState.
+     * @param {ApplicationState} [previousState] - Предыдущее состояние приложения
+     */
+    constructor(previousState) {
+        super("left_fiber_placed", previousState);
     }
 
     onLeftFiberRemoved() {
         Application.setInstructionText("Поместите левое волокно в сварочный аппарат");
-        Application.changeState(new CanPlaceLeftFiberState());
+        Application.changeState(new CanPlaceLeftFiberState(this));
     }
 
     onLeftFiberCladdingClampDown() {
-        if (Application.fibersPlaced) {
+        if (this.fibersPlaced) {
             if (Application.splicer.children.lid.checkDependencies()) {
                 Application.setInstructionText("Закройте крышку сварочного аппарата");
-                Application.changeState(new FibersPlacedState());
+                Application.changeState(new FibersPlacedState(this));
             } else {
                 Application.setInstructionText("Опустите зажимы с правой стороны");
-                Application.changeState(new RightFiberPlacedState());
+                Application.changeState(new RightFiberPlacedState(this));
             }
         } else if (Application.splicer.children.rightFiberClamp.isUp()) {
             Application.setInstructionText("Поместите правое волокно в сварочный аппарат");
-            Application.changeState(new CanPlaceRightFiberState());
+            Application.changeState(new CanPlaceRightFiberState(this));
         } else {
             Application.setInstructionText("Поднимите зажимы с правой стороны");
-            Application.changeState(new InitialState());
+            Application.changeState(new InitialState(this));
         }
     }
 }
 
 /** Состояние, в котором оба волокна правильно расположены */
 export class FibersPlacedState extends ApplicationState {
-    constructor() {
-        super("fibers_placed");
+    /**
+     * Создает экземпляр FibersPlacedState.
+     * @param {ApplicationState} [previousState] - Предыдущее состояние приложения
+     */
+    constructor(previousState) {
+        super("fibers_placed", previousState);
     }
 
     onLeftFiberCladdingClampUp() {
         Application.setInstructionText("Опустите зажимы с левой стороны");
-        Application.changeState(new LeftFiberPlacedState());
+        Application.changeState(new LeftFiberPlacedState(this));
     }
 
     onRightFiberCladdingClampUp() {
         Application.setInstructionText("Опустите зажимы с правой стороны");
-        Application.changeState(new RightFiberPlacedState());
+        Application.changeState(new RightFiberPlacedState(this));
     }
 
     onLeftFiberCladdingClampDown() {
@@ -367,37 +478,41 @@ export class FibersPlacedState extends ApplicationState {
 
     onLidClosed() {
         Application.setInstructionText("Нажмите на кнопку SET");
-        Application.changeState(new ReadyToSpliceState());
+        Application.changeState(new ReadyToSpliceState(this));
     }
 }
 
 /** Состояние, в котором можно начать процесс сварки */
 export class ReadyToSpliceState extends ApplicationState {
-    constructor() {
-        super("ready_to_splice");
+    /**
+     * Создает экземпляр ReadyToSpliceState.
+     * @param {ApplicationState} [previousState] - Предыдущее состояние приложения
+     */
+    constructor(previousState) {
+        super("ready_to_splice", previousState);
     }
 
     onLidOpened() {
         Application.setInstructionText("Закройте крышку сварочного аппарата");
-        Application.changeState(new FibersPlacedState());
+        Application.changeState(new FibersPlacedState(this));
     }
 
     onSetPressed() {
         Application.setInstructionText("Дождитесь завершения сварки");
-        Application.changeState(new SpliceInProgressState());
+        Application.changeState(new SpliceInProgressState(this));
 
-        Application.splicer.children.screen.startSpliceAnimation();
-
-        setTimeout(function() {
-            Application.state.onSpliceCompleted();
-        }, 5000);
+        Application.spliceProcess.start();
     }
 }
 
 /** Состояние, в котором производится сварка */
 export class SpliceInProgressState extends ApplicationState {
-    constructor() {
-        super("splice_in_progress");
+    /**
+     * Создает экземпляр SpliceInProgressState.
+     * @param {ApplicationState} [previousState] - Предыдущее состояние приложения
+     */
+    constructor(previousState) {
+        super("splice_in_progress", previousState);
     }
 
     canOpenLid() {
@@ -428,14 +543,18 @@ export class SpliceInProgressState extends ApplicationState {
         Application.spliceProtectionCase.addToApplication();
 
         Application.setInstructionText("Извлеките волокно из сварочного аппарата");
-        Application.changeState(new SpliceCompletedState());
+        Application.changeState(new SpliceCompletedState(this));
     }
 }
 
 /** Состояние, в котором сварка завершена */
 export class SpliceCompletedState extends ApplicationState {
-    constructor() {
-        super("splice_completed");
+    /**
+     * Создает экземпляр SpliceCompletedState.
+     * @param {ApplicationState} [previousState] - Предыдущее состояние приложения
+     */
+    constructor(previousState) {
+        super("splice_completed", previousState);
     }
 
     onLidOpened() {
@@ -465,14 +584,18 @@ export class SpliceCompletedState extends ApplicationState {
 
     onFiberRemoved() {
         Application.setInstructionText("Разместите гильзу КДЗС в центре места сварки");
-        Application.changeState(new ReadyToPlaceSpliceProtection());
+        Application.changeState(new ReadyToPlaceSpliceProtection(this));
     }
 }
 
 /** Состояние, в котором можно разместить гильзу КДЗС */
 export class ReadyToPlaceSpliceProtection extends ApplicationState {
-    constructor() {
-        super("ready_to_place_splice_protection");
+    /**
+     * Создает экземпляр ReadyToPlaceSpliceProtection.
+     * @param {ApplicationState} [previousState] - Предыдущее состояние приложения
+     */
+    constructor(previousState) {
+        super("ready_to_place_splice_protection", previousState);
     }
 
     onSpliceProtectionPlaced() {
@@ -480,9 +603,9 @@ export class ReadyToPlaceSpliceProtection extends ApplicationState {
         Application.fusedFiber.addPadding();
 
         if (Application.splicer.children.mainHeaterLid.isOpen() && Application.splicer.children.heaterSideLids.isOpen()) {
-            Application.changeState(new ReadyToPlaceFiberInHeaterState());
+            Application.changeState(new ReadyToPlaceFiberInHeaterState(this));
         } else {
-            Application.changeState(new SpliceProtectionPlacedState());
+            Application.changeState(new SpliceProtectionPlacedState(this));
         }
     }
 
@@ -501,8 +624,12 @@ function _instructToOpenHeater() {
 
 /** Состояние, в котором гильза КДЗС размещена в центре места сварки */
 export class SpliceProtectionPlacedState extends ApplicationState {
-    constructor() {
-        super("splice_protection_placed");
+    /**
+     * Создает экземпляр SpliceProtectionPlacedState.
+     * @param {ApplicationState} [previousState] - Предыдущее состояние приложения
+     */
+    constructor(previousState) {
+        super("splice_protection_placed", previousState);
     }
 
     onMainHeaterLidClosed() {
@@ -527,14 +654,18 @@ export class SpliceProtectionPlacedState extends ApplicationState {
 
     _onHeaterLidsOpened() {
         Application.setInstructionText("Поместите волокно с КДЗС в нагреватель");
-        Application.changeState(new ReadyToPlaceFiberInHeaterState());
+        Application.changeState(new ReadyToPlaceFiberInHeaterState(this));
     }
 }
 
 /** Состояние, в котором можно поместить волокно в нагреватель */
 export class ReadyToPlaceFiberInHeaterState extends ApplicationState {
-    constructor() {
-        super("ready_to_place_fiber_in_heater");
+    /**
+     * Создает экземпляр ReadyToPlaceFiberInHeaterState.
+     * @param {ApplicationState} [previousState] - Предыдущее состояние приложения
+     */
+    constructor(previousState) {
+        super("ready_to_place_fiber_in_heater", previousState);
     }
 
     canPlaceFiberInHeater() {
@@ -554,7 +685,7 @@ export class ReadyToPlaceFiberInHeaterState extends ApplicationState {
 
     _onHeaterLidsClosed() {
         Application.setInstructionText("Нажмите на кнопку HEAT");
-        Application.changeState(new ReadyToHeatState());
+        Application.changeState(new ReadyToHeatState(this));
     }
 
     _canInteractWithHeaterLid() {
@@ -598,13 +729,17 @@ export class ReadyToPlaceFiberInHeaterState extends ApplicationState {
 
 /** Состояние, в котором можно включить нагреватель */
 export class ReadyToHeatState extends ApplicationState {
-    constructor() {
-        super("ready_to_heat");
+    /**
+     * Создает экземпляр ReadyToHeatState.
+     * @param {ApplicationState} [previousState] - Предыдущее состояние приложения
+     */
+    constructor(previousState) {
+        super("ready_to_heat", previousState);
     }
 
     _onHeaterLidsOpened() {
         Application.setInstructionText("Закройте крышку нагревателя");
-        Application.changeState(new ReadyToPlaceFiberInHeaterState());
+        Application.changeState(new ReadyToPlaceFiberInHeaterState(this));
     }
 
     onMainHeaterLidOpened() {
@@ -618,15 +753,19 @@ export class ReadyToHeatState extends ApplicationState {
     onHeatPressed() {
         Application.setInstructionText("Дождитесь завершения работы нагревателя");
         Application.splicer.heaterIndicator.startFlashing();
-        Application.changeState(new HeatingInProgressState());
+        Application.changeState(new HeatingInProgressState(this));
         Application.spliceProtectionCase.shrink();
     }
 }
 
 /** Состояние, в котором нагреватель работает */
 export class HeatingInProgressState extends ApplicationState {
-    constructor() {
-        super("heating_in_progress");
+    /**
+     * Создает экземпляр HeatingInProgressState.
+     * @param {ApplicationState} [previousState] - Предыдущее состояние приложения
+     */
+    constructor(previousState) {
+        super("heating_in_progress", previousState);
     }
 
     canOpenMainHeaterLid() {
@@ -640,14 +779,18 @@ export class HeatingInProgressState extends ApplicationState {
     onHeatingCompleted() {
         Application.splicer.heaterIndicator.stopFlashing();
         Application.setInstructionText("Волокно можно извлечь");
-        Application.changeState(new HeatingCompletedState());
+        Application.changeState(new HeatingCompletedState(this));
     }
 }
 
 /** Состояние, в котором нагреватель завершил работу */
 export class HeatingCompletedState extends ApplicationState {
-    constructor() {
-        super("heating_completed");
+    /**
+     * Создает экземпляр HeatingCompletedState.
+     * @param {ApplicationState} [previousState] - Предыдущее состояние приложения
+     */
+    constructor(previousState) {
+        super("heating_completed", previousState);
     }
 
     canPlaceFiberInHeater() {

@@ -12,7 +12,12 @@ import * as Colors from "./colors";
 import {default as Model} from "./models/fujikura_fsm-30s.gltf";
 import {default as FiberModel} from "./models/fiber_optic_patch_cord.gltf";
 import {default as SpliceProtectionCaseModel} from "./models/splice_protection_case.gltf";
+import SpliceProcess from "./SpliceProcess";
 
+/**
+ * Данная функция извлекает параметры из URL вида #param1:value1;param2:value2
+ * @return {Map} ключ - имя параметра, значение - значение параметра
+ */
 function parseURLHashParameters() {
     const q = window.location.hash.substring(1);
     const keyValuePairs = q.split(";");
@@ -64,6 +69,7 @@ export class ApplicationClass {
         this.clock = new THREE.Clock();
         this.clockDelta = 0;
 
+        // Автоматически подстраивать размер canvas под размер окна
         window.addEventListener("resize", () => {
             const w = window.innerWidth;
             const h = window.innerHeight;
@@ -74,11 +80,7 @@ export class ApplicationClass {
         });
 
         this.state = new InitialState();
-
-        this._leftFiberPlaced = false;
-        this._rightFiberPlaced = false;
-        this._fiberPlacedInHeater = false;
-        this._spliceProtectionPlaced = false;
+        this.spliceProcess = null;
 
         this.splicerAnimations = null;
         this.splicerModel = null;
@@ -151,84 +153,8 @@ export class ApplicationClass {
         }
     }
 
-    get leftFiberPlaced() {
-        return this._leftFiberPlaced;
-    }
-
-    set leftFiberPlaced(value) {
-        const oldValue = this._leftFiberPlaced;
-
-        if (oldValue !== value) {
-            this._leftFiberPlaced = value;
-
-            if (value) {
-                this.state.onLeftFiberPlaced();
-            } else {
-                this.state.onLeftFiberRemoved();
-            }
-        }
-    }
-
-    get rightFiberPlaced() {
-        return this._rightFiberPlaced;
-    }
-
-    set rightFiberPlaced(value) {
-        const oldValue = this._rightFiberPlaced;
-
-        if (oldValue !== value) {
-            this._rightFiberPlaced = value;
-
-            if (value) {
-                this.state.onRightFiberPlaced();
-            } else {
-                this.state.onRightFiberRemoved();
-            }
-        }
-    }
-
-    get fibersPlaced() {
-        return this.leftFiberPlaced && this.rightFiberPlaced;
-    }
-
-    get fiberPlacedInHeater() {
-        return this._fiberPlacedInHeater;
-    }
-
-    set fiberPlacedInHeater(value) {
-        const oldValue = this._fiberPlacedInHeater;
-
-        if (oldValue !== value) {
-            this._fiberPlacedInHeater = value;
-
-            if (value) {
-                this.state.onFiberPlacedInHeater();
-            } else {
-                this.state.onFiberRemovedFromHeater();
-            }
-        }
-    }
-
-    get spliceProtectionPlaced() {
-        return this._spliceProtectionPlaced;
-    }
-
-    set spliceProtectionPlaced(value) {
-        const oldValue = this._spliceProtectionPlaced;
-
-        if (oldValue !== value) {
-            this._spliceProtectionPlaced = value;
-
-            if (value) {
-                this.state.onSpliceProtectionPlaced();
-            } else {
-                this.state.onSpliceProtectionRemoved();
-            }
-        }
-    }
-
     /**
-     * Изменить состояние приложения
+     * Изменить состояние приложения.
      * @param {ApplicationState} newState - новое состояние
      */
     changeState(newState) {
@@ -236,29 +162,53 @@ export class ApplicationClass {
         this.state = newState;
     }
 
+    /**
+     * Добавить объект.
+     * @param {object} object - объект, который нужно добавить
+     */
     addObject(object) {
         this.objects.push(object);
     }
 
+    /**
+     * Удалить объект.
+     * @param {object} object - объект, который нужно удалить
+     */
     removeObject(object) {
         const index = this.objects.indexOf(object);
         if (index > -1) this.objects.splice(index, 1);
     }
 
+    /**
+     * Добавить интерактивный элемент.
+     * @param {InteractiveElement} element - интерактивный элемент, который нужно добавить
+     */
     addElement(element) {
         this.elements.push(element);
     }
 
+    /**
+     * Удалить интерактивный элемент.
+     * @param {InteractiveElement} element - интерактивный элемент, который нужно удалить
+     */
     removeElement(element) {
         const index = this.elements.indexOf(element);
         if (index > -1) this.elements.splice(index, 1);
     }
 
+    /**
+     * Добавить 3D-модель.
+     * @param {THREE.Object3D} model - 3D-модель, которую нужно добавить
+     */
     addModel(model) {
         this.models.push(model);
         this.scene.add(model);
     }
 
+    /**
+     * Удалить 3D-модель.
+     * @param {THREE.Object3D} model - 3D-модель, которую нужно удалить
+     */
     removeModel(model) {
         const index = this.models.indexOf(model);
         if (index > -1) this.models.splice(index, 1);
@@ -334,6 +284,9 @@ export class ApplicationClass {
         this.splicer.children.screen.setVideo(this.videoTexture);
     }
 
+    /**
+     * Инициализация приложения. Данный метод должен вызываться после полной загрузки страницы.
+     */
     async initialize() {
         this.instructionsElement = document.querySelector("#instructions");
         this.tooltipElement = document.querySelector("#tooltip");
@@ -353,6 +306,8 @@ export class ApplicationClass {
         document.querySelector("#hide-help-button").addEventListener("click", () => {
             this.hideHelp();
         });
+
+        this.spliceProcess = new SpliceProcess();
 
         this.mouseHandler = new MouseHandler();
 
@@ -381,6 +336,11 @@ export class ApplicationClass {
         Application.renderer.domElement.style.zIndex = "1";
     }
 
+    /**
+     * Получить интерактивный элемент по 3D-объекту.
+     * @param {THREE.Object3D} obj - 3D-объект
+     * @return {(InteractiveElement|null)} соответствующий интерактивный элемент или null
+     */
     getElementByObject(obj) {
         if (!obj) return null;
 
@@ -438,6 +398,9 @@ export class ApplicationClass {
         }
     }
 
+    /**
+     * Обновить состояние приложения. Данный метод должен вызываться каждый кадр.
+     */
     update() {
         for (const object of this.objects) {
             object.update(this);
@@ -448,6 +411,9 @@ export class ApplicationClass {
         }
     }
 
+    /**
+     * Запустить цикл анимации.
+     */
     animate() {
         // We do it this way to keep `this` bound
         const animateFunc = () => {

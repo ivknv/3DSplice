@@ -76,9 +76,9 @@ export default class Fiber extends InteractiveElement {
         const tolerance = 0.0015;
 
         if (this.direction === "left") {
-            Application.leftFiberPlaced = Math.abs(this.getTipPosition().x - this.maxX) < tolerance;
+            Application.state.leftFiberPlaced = Math.abs(this.getTipPosition().x - this.maxX) < tolerance;
         } else {
-            Application.rightFiberPlaced = Math.abs(this.getTipPosition().x - this.minX) < tolerance;
+            Application.state.rightFiberPlaced = Math.abs(this.getTipPosition().x - this.minX) < tolerance;
         }
     }
 
@@ -141,6 +141,7 @@ export default class Fiber extends InteractiveElement {
     }
 
     update() {
+        super.update();
         if (!this.active) return;
 
         if (this.held) this.syncWithMouse();

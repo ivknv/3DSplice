@@ -2,8 +2,9 @@ import Application from "./Application";
 import * as Colors from "./colors";
 
 /**
- * Интерактивный элемент.Представляет собой набор 3D-объектов, с которыми
+ * Интерактивный элемент. Представляет собой набор 3D-объектов, с которыми
  * может взаимодейстовать пользователь.
+ *
  * @property {THREE.Object3D}  model    - 3D-модель
  * @property {object}          objects  - 3D-объекты (отдельные составляющие модели)
  * @property {object}          children - Дочерние интерактивные элементы

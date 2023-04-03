@@ -54,11 +54,11 @@ export default class SpliceProtectionCase extends InteractiveElement {
     }
 
     isCentered() {
-        return Math.abs(this.model.position.x) < 0.005;
+        return Math.abs(this.model.position.x) < 0.004;
     }
 
     checkPlacement() {
-        Application.spliceProtectionPlaced = this.isCentered();
+        Application.state.spliceProtectionPlaced = this.isCentered();
     }
 
     onClick(event) {
@@ -122,6 +122,8 @@ export default class SpliceProtectionCase extends InteractiveElement {
     }
 
     update() {
+        super.update();
+
         this.mixer.update(Application.clockDelta);
         const scale = (5/6) / this.model.scale.x;
         this.metalRod.scale.x = scale;
