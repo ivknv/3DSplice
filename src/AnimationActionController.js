@@ -43,7 +43,7 @@ export default class AnimationActionController {
      * @param {THREE.AnimationMixer}  mixer      - Экземпляр THREE.AnimationMixer
      * @param {string}                name       - Имя анимации
      * @return {AnimationActionController} контроллер анимации */
-    static fromAnimationName(animations, mixer, name, interactiveElement) {
+    static fromAnimationName(animations, mixer, name) {
         const animation = THREE.AnimationClip.findByName(animations, name);
 
         return new AnimationActionController(mixer, animation);

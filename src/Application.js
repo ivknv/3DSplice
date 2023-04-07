@@ -85,6 +85,7 @@ export class ApplicationClass {
         this.splicerAnimations = null;
         this.splicerModel = null;
         this.fiberModel = null;
+        this.spliceProtectionAnimations = null;
         this.spliceProtectionCaseModel = null;
 
         this.splicer = null;
@@ -257,17 +258,20 @@ export class ApplicationClass {
 
     async loadModels() {
         const splicerGLTF = await parseGLTF(Model);
+        const spliceProtectionGLTF = await parseGLTF(SpliceProtectionCaseModel);
         this.splicerModel = splicerGLTF.scene.children[0];
         this.splicerAnimations = splicerGLTF.animations;
         this.fiberModel = (await parseGLTF(FiberModel)).scene.children[0];
-        this.spliceProtectionCaseModel = (await parseGLTF(SpliceProtectionCaseModel)).scene.children[0];
+        this.spliceProtectionCaseModel = spliceProtectionGLTF.scene.children[0];
+        this.spliceProtectionAnimations = spliceProtectionGLTF.animations;
     }
 
     setupInteractiveElements() {
         this.splicer = new Splicer(this.splicerModel, this.splicerAnimations);
         this.leftFiber = new Fiber(this.fiberModel.clone(), "left");
         this.rightFiber = new Fiber(this.fiberModel.clone(), "right");
-        this.spliceProtectionCase = new SpliceProtectionCase(this.spliceProtectionCaseModel);
+        this.spliceProtectionCase = new SpliceProtectionCase(
+            this.spliceProtectionCaseModel, this.spliceProtectionAnimations);
 
         this.spliceProtectionCase.setPosition(0.098, 0.0527, 0.0008);
 

@@ -11,7 +11,7 @@ export default class SpliceProtectionCase extends InteractiveElement {
      * Создает экземпляр SpliceProtectionCase.
      * @param {THREE.Object3D} model - 3D-модель гильзы КДЗС
      */
-    constructor(model) {
+    constructor(model, animations) {
         const group = new THREE.Group();
         group.add(model);
         super(group, ["Cube", "Cylinder001"]);
@@ -22,14 +22,9 @@ export default class SpliceProtectionCase extends InteractiveElement {
         this.raycaster = new THREE.Raycaster();
         this.delta = 0;
 
-        const plasticCase = this.model.getObjectByName("Cube");
-        this.metalRod = this.model.getObjectByName("Cylinder001");
-
-        this.mixer = new THREE.AnimationMixer(plasticCase);
-        this.keyframes = new THREE.VectorKeyframeTrack(
-            ".scale", [0, 15], [1, 1, 1, 5/6, 2/3, 2/3], THREE.InterpolateSmooth);
-        this.animationClip = new THREE.AnimationClip("Shrink", 15, [this.keyframes]);
-        this.animationActionController = new AnimationActionController(this.mixer, this.animationClip);
+        this.mixer = new THREE.AnimationMixer(model);
+        this.animationActionController = AnimationActionController.fromAnimationName(
+            animations, this.mixer, "Shrink");
 
         this.tooltip = "Переместить гильзу КДЗС";
 
@@ -124,11 +119,7 @@ export default class SpliceProtectionCase extends InteractiveElement {
     update() {
         super.update();
 
-        this.mixer.update(Application.clockDelta);
-        const scale = (5/6) / this.model.scale.x;
-        this.metalRod.scale.x = scale;
-        this.metalRod.scale.y = scale;
-        this.metalRod.scale.z = scale;
+        this.mixer.update(Application.clockDelta / 5);
 
         if (this.held) this.syncWithMouse();
         this.updateRotation();
