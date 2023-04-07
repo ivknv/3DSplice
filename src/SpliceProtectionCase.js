@@ -10,6 +10,7 @@ export default class SpliceProtectionCase extends InteractiveElement {
     /**
      * Создает экземпляр SpliceProtectionCase.
      * @param {THREE.Object3D} model - 3D-модель гильзы КДЗС
+     * @param {THREE.AnimationClip[]} animations - набор анимаций
      */
     constructor(model, animations) {
         const group = new THREE.Group();
