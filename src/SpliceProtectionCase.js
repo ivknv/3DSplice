@@ -105,7 +105,7 @@ export default class SpliceProtectionCase extends InteractiveElement {
         newPosition.applyAxisAngle(new THREE.Vector3(0, 0, 1), Application.rightFiber.model.rotation.z);
         this.model.rotation.z = -Math.PI * 0.5 + Application.rightFiber.model.rotation.z;
         this.model.position.x = newPosition.x + Application.rightFiber.model.position.x;
-        this.model.position.y = newPosition.y + 0.001 + Application.rightFiber.model.position.y;
+        this.model.position.y = newPosition.y + 0.0008 + Application.rightFiber.model.position.y;
         this.model.position.z = newPosition.z + Application.rightFiber.model.position.z;
     }
 
