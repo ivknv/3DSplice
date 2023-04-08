@@ -39,7 +39,7 @@ export default class SpliceProtectionCase extends InteractiveElement {
         this.padding.scale.y = 3;
         this.padding.scale.z = 6;
 
-        this.objects[this.padding.uuid] = this.padding;
+        this.objects.add(this.padding);
 
         group.add(this.padding);
     }

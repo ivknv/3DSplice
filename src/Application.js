@@ -7,7 +7,7 @@ import SpliceProtectionCase from "./SpliceProtectionCase";
 import {parseGLTF} from "./gltf";
 import {clamp} from "./common";
 import Stats from "stats.js";
-import {InitialState} from "./ApplicationState";
+import {ApplicationState, InitialState} from "./ApplicationState";
 import * as Colors from "./colors";
 import {default as Model} from "./models/fujikura_fsm-30s.gltf";
 import {default as FiberModel} from "./models/fiber_optic_patch_cord.gltf";
@@ -348,13 +348,7 @@ export class ApplicationClass {
     getElementByObject(obj) {
         if (!obj) return null;
 
-        const predicate = x => {
-            for (const uuid in x.objects) {
-                if (x.objects[uuid] === obj) return true;
-            }
-
-            return false;
-        };
+        const predicate = x => { return x.objects.has(obj); };
 
         for (const element of this.elements) {
             if (predicate(element)) return element;

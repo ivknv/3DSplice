@@ -80,13 +80,13 @@ export default class FusedFiber extends InteractiveElement {
     }
 
     addPadding() {
-        this.objects[this.leftPadding.uuid] = this.leftPadding;
-        this.objects[this.rightPadding.uuid] = this.rightPadding;
+        this.objects.add(this.leftPadding);
+        this.objects.add(this.rightPadding);
     }
 
     removePadding() {
-        delete this.objects[this.leftPadding.uuid];
-        delete this.objects[this.rightPadding.uuid];
+        this.objects.delete(this.leftPadding);
+        this.objects.delete(this.rightPadding);
     }
 
     onClick(event) {

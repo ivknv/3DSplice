@@ -48,12 +48,12 @@ export default class Fiber extends InteractiveElement {
 
     addPadding() {
         this.model.add(this.padding);
-        this.objects[this.padding.uuid] = this.padding;
+        this.objects.add(this.padding);
     }
 
     removePadding() {
         this.model.remove(this.padding);
-        delete this.objects[this.padding.uuid];
+        this.objects.delete(this.padding);
     }
 
     setDirection(direction) {

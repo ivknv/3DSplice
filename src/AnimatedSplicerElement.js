@@ -6,7 +6,8 @@ import Application from "./Application";
  * Переопределяет метод checkDependencies() - проверяет, чтобы все элементы-зависимости
  * были в требуемом состоянии анимации.
  *
- * @property {object} dependencies - ключ - имя элемента, значение - состояние*/
+ * @property {object} dependencies - ключ - имя элемента, значение - состояние
+ */
 export default class AnimatedSplicerElement extends AnimatedInteractiveElement {
     /**
      * Создает экземпляр AnimatedSplicerElement

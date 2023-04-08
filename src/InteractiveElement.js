@@ -6,7 +6,7 @@ import * as Colors from "./colors";
  * может взаимодейстовать пользователь.
  *
  * @property {THREE.Object3D}  model    - 3D-модель
- * @property {object}          objects  - 3D-объекты (отдельные составляющие модели)
+ * @property {Set}             objects  - 3D-объекты (отдельные составляющие модели)
  * @property {object}          children - Дочерние интерактивные элементы
  * @property {boolean}         active   - Позволяет деактивировать элемент
  * @property {string}          tooltip  - Текст подсказки, который показывается при наведении на элемент
@@ -20,8 +20,8 @@ export default class InteractiveElement {
      */
     constructor(model, objectNames) {
         this.active = true;
-        this.objects = {};
-        this._originalMaterials = {};
+        this.objects = new Set();
+        this._originalMaterials = new Map();
         this.children = {};
         this.model = model;
         this.tooltip = "";
@@ -29,10 +29,8 @@ export default class InteractiveElement {
         this._highlightColor = Colors.HIGHLIGHT;
 
         for (const name of objectNames) {
-            const objects = model.getObjectsByProperty("name", name);
-
-            for (const object of objects) {
-                this.objects[object.uuid] = object;
+            for (const object of model.getObjectsByProperty("name", name)) {
+                this.objects.add(object);
             }
         }
     }
@@ -52,22 +50,21 @@ export default class InteractiveElement {
     }
 
     updateHighlightColor() {
-        for (const uuid in this.objects) {
+        for (const object of this.objects) {
             // Skip if already highlighted
-            if (!this.isObjectHighlighted(uuid)) continue;
+            if (!this.isObjectHighlighted(object)) continue;
 
-            const obj = this.objects[uuid];
-            obj.material.color.set(this.highlightColor);
+            object.material.color.set(this.highlightColor);
         }
     }
 
-    isObjectHighlighted(uuid) {
-        return uuid in this._originalMaterials;
+    isObjectHighlighted(object) {
+        return this._originalMaterials.has(object);
     }
 
     isHighlighted() {
-        for (const uuid in this.objects) {
-            if (this.isObjectHighlighted()) return true;
+        for (const object of this.objects) {
+            if (this.isObjectHighlighted(object)) return true;
         }
 
         return false;
@@ -75,31 +72,28 @@ export default class InteractiveElement {
 
     /** Подсветить интерактивный элемент */
     highlight() {
-        for (const uuid in this.objects) {
+        for (const object of this.objects) {
             // Skip if already highlighted
-            if (this.isObjectHighlighted(uuid)) continue;
+            if (this.isObjectHighlighted(object)) continue;
 
-            const obj = this.objects[uuid];
-
-            this._originalMaterials[uuid] = obj.material;
-            obj.material = obj.material.clone();
-            obj.material.metalness = 0.0;
-            obj.material.roughness = 1.0;
-            obj.material.color.set(this.highlightColor);
+            this._originalMaterials.set(object, object.material);
+            object.material = object.material.clone();
+            object.material.metalness = 0.0;
+            object.material.roughness = 1.0;
+            object.material.color.set(this.highlightColor);
         }
     }
 
     /** Убрать подсветку интерактивного элемента */
     clearHighlight() {
-        for (const uuid in this.objects) {
+        for (const object of this.objects) {
             // Skip if not highlighted
-            if (!this.isObjectHighlighted(uuid)) continue;
+            if (!this.isObjectHighlighted(object)) continue;
 
-            const obj = this.objects[uuid];
-            const highlightMaterial = obj.material;
-            obj.material = this._originalMaterials[uuid];
+            const highlightMaterial = object.material;
+            object.material = this._originalMaterials.get(object);
 
-            delete this._originalMaterials[uuid];
+            this._originalMaterials.delete(object);
             highlightMaterial.dispose();
         }
     }

@@ -249,7 +249,13 @@ class ScreenElement extends AnimatedSplicerElement {
      * @param {THREE.VideoTexture} texture - Видео-текстура Three.js
      */
     setVideo(texture) {
-        const screenObject = Object.values(this.objects).find(x => { return x.name === "Cube113_1"; });
+        let screenObject = null;
+        for (const object of this.objects) {
+            if (object.name === "Cube113_1") {
+                screenObject = object;
+                break;
+            }
+        }
 
         screenObject.material.map = texture;
         screenObject.material.color.set(0xFFFFFF);
