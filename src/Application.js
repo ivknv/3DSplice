@@ -43,7 +43,7 @@ function parseURLHashParameters() {
  * @property {Splicer}              splicer    - Сварочный аппарат
  * @property {Fiber}                leftFiber  - Левое волокно
  * @property {Fiber}                rightFiber - Правое волокно
- * @property {FusedFiber}           fuseFiber  - Волокно, полученное в результате сварки
+ * @property {FusedFiber}           fusedFiber  - Волокно, полученное в результате сварки
  * @property {InteractiveElement[]} elements   - Массив всех интерактивных элементов
  * @property {THREE.Object3D}       models     - Массив всех 3D-моделей
  * @property {object[]}             objects    - Массив других объектов
