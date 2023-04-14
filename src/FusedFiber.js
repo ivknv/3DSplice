@@ -89,7 +89,7 @@ export default class FusedFiber extends InteractiveElement {
         this.objects.delete(this.rightPadding);
     }
 
-    onClick(event) {
+    onClick() {
         if (!this.held) {
             if (this.animationActionControllerLeft.state !== "completed") return;
             if (this.animationActionControllerRight.state !== "completed") return;

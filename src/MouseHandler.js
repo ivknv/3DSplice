@@ -70,7 +70,7 @@ export default class MouseHandler {
             }
 
             if (selection) {
-                selection.onClick(event);
+                selection.onClick();
             }
 
             if (selection !== this.focusedElement && this.focusedElement) {

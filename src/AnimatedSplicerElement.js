@@ -50,7 +50,7 @@ export default class AnimatedSplicerElement extends InteractiveElement {
         return this.animationActionController.state;
     }
 
-    onClick(event) {
+    onClick() {
         if (this.checkDependencies()) {
             this.animationActionController.toggle();
         }

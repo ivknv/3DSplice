@@ -57,7 +57,7 @@ export default class SpliceProtectionCase extends InteractiveElement {
         Application.state.spliceProtectionPlaced = this.isCentered();
     }
 
-    onClick(event) {
+    onClick() {
         if (!this.held) {
             if (!Application.state.canPlaceSpliceProtection()) return;
 

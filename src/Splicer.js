@@ -45,10 +45,10 @@ class LidElement extends AnimatedSplicerElement {
         return this.animationState === "initial";
     }
 
-    onClick(event) {
+    onClick() {
         if ((this.isClosed() && Application.state.canOpenLid()) ||
             (this.isOpen() && Application.state.canCloseLid())) {
-            super.onClick(event);
+            super.onClick();
         }
 
         Application.mouseHandler.updateTooltip();
@@ -92,8 +92,8 @@ class FiberCladdingClampElement extends AnimatedSplicerElement {
         return this.animationState === "initial";
     }
 
-    onClick(event) {
-        super.onClick(event);
+    onClick() {
+        super.onClick();
         Application.mouseHandler.updateTooltip();
     }
 
@@ -178,8 +178,8 @@ class FiberClampElement extends AnimatedSplicerElement {
         return this.animationState === "initial";
     }
 
-    onClick(event) {
-        super.onClick(event);
+    onClick() {
+        super.onClick();
         Application.mouseHandler.updateTooltip();
     }
 
@@ -292,8 +292,8 @@ class ScreenBearingElement extends AnimatedSplicerElement {
         };
     }
 
-    onClick(event) {
-        super.onClick(event);
+    onClick() {
+        super.onClick();
         Application.mouseHandler.updateTooltip();
     }
 
@@ -353,8 +353,8 @@ class HeaterMainLidElement extends AnimatedSplicerElement {
         return this.animationState === "initial";
     }
 
-    onClick(event) {
-        super.onClick(event);
+    onClick() {
+        super.onClick();
         Application.mouseHandler.updateTooltip();
     }
 
@@ -414,8 +414,8 @@ class HeaterSideLidsElement extends AnimatedSplicerElement {
         return this.animationState === "initial";
     }
 
-    onClick(event) {
-        super.onClick(event);
+    onClick() {
+        super.onClick();
         Application.mouseHandler.updateTooltip();
     }
 
@@ -436,7 +436,7 @@ class SetButtonElement extends InteractiveElement {
         this.tooltip = "Произвести сварку";
     }
 
-    onClick(event) {
+    onClick() {
         Application.state.onSetPressed();
     }
 }
@@ -456,7 +456,7 @@ class HeatButtonElement extends InteractiveElement {
         this.tooltip = "Включить нагреватель";
     }
 
-    onClick(event) {
+    onClick() {
         Application.state.onHeatPressed();
     }
 }

@@ -100,9 +100,8 @@ export default class InteractiveElement {
 
     /**
      * Вызывается при нажатии на интерактивный элемент
-     * @param {Event} event - объект события mousedown
      */
-    onClick(event) {}
+    onClick() {}
 
     /**
      * Вызывается при нажатии мимо интерактивного элемента, если он до этого был выбран

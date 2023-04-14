@@ -94,7 +94,7 @@ export default class Fiber extends InteractiveElement {
         return clampElement.isUp();
     }
 
-    onClick(event) {
+    onClick() {
         if (!this.held) {
             if (!this.isClickable()) return;
 
