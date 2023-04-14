@@ -52,7 +52,7 @@ function parseURLHashParameters() {
  * @property {HTMLElement}          tooltipElement      - HTML-элемент текстовых подсказок
  * @property {HTMLElement}          videoElement        - HTML-элемент видео для экрана сварочного аппарата
  */
-export class ApplicationClass {
+class _Application {
     constructor() {
         this.scene = new THREE.Scene();
         this.camera = null;
@@ -430,5 +430,5 @@ export class ApplicationClass {
     }
 }
 
-const Application = new ApplicationClass();
+const Application = new _Application();
 export default Application;
