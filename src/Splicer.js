@@ -569,6 +569,26 @@ export default class Splicer extends InteractiveElement {
             heatButton: new HeatButtonElement(this),
             powerSwitch: new PowerSwitchElement(this)
         };
+
+        const makeAction = (clipName) => {
+            const clip = THREE.AnimationClip.findByName(animations, clipName);
+
+            const action = this.mixer.clipAction(clip);
+            action.clampWhenFinished = true;
+            action.loop = THREE.LoopOnce;
+
+            return action;
+        };
+
+        this._revealElectrodeAction1 = makeAction("Reveal Electrode 1");
+        this._revealElectrodeAction2 = makeAction("Reveal Electrode 2");
+
+        this.revealElectrode();
+    }
+
+    revealElectrode() {
+        this._revealElectrodeAction1.play();
+        this._revealElectrodeAction2.play();
     }
 
     update() {
