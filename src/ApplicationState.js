@@ -193,10 +193,10 @@ export default class ApplicationState {
     onMainHeaterLidClosed() {}
 
     /** Вызывается, когда зажимы нагревателя подняты */
-    onHeaterSideLidsOpened() {}
+    onHeaterClampsOpened() {}
 
     /** Вызывается, когда зажимы нагревателя опущены */
-    onHeaterSideLidsClosed() {}
+    onHeaterClampsClosed() {}
 
     /**
      * Позволяет контролировать, можно ли перемещать гильзу КДЗС
@@ -226,16 +226,16 @@ export default class ApplicationState {
      * Позволяет контролировать, можно ли поднимать зажимы нагревателя
      * @return {boolean} можно ли поднимать зажимы нагревателя
      */
-    canOpenHeaterSideLids() {
-        return Application.splicer.children.heaterSideLids.isClosed();
+    canLiftHeaterClamps() {
+        return Application.splicer.children.heaterClamps.isDown();
     }
 
     /**
      * Позволяет контролировать, можно ли опускать зажимы нагревателя
      * @return {boolean} можно ли опускать зажимы нагревателя
      */
-    canCloseHeaterSideLids() {
-        return Application.splicer.children.heaterSideLids.isOpen();
+    canLowerHeaterClamps() {
+        return Application.splicer.children.heaterClamps.isUp();
     }
 
     /**
@@ -602,7 +602,7 @@ export class ReadyToPlaceSpliceProtection extends ApplicationState {
         Application.setInstructionText("Поместите волокно с КДЗС в нагреватель");
         Application.fusedFiber.addPadding();
 
-        if (Application.splicer.children.mainHeaterLid.isOpen() && Application.splicer.children.heaterSideLids.isOpen()) {
+        if (Application.splicer.children.mainHeaterLid.isOpen() && Application.splicer.children.heaterClamps.isUp()) {
             Application.changeState(new ReadyToPlaceFiberInHeaterState(this));
         } else {
             Application.changeState(new SpliceProtectionPlacedState(this));
@@ -636,17 +636,17 @@ export class SpliceProtectionPlacedState extends ApplicationState {
         _instructToOpenHeater();
     }
 
-    onHeaterSideLidsClosed() {
+    onHeaterClampsClosed() {
         _instructToOpenHeater();
     }
 
     onMainHeaterLidOpened() {
-        if (Application.splicer.children.heaterSideLids.isOpen()) {
+        if (Application.splicer.children.heaterClamps.isUp()) {
             this._onHeaterLidsOpened();
         }
     }
 
-    onHeaterSideLidsOpened() {
+    onHeaterClampsOpened() {
         if (Application.splicer.children.mainHeaterLid.isOpen()) {
             this._onHeaterLidsOpened();
         }
@@ -670,7 +670,7 @@ export class ReadyToPlaceFiberInHeaterState extends ApplicationState {
 
     canPlaceFiberInHeater() {
         if (!Application.splicer.children.mainHeaterLid.isOpen()) return false;
-        if (!Application.splicer.children.heaterSideLids.isOpen()) return false;
+        if (!Application.splicer.children.heaterClamps.isUp()) return false;
 
         return true;
     }
@@ -692,12 +692,12 @@ export class ReadyToPlaceFiberInHeaterState extends ApplicationState {
         return Application.leftFiber.model.position.y < 0.05;
     }
 
-    canOpenHeaterSideLids() {
+    canLiftHeaterClamps() {
         return false;
     }
 
-    canCloseHeaterSideLids() {
-        if (!super.canCloseHeaterSideLids()) return false;
+    canLowerHeaterClamps() {
+        if (!super.canLowerHeaterClamps()) return false;
         return this._canInteractWithHeaterLid();
     }
 
@@ -711,14 +711,14 @@ export class ReadyToPlaceFiberInHeaterState extends ApplicationState {
     }
 
     onMainHeaterLidClosed() {
-        if (Application.splicer.children.heaterSideLids.isClosed()) {
+        if (Application.splicer.children.heaterClamps.isDown()) {
             this._onHeaterLidsClosed();
         } else {
             Application.setInstructionText("Закройте крышку нагревателя");
         }
     }
 
-    onHeaterSideLidsClosed() {
+    onHeaterClampsClosed() {
         if (Application.splicer.children.mainHeaterLid.isClosed()) {
             this._onHeaterLidsClosed();
         } else {
@@ -746,7 +746,7 @@ export class ReadyToHeatState extends ApplicationState {
         this._onHeaterLidsOpened();
     }
 
-    onHeaterSideLidsOpened() {
+    onHeaterClampsOpened() {
         this._onHeaterLidsOpened();
     }
 
@@ -772,7 +772,7 @@ export class HeatingInProgressState extends ApplicationState {
         return false;
     }
 
-    canOpenHeaterSideLids() {
+    canLiftHeaterClamps() {
         return false;
     }
 
@@ -795,7 +795,7 @@ export class HeatingCompletedState extends ApplicationState {
 
     canPlaceFiberInHeater() {
         if (!Application.splicer.children.mainHeaterLid.isOpen()) return false;
-        if (!Application.splicer.children.heaterSideLids.isOpen()) return false;
+        if (!Application.splicer.children.heaterClamps.isUp()) return false;
 
         return true;
     }
@@ -804,13 +804,13 @@ export class HeatingCompletedState extends ApplicationState {
         return Application.leftFiber.model.position.y < 0.05 || Application.leftFiber.model.position.y > 0.068;
     }
 
-    canOpenHeaterSideLids() {
-        if (!super.canOpenHeaterSideLids()) return false;
+    canLiftHeaterClamps() {
+        if (!super.canLiftHeaterClamps()) return false;
         return this._canInteractWithHeaterLid();
     }
 
-    canCloseHeaterSideLids() {
-        if (!super.canCloseHeaterSideLids()) return false;
+    canLowerHeaterClamps() {
+        if (!super.canLowerHeaterClamps()) return false;
         return this._canInteractWithHeaterLid();
     }
 

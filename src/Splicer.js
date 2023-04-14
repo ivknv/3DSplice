@@ -368,7 +368,7 @@ class HeaterMainLidElement extends AnimatedSplicerElement {
 }
 
 /** Зажимы нагревателя */
-class HeaterSideLidsElement extends AnimatedSplicerElement {
+class HeaterClampsElement extends AnimatedSplicerElement {
     constructor(splicer) {
         super(
             splicer.model,
@@ -378,21 +378,21 @@ class HeaterSideLidsElement extends AnimatedSplicerElement {
             "Lift Up Heating Chamber Side Lid");
 
         this.animationActionController.onCompleted = () => {
-            Application.state.onHeaterSideLidsOpened();
+            Application.state.onHeaterClampsOpened();
         };
 
         this.animationActionController.onReset = () => {
-            Application.state.onHeaterSideLidsClosed();
+            Application.state.onHeaterClampsClosed();
         };
     }
 
     checkDependencies() {
         if (!super.checkDependencies()) return false;
 
-        if (this.isClosed()) {
-            return Application.state.canOpenHeaterSideLids();
-        } else if (this.isOpen()) {
-            return Application.state.canCloseHeaterSideLids();
+        if (this.isDown()) {
+            return Application.state.canLiftHeaterClamps();
+        } else if (this.isUp()) {
+            return Application.state.canLowerHeaterClamps();
         }
 
         return false;
@@ -402,7 +402,7 @@ class HeaterSideLidsElement extends AnimatedSplicerElement {
      * Позволяет определить, открыты ли зажимы нагревателя
      * @return {boolean} true, если зажимы нагревателя полностью открыты, иначе false
      */
-    isOpen() {
+    isUp() {
         return this.animationState === "completed";
     }
 
@@ -410,7 +410,7 @@ class HeaterSideLidsElement extends AnimatedSplicerElement {
      * Позволяет определить, закрыты ли зажимы нагревателя
      * @return {boolean} true, если зажимы нагревателя полностью закрыты, иначе false
      */
-    isClosed() {
+    isDown() {
         return this.animationState === "initial";
     }
 
@@ -420,7 +420,7 @@ class HeaterSideLidsElement extends AnimatedSplicerElement {
     }
 
     get tooltip() {
-        return this.isClosed() ? "Открыть крышку нагревателя" : "Закрыть крышку нагревателя";
+        return this.isDown() ? "Открыть крышку нагревателя" : "Закрыть крышку нагревателя";
     }
 
     set tooltip(value) {
@@ -535,7 +535,7 @@ class HeaterIndicator {
  * @property {ScreenElement}                  children.Screen - Экран сварочного аппарата
  * @property {ScreenBearingElement}           children.screenBearing - Крепление экрана
  * @property {HeaterMainLidElement}           children.mainHeaterLid - Крышка нагревателя
- * @property {HeaterSideLidsElement}          children.heaterSideLids - Зажимы нагревателя
+ * @property {HeaterClampsElement}            children.heaterClamps - Зажимы нагревателя
  * @property {SetButtonElement}               children.setButton - Кнопка SET
  * @property {ResetButtonElement}             children.resetButton - Кнопка RESET
  * @property {HeatButton}                     children.heatButton - Кнопка HEAT
@@ -563,7 +563,7 @@ export default class Splicer extends InteractiveElement {
             screen: new ScreenElement(this),
             screenBearing: new ScreenBearingElement(this),
             mainHeaterLid: new HeaterMainLidElement(this),
-            heaterSideLids: new HeaterSideLidsElement(this),
+            heaterClamps: new HeaterClampsElement(this),
             setButton: new SetButtonElement(this),
             resetButton: new ResetButtonElement(this),
             heatButton: new HeatButtonElement(this),
