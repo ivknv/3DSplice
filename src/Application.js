@@ -51,7 +51,6 @@ function parseURLHashParameters() {
  * @property {FusedFiber}           fusedFiber  - Волокно, полученное в результате сварки
  * @property {InteractiveElement[]} elements   - Массив всех интерактивных элементов
  * @property {THREE.Object3D}       models     - Массив всех 3D-моделей
- * @property {object[]}             objects    - Массив других объектов
  * @property {MouseHandler}         mouseHandler   - Объект, реализующий отслеживание событий мыши
  * @property {Instructions}         instructions   - Объект для отображения инструкций
  * @property {Facade}               facade         - Объект для управления "заслоном"
@@ -94,7 +93,6 @@ class _Application {
 
         this.elements = [];
         this.models = [];
-        this.objects = [];
         this.mouseHandler = null;
 
         this.spliceProtectionCase = null;
@@ -215,23 +213,6 @@ class _Application {
     }
 
     /**
-     * Добавить объект.
-     * @param {object} object - объект, который нужно добавить
-     */
-    addObject(object) {
-        this.objects.push(object);
-    }
-
-    /**
-     * Удалить объект.
-     * @param {object} object - объект, который нужно удалить
-     */
-    removeObject(object) {
-        const index = this.objects.indexOf(object);
-        if (index > -1) this.objects.splice(index, 1);
-    }
-
-    /**
      * Добавить интерактивный элемент.
      * @param {InteractiveElement} element - интерактивный элемент, который нужно добавить
      */
@@ -317,9 +298,6 @@ class _Application {
         this.spliceProcess = new SpliceProcess();
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
-        this.addObject(this.controls);
-        this.addObject(this.mouseHandler);
-
         await this.loadModels();
 
         this.renderer.domElement.style.opacity = 1;
@@ -397,9 +375,8 @@ class _Application {
      * Обновить состояние приложения. Данный метод должен вызываться каждый кадр.
      */
     update() {
-        for (const object of this.objects) {
-            object.update(this);
-        }
+        this.controls.update();
+        this.mouseHandler.update();
 
         for (const element of this.elements) {
             element.update(this);
