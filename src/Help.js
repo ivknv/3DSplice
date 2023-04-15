@@ -1,6 +1,7 @@
 import Application from "./Application";
 
-/** Экрана помощи
+/**
+ * Экран помощи
  *
  * @property {HTMLElement} domElement - HTML-элемент экрана помощи
  */

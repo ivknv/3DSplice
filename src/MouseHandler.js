@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import Application from "./Application";
+import Tooltip from "./Tooltip";
 
 const DRAG_THRESHOLD = 2048;
 
@@ -78,6 +79,9 @@ export default class MouseHandler {
             this.focusedElement = selection;
         };
 
+        this.tooltip = new Tooltip();
+        Application.domElement.appendChild(this.tooltip.domElement);
+
         // Обновлять координаты курсора мыши при его перемещении
         this.root.addEventListener("pointermove", this.onPointerMove);
 
@@ -95,6 +99,8 @@ export default class MouseHandler {
         this.root.removeEventListener("pointermove", this.onPointerMove);
         this.root.removeEventListener("mousedown", this.onMouseDown);
         this.root.removeEventListener("mouseup", this.onMouseUp);
+
+        Application.domElement.removeChild(this.tooltip.domElement);
     }
 
     /**
@@ -180,15 +186,14 @@ export default class MouseHandler {
 
     /** Обновляет текстовую подсказку над элементом */
     updateTooltip() {
-        const tooltip = Application.tooltip;
         const element = this.hoveredElement;
 
         if (element !== null && element.tooltip) {
-            tooltip.setText(element.tooltip);
-            tooltip.setPosition(this.positionPx.x + 16, this.positionPx.y + 16);
-            tooltip.show();
+            this.tooltip.setText(element.tooltip);
+            this.tooltip.setPosition(this.positionPx.x + 16, this.positionPx.y + 16);
+            this.tooltip.show();
         } else {
-            tooltip.hide();
+            this.tooltip.hide();
         }
     }
 

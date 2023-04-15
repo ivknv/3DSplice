@@ -14,7 +14,6 @@ import {default as FiberModel} from "./models/fiber_optic_patch_cord.gltf";
 import {default as SpliceProtectionCaseModel} from "./models/splice_protection_case.gltf";
 import SpliceProcess from "./SpliceProcess";
 import Instructions from "./Instructions";
-import Tooltip from "./Tooltip";
 import Facade from "./Facade";
 import SplashScreen from "./SplashScreen";
 import Help from "./Help";
@@ -55,7 +54,6 @@ function parseURLHashParameters() {
  * @property {object[]}             objects    - Массив других объектов
  * @property {MouseHandler}         mouseHandler   - Объект, реализующий отслеживание событий мыши
  * @property {Instructions}         instructions   - Объект для отображения инструкций
- * @property {Tooltip}              tooltip        - Объект для отображения текстовых подсказок
  * @property {Facade}               facade         - Объект для управления "заслоном"
  * @property {SplashScreen}         splashScreen   - Объект для управления стартовым экраном
  * @property {Help}                 help           - Объект экрана помощи
@@ -103,7 +101,6 @@ class _Application {
         this.fusedFiber = null;
 
         this.instructions = new Instructions();
-        this.tooltip = new Tooltip();
         this.videoElement = null;
         this.facade = null;
         this.splashScreen = null;
@@ -155,7 +152,6 @@ class _Application {
         this.resizeObserver = new ResizeObserver(this.onWindowResize);
 
         this.domElement.appendChild(this.instructions.domElement);
-        this.domElement.appendChild(this.tooltip.domElement);
 
         // Автоматически подстраивать размер canvas под размер главного элемента
         this.resizeObserver.observe(this.domElement);
