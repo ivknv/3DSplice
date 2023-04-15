@@ -30,6 +30,10 @@ export default class AnimatedSplicerElement extends InteractiveElement {
         this.dependencies = {};
     }
 
+    dispose() {
+        this.animationActionController.dispose();
+    }
+
     /**
      * Проверяет, можно ли запускать анимацию
      * @return {boolean} true, если можно, false, если нельзя

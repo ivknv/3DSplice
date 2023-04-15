@@ -36,6 +36,16 @@ export default class InteractiveElement {
     }
 
     /**
+     * Данный метод предназначен для удаления всех обработчиков событий и
+     * освобождения ресурсов.
+     */
+    dispose() {
+        for (const child in this.children) {
+            this.children[child].dispose();
+        }
+    }
+
+    /**
      * Цвет подсветки элемента
      * @return {(number|string)} значение свойства
      */

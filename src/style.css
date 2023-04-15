@@ -152,3 +152,9 @@
 #help-button:hover {
     background-color: #777;
 }
+
+.application-container {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+}

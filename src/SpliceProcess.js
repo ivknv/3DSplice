@@ -3,17 +3,23 @@ import Application from "./Application";
 export default class SpliceProcess {
     constructor() {
         this.active = false;
-
-        Application.videoElement.addEventListener("ended", () => {
+        this.videoElement = Application.videoElement;
+        this.onVideoEnded = () => {
             this.reset();
             Application.state.onSpliceCompleted();
-        });
+        };
+
+        this.videoElement.addEventListener("ended", this.onVideoEnded);
+    }
+
+    dispose() {
+        this.videoElement.removeEventListener("ended", this.onVideoEnded);
     }
 
     start() {
         this.active = true;
-        Application.videoElement.currentTime = 0;
-        Application.videoElement.play();
+        this.videoElement.currentTime = 0;
+        this.videoElement.play();
 
         // placeholder for now
         setTimeout(function() {
@@ -22,8 +28,8 @@ export default class SpliceProcess {
     }
 
     reset() {
-        Application.videoElement.currentTime = 0;
-        Application.videoElement.pause();
+        this.videoElement.currentTime = 0;
+        this.videoElement.pause();
         this.active = false;
     }
 }

@@ -502,6 +502,11 @@ class HeaterIndicator {
         this.flashing = false;
     }
 
+    /** Останавливает работу индикатора */
+    dispose() {
+        this.stopFlashing();
+    }
+
     /** Включить мигание */
     startFlashing() {
         if (this.intervalId !== null) this.stopFlashing();
@@ -594,5 +599,10 @@ export default class Splicer extends InteractiveElement {
     update() {
         super.update();
         this.mixer.update(Application.clockDelta * 6);
+    }
+
+    dispose() {
+        super.dispose();
+        this.heaterIndicator.dispose();
     }
 }

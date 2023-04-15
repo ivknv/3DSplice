@@ -32,21 +32,18 @@ export default class MouseHandler {
         // Used to determine what elements can be hovered
         this.hoverFilter = function(element) { return true; };
 
-        // Обновлять координаты курсора мыши при его перемещении
-        this.root.addEventListener("pointermove", event => {
+        this.onPointerMove = event => {
             this.updateMousePosition(event.clientX, event.clientY);
-        });
+        };
 
-        // Обработчик нажатия левой кнопки мыши
-        this.root.addEventListener("mousedown", event => {
+        this.onMouseDown = event => {
             this.updateMousePosition(event.clientX, event.clientY);
             this.updateHover();
             this.mouseDownSelection = this.hoveredElement;
             this.mouseDownPosition.copy(this.position);
-        });
+        };
 
-        // Обработчик отпускания левой кнопки мыши
-        this.root.addEventListener("mouseup", event => {
+        this.onMouseUp = () => {
             let selection = this.hoveredElement;
 
             if (selection === null) {
@@ -79,7 +76,25 @@ export default class MouseHandler {
                 }
             }
             this.focusedElement = selection;
-        });
+        };
+
+        // Обновлять координаты курсора мыши при его перемещении
+        this.root.addEventListener("pointermove", this.onPointerMove);
+
+        // Обработчик нажатия левой кнопки мыши
+        this.root.addEventListener("mousedown", this.onMouseDown);
+
+        // Обработчик отпускания левой кнопки мыши
+        this.root.addEventListener("mouseup", this.onMouseUp);
+    }
+
+    /**
+     * Удаляет все обработчики событий мыши.
+     */
+    dispose() {
+        this.root.removeEventListener("pointermove", this.onPointerMove);
+        this.root.removeEventListener("mousedown", this.onMouseDown);
+        this.root.removeEventListener("mouseup", this.onMouseUp);
     }
 
     /**
@@ -165,23 +180,20 @@ export default class MouseHandler {
 
     /** Обновляет текстовую подсказку над элементом */
     updateTooltip() {
-        const tooltip = Application.tooltipElement;
+        const tooltip = Application.tooltip;
         const element = this.hoveredElement;
 
         if (element !== null && element.tooltip) {
-            tooltip.innerText = element.tooltip;
-            tooltip.style.display = "inline-block";
-            tooltip.style.opacity = 1;
-            tooltip.style.left = Math.floor(this.positionPx.x + 16) + "px";
-            tooltip.style.top = Math.floor(this.positionPx.y + 16) + "px";
+            tooltip.setText(element.tooltip);
+            tooltip.setPosition(this.positionPx.x + 16, this.positionPx.y + 16);
+            tooltip.show();
         } else {
-            tooltip.style.opacity = 0;
+            tooltip.hide();
         }
     }
 
     /** Обновляет состояние объекта */
-    update()
-    {
+    update() {
         this.updateHover();
     }
 

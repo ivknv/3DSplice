@@ -13,6 +13,14 @@ import {default as Model} from "./models/fujikura_fsm-30s.gltf";
 import {default as FiberModel} from "./models/fiber_optic_patch_cord.gltf";
 import {default as SpliceProtectionCaseModel} from "./models/splice_protection_case.gltf";
 import SpliceProcess from "./SpliceProcess";
+import Instructions from "./Instructions";
+import Tooltip from "./Tooltip";
+import Facade from "./Facade";
+import SplashScreen from "./SplashScreen";
+import Help from "./Help";
+import StartButton from "./StartButton";
+import HelpButton from "./HelpButton";
+import HideHelpButton from "./HideHelpButton";
 
 /**
  * Данная функция извлекает параметры из URL вида #param1:value1;param2:value2
@@ -47,10 +55,17 @@ function parseURLHashParameters() {
  * @property {InteractiveElement[]} elements   - Массив всех интерактивных элементов
  * @property {THREE.Object3D}       models     - Массив всех 3D-моделей
  * @property {object[]}             objects    - Массив других объектов
- * @property {MouseHandler}         mouseHandler - Объект, реализующий отслеживание событий мыши
- * @property {HTMLElement}          instructionsElement - HTML-элемент инструкций
- * @property {HTMLElement}          tooltipElement      - HTML-элемент текстовых подсказок
- * @property {HTMLElement}          videoElement        - HTML-элемент видео для экрана сварочного аппарата
+ * @property {MouseHandler}         mouseHandler   - Объект, реализующий отслеживание событий мыши
+ * @property {Instructions}         instructions   - Объект для отображения инструкций
+ * @property {Tooltip}              tooltip        - Объект для отображения текстовых подсказок
+ * @property {Facade}               facade         - Объект для управления "заслоном"
+ * @property {SplashScreen}         splashScreen   - Объект для управления стартовым экраном
+ * @property {StartButton}          startButton    - Объект кнопки "Начать"
+ * @property {Help}                 help           - Объект экрана помощи
+ * @property {HelpButton}           helpButton     - Объект кнопки для показа помощи
+ * @property {HideHelpButton}       hideHelpButton - Объект кнопки для скрытия помощи
+ * @property {HTMLElement}          videoElement   - HTML-элемент видео для экрана сварочного аппарата
+ * @property {HTMLElement}          domElement     - Главный HTML-элемент приложения
  */
 class _Application {
     constructor() {
@@ -68,16 +83,6 @@ class _Application {
 
         this.clock = new THREE.Clock();
         this.clockDelta = 0;
-
-        // Автоматически подстраивать размер canvas под размер окна
-        window.addEventListener("resize", () => {
-            const w = window.innerWidth;
-            const h = window.innerHeight;
-
-            this.renderer.setSize(w, h);
-            this.camera.aspect = w / h;
-            this.camera.updateProjectionMatrix();
-        });
 
         this.state = new InitialState();
         this.spliceProcess = null;
@@ -101,9 +106,66 @@ class _Application {
         this.spliceProtectionCase = null;
         this.fusedFiber = null;
 
-        this.instructionsElement = null;
-        this.tooltipElement = null;
+        this.instructions = new Instructions();
+        this.tooltip = new Tooltip();
         this.videoElement = null;
+        this.facade = null;
+        this.splashScreen = null;
+        this.help = null;
+        this.startButton = null;
+        this.helpButton = null;
+        this.hideHelpButton = null;
+
+        this.onWindowResize = () => {
+            const w = this.domElement.offsetWidth;
+            const h = this.domElement.offsetHeight;
+
+            this.renderer.setSize(w, h);
+            this.camera.aspect = w / h;
+            this.camera.updateProjectionMatrix();
+        };
+
+        this.domElement = null;
+        this.resizeObserver = null;
+        this.setupDOMElement();
+
+        // Флаг, применяемый для остановки requestAnimationFrame()
+        this._mainloopActive = true;
+    }
+
+    /**
+     * Убирает все обработчики событий и останавлиает отрисовку кадров.
+     */
+    dispose() {
+        this._mainloopActive = false;
+        this.resizeObserver?.unobserve(this.domElement);
+        this.mouseHandler?.dispose();
+        this.spliceProcess?.dispose();
+
+        for (const interactiveElement of this.elements) {
+            interactiveElement.dispose();
+        }
+
+        this.startButton?.dispose();
+        this.helpButton?.dispose();
+        this.hideHelpButton?.dispose();
+
+        this.controls?.dispose();
+        this.renderer?.dispose();
+    }
+
+    setupDOMElement() {
+        this.domElement = document.createElement("div");
+        this.domElement.classList.add("application-container");
+        this.domElement.appendChild(this.renderer.domElement);
+        this.domElement.appendChild(this.stats.domElement);
+        this.resizeObserver = new ResizeObserver(this.onWindowResize);
+
+        this.domElement.appendChild(this.instructions.domElement);
+        this.domElement.appendChild(this.tooltip.domElement);
+
+        // Автоматически подстраивать размер canvas под размер главного элемента
+        this.resizeObserver.observe(this.domElement);
     }
 
     setupRenderer() {
@@ -217,45 +279,6 @@ class _Application {
         this.scene.remove(model);
     }
 
-    /**
-     * Задать текст инструкций.
-     * @param {string} text - текст инструкций
-     */
-    setInstructionText(text) {
-        this.instructionsElement.innerText = text;
-    }
-
-    hideFacade() {
-        document.querySelector("#facade").classList.add("facade-hidden");
-    }
-
-    showFacade() {
-        document.querySelector("#facade").classList.remove("facade-hidden");
-    }
-
-    hideSplashScreen() {
-        document.querySelector("#splash-screen").classList.add("splash-screen-hidden");
-    }
-
-    showHelp() {
-        this.showFacade();
-
-        document.querySelector("#splash-screen").classList.add("splash-screen-obscured");
-        document.querySelector("#help-button").classList.add("help-button-hidden");
-        document.querySelector("#help").classList.remove("help-hidden");
-    }
-
-    hideHelp() {
-        const splashScreen = document.querySelector("#splash-screen")
-        document.querySelector("#help").classList.add("help-hidden");
-        splashScreen.classList.remove("splash-screen-obscured");
-        document.querySelector("#help-button").classList.remove("help-button-hidden");
-
-        if (splashScreen.classList.contains("splash-screen-hidden")) {
-            this.hideFacade();
-        }
-    }
-
     async loadModels() {
         const splicerGLTF = await parseGLTF(Model);
         const spliceProtectionGLTF = await parseGLTF(SpliceProtectionCaseModel);
@@ -292,32 +315,19 @@ class _Application {
      * Инициализация приложения. Данный метод должен вызываться после полной загрузки страницы.
      */
     async initialize() {
-        this.instructionsElement = document.querySelector("#instructions");
-        this.tooltipElement = document.querySelector("#tooltip");
-        this.videoElement = document.querySelector("#screen-video");
-
-        document.querySelector("#start-button").addEventListener("click", () => {
-            this.instructionsElement.style.display = "block";
-
-            this.hideFacade();
-            this.hideSplashScreen();
-        });
-
-        document.querySelector("#help-button").addEventListener("click", () => {
-            this.showHelp();
-        });
-
-        document.querySelector("#hide-help-button").addEventListener("click", () => {
-            this.hideHelp();
-        });
-
-        this.spliceProcess = new SpliceProcess();
-
+        this.facade = new Facade();
+        this.splashScreen = new SplashScreen();
+        this.help = new Help();
+        this.startButton = new StartButton();
+        this.helpButton = new HelpButton();
+        this.hideHelpButton = new HideHelpButton();
         this.mouseHandler = new MouseHandler();
 
+        this.videoElement = document.querySelector("#screen-video");
         this.videoTexture = new THREE.VideoTexture(this.videoElement);
         this.videoTexture.flipY = false;
 
+        this.spliceProcess = new SpliceProcess();
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
         this.addObject(this.controls);
@@ -331,7 +341,7 @@ class _Application {
 
         this.stats.showPanel(0);
 
-        this.setInstructionText("Откройте крышку сварочного аппарата");
+        this.instructions.setText("Откройте крышку сварочного аппарата");
 
         Application.stats.domElement.style.right = "0px";
         Application.stats.domElement.style.removeProperty("left");
@@ -415,6 +425,8 @@ class _Application {
     animate() {
         // We do it this way to keep `this` bound
         const animateFunc = () => {
+            if (!this._mainloopActive) return;
+
             this.stats.begin();
             this.clockDelta = this.clock.getDelta();
 

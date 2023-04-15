@@ -17,6 +17,7 @@ export default class AnimationActionController {
      */
     constructor(mixer, animation) {
         this.state = "initial";
+        this.mixer = mixer;
         this.animation = animation;
         this.action = mixer.clipAction(this.animation);
         this.action.clampWhenFinished = true;
@@ -24,7 +25,7 @@ export default class AnimationActionController {
         this.onCompleted = function() {}
         this.onReset = function() {}
 
-        mixer.addEventListener("finished", (event) => {
+        this.onAnimationFinished = event => {
             if (event.action !== this.action) return;
 
             if (this.state == "playing_forward") {
@@ -34,7 +35,16 @@ export default class AnimationActionController {
                 this.state = "initial";
                 this.onReset();
             }
-        });
+        };
+
+        mixer.addEventListener("finished", this.onAnimationFinished);
+    }
+
+    /**
+     * Удаляет все обработчики событий.
+     */
+    dispose() {
+        this.mixer.removeEventListener("finished", this.onAnimationFinished);
     }
 
     /**

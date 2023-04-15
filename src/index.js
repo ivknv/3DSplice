@@ -4,8 +4,7 @@ import "./fonts/OpenSans-Regular.ttf";
 
 async function main() {
     document.addEventListener("DOMContentLoaded", function() {
-        document.querySelector("#main").appendChild(Application.renderer.domElement);
-        document.querySelector("#main").appendChild(Application.stats.domElement);
+        document.querySelector("#main").appendChild(Application.domElement);
 
         Application.initialize().then(function() {
             Application.animate();

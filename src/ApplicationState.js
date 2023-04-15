@@ -254,7 +254,7 @@ export default class ApplicationState {
 }
 
 function _instructToLiftClamps() {
-    Application.setInstructionText("Поднимите зажимы для волокна");
+    Application.instructions.setText("Поднимите зажимы для волокна");
 }
 
 /** Исходное состояние */
@@ -271,10 +271,10 @@ export class InitialState extends ApplicationState {
 
     onLidClosed() {
         if (this.fibersPlaced) {
-            Application.setInstructionText("Нажмите кнопку SET");
+            Application.instructions.setText("Нажмите кнопку SET");
             Application.changeState(new ReadyToSpliceState(this));
         } else {
-            Application.setInstructionText("Откройте крышку сварочного аппарата");
+            Application.instructions.setText("Откройте крышку сварочного аппарата");
         }
     }
 
@@ -284,9 +284,9 @@ export class InitialState extends ApplicationState {
     onLeftFiberCladdingClampDown() {
         if (this.fibersPlaced) {
             if (Application.splicer.children.rightFiberCladdingClamp.isDown()) {
-                Application.setInstructionText("Закройте крышку сварочного аппарата");
+                Application.instructions.setText("Закройте крышку сварочного аппарата");
             } else {
-                Application.setInstructionText("Опустите зажимы с правой стороны");
+                Application.instructions.setText("Опустите зажимы с правой стороны");
             }
         } else {
             _instructToLiftClamps();
@@ -296,9 +296,9 @@ export class InitialState extends ApplicationState {
     onRightFiberCladdingClampDown() {
         if (this.fibersPlaced) {
             if (Application.splicer.children.leftFiberCladdingClamp.isDown()) {
-                Application.setInstructionText("Закройте крышку сварочного аппарата");
+                Application.instructions.setText("Закройте крышку сварочного аппарата");
             } else {
-                Application.setInstructionText("Опустите зажимы с левой стороны");
+                Application.instructions.setText("Опустите зажимы с левой стороны");
             }
         } else {
             _instructToLiftClamps();
@@ -307,20 +307,20 @@ export class InitialState extends ApplicationState {
 
     onLeftFiberClampUp() {
         if (!this.leftFiberPlaced) {
-            Application.setInstructionText("Поместите левое волокно в сварочный аппарат");
+            Application.instructions.setText("Поместите левое волокно в сварочный аппарат");
             Application.changeState(new CanPlaceLeftFiberState(this));
         } else {
-            Application.setInstructionText("Опустите зажимы с левой стороны");
+            Application.instructions.setText("Опустите зажимы с левой стороны");
             Application.changeState(new LeftFiberPlacedState(this));
         }
     }
 
     onRightFiberClampUp() {
         if (!this.leftFiberPlaced) {
-            Application.setInstructionText("Поместите правое волокно в сварочный аппарат");
+            Application.instructions.setText("Поместите правое волокно в сварочный аппарат");
             Application.changeState(new CanPlaceRightFiberState(this));
         } else {
-            Application.setInstructionText("Опустите зажимы с правой стороны");
+            Application.instructions.setText("Опустите зажимы с правой стороны");
             Application.changeState(new RightFiberPlacedState(this));
         }
     }
@@ -337,12 +337,12 @@ export class CanPlaceLeftFiberState extends ApplicationState {
     }
 
     onLeftFiberPlaced() {
-        Application.setInstructionText("Опустите зажимы с левой стороны");
+        Application.instructions.setText("Опустите зажимы с левой стороны");
         Application.changeState(new LeftFiberPlacedState(this));
     }
 
     onLeftFiberClampDown() {
-        Application.setInstructionText("Поднимите зажимы для волокна");
+        Application.instructions.setText("Поднимите зажимы для волокна");
         Application.changeState(new InitialState(this));
     }
 }
@@ -358,12 +358,12 @@ export class CanPlaceRightFiberState extends ApplicationState {
     }
 
     onRightFiberPlaced() {
-        Application.setInstructionText("Опустите зажимы с правой стороны");
+        Application.instructions.setText("Опустите зажимы с правой стороны");
         Application.changeState(new RightFiberPlacedState(this));
     }
 
     onRightFiberClampDown() {
-        Application.setInstructionText("Поднимите зажимы для волокна");
+        Application.instructions.setText("Поднимите зажимы для волокна");
         Application.changeState(new InitialState(this));
     }
 }
@@ -379,28 +379,28 @@ export class RightFiberPlacedState extends ApplicationState {
     }
 
     onRightFiberRemoved() {
-        Application.setInstructionText("Поместите правое волокно в сварочный аппарат");
+        Application.instructions.setText("Поместите правое волокно в сварочный аппарат");
         Application.changeState(new CanPlaceRightFiberState(this));
     }
 
     onRightFiberClampDown() {
-        Application.setInstructionText("Опустите зажимы с правой стороны");
+        Application.instructions.setText("Опустите зажимы с правой стороны");
     }
 
     onRightFiberCladdingClampDown() {
         if (this.fibersPlaced) {
             if (Application.splicer.children.lid.checkDependencies()) {
-                Application.setInstructionText("Закройте крышку сварочного аппарата");
+                Application.instructions.setText("Закройте крышку сварочного аппарата");
                 Application.changeState(new FibersPlacedState(this));
             } else {
-                Application.setInstructionText("Опустите зажимы с левой стороны");
+                Application.instructions.setText("Опустите зажимы с левой стороны");
                 Application.changeState(new LeftFiberPlacedState(this));
             }
         } else if (Application.splicer.children.leftFiberClamp.isUp()) {
-            Application.setInstructionText("Поместите левое волокно в сварочный аппарат");
+            Application.instructions.setText("Поместите левое волокно в сварочный аппарат");
             Application.changeState(new CanPlaceLeftFiberState(this));
         } else {
-            Application.setInstructionText("Поднимите зажимы с левой стороны");
+            Application.instructions.setText("Поднимите зажимы с левой стороны");
             Application.changeState(new InitialState(this));
         }
     }
@@ -417,24 +417,24 @@ export class LeftFiberPlacedState extends ApplicationState {
     }
 
     onLeftFiberRemoved() {
-        Application.setInstructionText("Поместите левое волокно в сварочный аппарат");
+        Application.instructions.setText("Поместите левое волокно в сварочный аппарат");
         Application.changeState(new CanPlaceLeftFiberState(this));
     }
 
     onLeftFiberCladdingClampDown() {
         if (this.fibersPlaced) {
             if (Application.splicer.children.lid.checkDependencies()) {
-                Application.setInstructionText("Закройте крышку сварочного аппарата");
+                Application.instructions.setText("Закройте крышку сварочного аппарата");
                 Application.changeState(new FibersPlacedState(this));
             } else {
-                Application.setInstructionText("Опустите зажимы с правой стороны");
+                Application.instructions.setText("Опустите зажимы с правой стороны");
                 Application.changeState(new RightFiberPlacedState(this));
             }
         } else if (Application.splicer.children.rightFiberClamp.isUp()) {
-            Application.setInstructionText("Поместите правое волокно в сварочный аппарат");
+            Application.instructions.setText("Поместите правое волокно в сварочный аппарат");
             Application.changeState(new CanPlaceRightFiberState(this));
         } else {
-            Application.setInstructionText("Поднимите зажимы с правой стороны");
+            Application.instructions.setText("Поднимите зажимы с правой стороны");
             Application.changeState(new InitialState(this));
         }
     }
@@ -451,33 +451,33 @@ export class FibersPlacedState extends ApplicationState {
     }
 
     onLeftFiberCladdingClampUp() {
-        Application.setInstructionText("Опустите зажимы с левой стороны");
+        Application.instructions.setText("Опустите зажимы с левой стороны");
         Application.changeState(new LeftFiberPlacedState(this));
     }
 
     onRightFiberCladdingClampUp() {
-        Application.setInstructionText("Опустите зажимы с правой стороны");
+        Application.instructions.setText("Опустите зажимы с правой стороны");
         Application.changeState(new RightFiberPlacedState(this));
     }
 
     onLeftFiberCladdingClampDown() {
         if (Application.splicer.children.rightFiberCladdingClamp.isDown()) {
-            Application.setInstructionText("Закройте крышку сварочного аппарата");
+            Application.instructions.setText("Закройте крышку сварочного аппарата");
         } else {
-            Application.setInstructionText("Опустите зажимы с правой стороны");
+            Application.instructions.setText("Опустите зажимы с правой стороны");
         }
     }
 
     onRightFiberCladdingClampDown() {
         if (Application.splicer.children.leftFiberCladdingClamp.isDown()) {
-            Application.setInstructionText("Закройте крышку сварочного аппарата");
+            Application.instructions.setText("Закройте крышку сварочного аппарата");
         } else {
-            Application.setInstructionText("Опустите зажимы с левой стороны");
+            Application.instructions.setText("Опустите зажимы с левой стороны");
         }
     }
 
     onLidClosed() {
-        Application.setInstructionText("Нажмите на кнопку SET");
+        Application.instructions.setText("Нажмите на кнопку SET");
         Application.changeState(new ReadyToSpliceState(this));
     }
 }
@@ -493,12 +493,12 @@ export class ReadyToSpliceState extends ApplicationState {
     }
 
     onLidOpened() {
-        Application.setInstructionText("Закройте крышку сварочного аппарата");
+        Application.instructions.setText("Закройте крышку сварочного аппарата");
         Application.changeState(new FibersPlacedState(this));
     }
 
     onSetPressed() {
-        Application.setInstructionText("Дождитесь завершения сварки");
+        Application.instructions.setText("Дождитесь завершения сварки");
         Application.changeState(new SpliceInProgressState(this));
 
         Application.spliceProcess.start();
@@ -542,7 +542,7 @@ export class SpliceInProgressState extends ApplicationState {
         Application.spliceProtectionCase.removeFromApplication();
         Application.spliceProtectionCase.addToApplication();
 
-        Application.setInstructionText("Извлеките волокно из сварочного аппарата");
+        Application.instructions.setText("Извлеките волокно из сварочного аппарата");
         Application.changeState(new SpliceCompletedState(this));
     }
 }
@@ -558,11 +558,11 @@ export class SpliceCompletedState extends ApplicationState {
     }
 
     onLidOpened() {
-        Application.setInstructionText("Поднимите зажимы для волокна");
+        Application.instructions.setText("Поднимите зажимы для волокна");
     }
 
     onLidClosed() {
-        Application.setInstructionText("Извлеките волокно из сварочного аппарата");
+        Application.instructions.setText("Извлеките волокно из сварочного аппарата");
     }
 
     onLeftFiberClampUp() {
@@ -583,7 +583,7 @@ export class SpliceCompletedState extends ApplicationState {
     }
 
     onFiberRemoved() {
-        Application.setInstructionText("Разместите гильзу КДЗС в центре места сварки");
+        Application.instructions.setText("Разместите гильзу КДЗС в центре места сварки");
         Application.changeState(new ReadyToPlaceSpliceProtection(this));
     }
 }
@@ -599,7 +599,7 @@ export class ReadyToPlaceSpliceProtection extends ApplicationState {
     }
 
     onSpliceProtectionPlaced() {
-        Application.setInstructionText("Поместите волокно с КДЗС в нагреватель");
+        Application.instructions.setText("Поместите волокно с КДЗС в нагреватель");
         Application.fusedFiber.addPadding();
 
         if (Application.splicer.children.mainHeaterLid.isOpen() && Application.splicer.children.heaterClamps.isUp()) {
@@ -610,7 +610,7 @@ export class ReadyToPlaceSpliceProtection extends ApplicationState {
     }
 
     onSpliceProtectionRemoved() {
-        Application.setInstructionText("Разместите гильзу КДЗС в центре места сварки");
+        Application.instructions.setText("Разместите гильзу КДЗС в центре места сварки");
     }
 
     canPlaceSpliceProtection() {
@@ -619,7 +619,7 @@ export class ReadyToPlaceSpliceProtection extends ApplicationState {
 }
 
 function _instructToOpenHeater() {
-    Application.setInstructionText("Откройте крышку нагревателя");
+    Application.instructions.setText("Откройте крышку нагревателя");
 }
 
 /** Состояние, в котором гильза КДЗС размещена в центре места сварки */
@@ -653,7 +653,7 @@ export class SpliceProtectionPlacedState extends ApplicationState {
     }
 
     _onHeaterLidsOpened() {
-        Application.setInstructionText("Поместите волокно с КДЗС в нагреватель");
+        Application.instructions.setText("Поместите волокно с КДЗС в нагреватель");
         Application.changeState(new ReadyToPlaceFiberInHeaterState(this));
     }
 }
@@ -676,15 +676,15 @@ export class ReadyToPlaceFiberInHeaterState extends ApplicationState {
     }
 
     onFiberPlacedInHeater() {
-        Application.setInstructionText("Закройте крышку нагревателя");
+        Application.instructions.setText("Закройте крышку нагревателя");
     }
 
     onFiberRemovedFromHeater() {
-        Application.setInstructionText("Поместите волокно с КДЗС в нагреватель");
+        Application.instructions.setText("Поместите волокно с КДЗС в нагреватель");
     }
 
     _onHeaterLidsClosed() {
-        Application.setInstructionText("Нажмите на кнопку HEAT");
+        Application.instructions.setText("Нажмите на кнопку HEAT");
         Application.changeState(new ReadyToHeatState(this));
     }
 
@@ -714,7 +714,7 @@ export class ReadyToPlaceFiberInHeaterState extends ApplicationState {
         if (Application.splicer.children.heaterClamps.isDown()) {
             this._onHeaterLidsClosed();
         } else {
-            Application.setInstructionText("Закройте крышку нагревателя");
+            Application.instructions.setText("Закройте крышку нагревателя");
         }
     }
 
@@ -722,7 +722,7 @@ export class ReadyToPlaceFiberInHeaterState extends ApplicationState {
         if (Application.splicer.children.mainHeaterLid.isClosed()) {
             this._onHeaterLidsClosed();
         } else {
-            Application.setInstructionText("Закройте крышку нагревателя");
+            Application.instructions.setText("Закройте крышку нагревателя");
         }
     }
 }
@@ -738,7 +738,7 @@ export class ReadyToHeatState extends ApplicationState {
     }
 
     _onHeaterLidsOpened() {
-        Application.setInstructionText("Закройте крышку нагревателя");
+        Application.instructions.setText("Закройте крышку нагревателя");
         Application.changeState(new ReadyToPlaceFiberInHeaterState(this));
     }
 
@@ -751,7 +751,7 @@ export class ReadyToHeatState extends ApplicationState {
     }
 
     onHeatPressed() {
-        Application.setInstructionText("Дождитесь завершения работы нагревателя");
+        Application.instructions.setText("Дождитесь завершения работы нагревателя");
         Application.splicer.heaterIndicator.startFlashing();
         Application.changeState(new HeatingInProgressState(this));
         Application.spliceProtectionCase.shrink();
@@ -778,7 +778,7 @@ export class HeatingInProgressState extends ApplicationState {
 
     onHeatingCompleted() {
         Application.splicer.heaterIndicator.stopFlashing();
-        Application.setInstructionText("Волокно можно извлечь");
+        Application.instructions.setText("Волокно можно извлечь");
         Application.changeState(new HeatingCompletedState(this));
     }
 }
@@ -825,10 +825,10 @@ export class HeatingCompletedState extends ApplicationState {
     }
 
     onFiberPlacedInHeater() {
-        Application.setInstructionText("Волокно можно извлечь");
+        Application.instructions.setText("Волокно можно извлечь");
     }
 
     onFiberRemovedFromHeater() {
-        Application.setInstructionText("");
+        Application.instructions.setText("");
     }
 }
