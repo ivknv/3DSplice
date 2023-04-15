@@ -18,9 +18,7 @@ import Tooltip from "./Tooltip";
 import Facade from "./Facade";
 import SplashScreen from "./SplashScreen";
 import Help from "./Help";
-import StartButton from "./StartButton";
 import HelpButton from "./HelpButton";
-import HideHelpButton from "./HideHelpButton";
 
 /**
  * Данная функция извлекает параметры из URL вида #param1:value1;param2:value2
@@ -60,10 +58,8 @@ function parseURLHashParameters() {
  * @property {Tooltip}              tooltip        - Объект для отображения текстовых подсказок
  * @property {Facade}               facade         - Объект для управления "заслоном"
  * @property {SplashScreen}         splashScreen   - Объект для управления стартовым экраном
- * @property {StartButton}          startButton    - Объект кнопки "Начать"
  * @property {Help}                 help           - Объект экрана помощи
  * @property {HelpButton}           helpButton     - Объект кнопки для показа помощи
- * @property {HideHelpButton}       hideHelpButton - Объект кнопки для скрытия помощи
  * @property {HTMLElement}          videoElement   - HTML-элемент видео для экрана сварочного аппарата
  * @property {HTMLElement}          domElement     - Главный HTML-элемент приложения
  */
@@ -112,9 +108,7 @@ class _Application {
         this.facade = null;
         this.splashScreen = null;
         this.help = null;
-        this.startButton = null;
         this.helpButton = null;
-        this.hideHelpButton = null;
 
         this.onWindowResize = () => {
             const w = this.domElement.offsetWidth;
@@ -146,9 +140,8 @@ class _Application {
             interactiveElement.dispose();
         }
 
-        this.startButton?.dispose();
-        this.helpButton?.dispose();
-        this.hideHelpButton?.dispose();
+        this.help?.dispose();
+        this.splashScreen?.dispose();
 
         this.controls?.dispose();
         this.renderer?.dispose();
@@ -318,9 +311,7 @@ class _Application {
         this.facade = new Facade();
         this.splashScreen = new SplashScreen();
         this.help = new Help();
-        this.startButton = new StartButton();
         this.helpButton = new HelpButton();
-        this.hideHelpButton = new HideHelpButton();
         this.mouseHandler = new MouseHandler();
 
         this.videoElement = document.querySelector("#screen-video");

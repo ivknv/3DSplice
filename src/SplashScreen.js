@@ -1,3 +1,5 @@
+import Application from "./Application";
+
 /**
  * Экран, показывающийся при первоначальной загрузке приложения
  *
@@ -6,6 +8,12 @@
 export default class SplashScreen {
     constructor() {
         this.domElement = document.getElementById("splash-screen");
+        this.startButton = new StartButton();
+    }
+
+    /** Удаляет все обработчики событий. */
+    dispose() {
+        this.startButton.dispose();
     }
 
     /** Показывает экран. */
@@ -29,5 +37,37 @@ export default class SplashScreen {
      */
     isHidden() {
         return this.domElement.classList.contains("splash-screen-hidden");
+    }
+}
+
+/** Кнопка "Начать"
+ *
+ * @property {HTMLElement} domElement - HTML-элемент кнопки
+ */
+class StartButton {
+    constructor() {
+        this.domElement = document.getElementById("start-button");
+        this.onClick = () => {
+            Application.instructions.show();
+            Application.facade.hide();
+            Application.splashScreen.hide();
+        };
+
+        this.domElement.addEventListener("click", this.onClick);
+    }
+
+    /** Удаляет все обработчики событий. */
+    dispose() {
+        this.domElement.removeEventListener("click", this.onClick);
+    }
+
+    /** Показывает кнопку. */
+    show() {
+        this.domElement.classList.remove("start-button-hidden");
+    }
+
+    /** Скрывает кнопку. */
+    hide() {
+        this.domElement.classList.add("start-button-hidden");
     }
 }
