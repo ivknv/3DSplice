@@ -92,7 +92,6 @@ class _Application {
         this.leftFiber = null;
 
         this.elements = [];
-        this.models = [];
         this.mouseHandler = null;
 
         this.spliceProtectionCase = null;
@@ -227,26 +226,6 @@ class _Application {
     removeElement(element) {
         const index = this.elements.indexOf(element);
         if (index > -1) this.elements.splice(index, 1);
-    }
-
-    /**
-     * Добавить 3D-модель.
-     * @param {THREE.Object3D} model - 3D-модель, которую нужно добавить
-     */
-    addModel(model) {
-        this.models.push(model);
-        this.scene.add(model);
-    }
-
-    /**
-     * Удалить 3D-модель.
-     * @param {THREE.Object3D} model - 3D-модель, которую нужно удалить
-     */
-    removeModel(model) {
-        const index = this.models.indexOf(model);
-        if (index > -1) this.models.splice(index, 1);
-
-        this.scene.remove(model);
     }
 
     async loadModels() {

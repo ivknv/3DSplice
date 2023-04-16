@@ -152,7 +152,7 @@ export default class MouseHandler {
     updateHover() {
         this.raycaster.setFromCamera(this.position, Application.camera);
 
-        const intersection = this.raycaster.intersectObjects(Application.models);
+        const intersection = this.raycaster.intersectObjects(Application.scene.children);
         const obj = intersection.length ? intersection[0].object : null;
         let element = Application.getElementByObject(obj);
 

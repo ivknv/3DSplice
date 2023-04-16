@@ -146,12 +146,12 @@ export default class InteractiveElement {
     /** Добавляет элемент в приложение */
     addToApplication() {
         Application.addElement(this);
-        if (this.model) Application.addModel(this.model);
+        if (this.model) Application.scene.add(this.model);
     }
 
     /** Удаляет элемент в приложение */
     removeFromApplication() {
-        if (this.model) Application.removeModel(this.model);
+        if (this.model) Application.scene.remove(this.model);
         Application.removeElement(this);
     }
 }
