@@ -383,10 +383,6 @@ export class RightFiberPlacedState extends ApplicationState {
         Application.changeState(new CanPlaceRightFiberState(this));
     }
 
-    onRightFiberClampDown() {
-        Application.instructions.setText("Опустите зажимы с правой стороны");
-    }
-
     onRightFiberCladdingClampDown() {
         if (this.fibersPlaced) {
             if (Application.splicer.children.lid.checkDependencies()) {
