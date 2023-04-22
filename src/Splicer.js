@@ -282,6 +282,7 @@ class ScreenElement extends AnimatedSplicerElement {
 
         screenObject.material.map = texture;
         screenObject.material.color.set(0x888888);
+        screenObject.material.reflectivity = 0.1;
         screenObject.material.needsUpdate = true;
     }
 
