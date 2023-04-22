@@ -2,6 +2,9 @@ import * as THREE from "three";
 import AnimatedSplicerElement from "./AnimatedSplicerElement";
 import InteractiveElement from "./InteractiveElement";
 import Application from "./Application";
+import Video from "./Video";
+import powerOnVideo from "./videos/power_on.mp4";
+import spliceVideo from "./videos/splice.mp4";
 
 /** Крышка сварочного аппарата */
 class LidElement extends AnimatedSplicerElement {
@@ -46,9 +49,14 @@ class LidElement extends AnimatedSplicerElement {
     }
 
     onClick() {
-        if ((this.isClosed() && Application.state.canOpenLid()) ||
-            (this.isOpen() && Application.state.canCloseLid())) {
+        if (!this.checkDependencies()) return;
+
+        if (this.isClosed() && Application.state.canOpenLid()) {
             super.onClick();
+            Application.splicer.revealElectrode();
+        } else if (this.isOpen() && Application.state.canCloseLid()) {
+            super.onClick();
+            Application.splicer.hideElectrode();
         }
 
         Application.mouseHandler.updateTooltip();
@@ -242,6 +250,21 @@ class ScreenElement extends AnimatedSplicerElement {
         };
 
         this.tooltip = "Повернуть экран";
+
+        this.powerOnVideo = new Video(powerOnVideo);
+        this.spliceVideo = new Video(spliceVideo);
+        this.setVideo(this.powerOnVideo.texture);
+
+        this._onPowerOn = () => {
+            Application.state.onPowerOn();
+        };
+
+        this.powerOnVideo.domElement.addEventListener("ended", this._onPowerOn);
+    }
+
+    dispose() {
+        super.dispose();
+        this.powerOnVideo.domElement.removeEventListener("ended", this._onPowerOn);
     }
 
     /**
@@ -258,21 +281,24 @@ class ScreenElement extends AnimatedSplicerElement {
         }
 
         screenObject.material.map = texture;
-        screenObject.material.color.set(0xFFFFFF);
+        screenObject.material.color.set(0x888888);
+        screenObject.material.needsUpdate = true;
     }
 
     /**
      * Переводит экран в начальное состояние
      */
     setInitialScreen() {
-        Application.videoElement.currentTime = 0;
+        this.setVideo(this.spliceVideo.texture);
+        this.spliceVideo.seek(0);
     }
 
     /**
      * Начинает показ фрагмента видео с процессом сварки
      */
     startSpliceAnimation() {
-        Application.videoElement.play();
+        this.setVideo(this.spliceVideo.texture);
+        this.spliceVideo.play();
     }
 }
 
@@ -465,6 +491,10 @@ class HeatButtonElement extends InteractiveElement {
 class PowerSwitchElement extends AnimatedSplicerElement {
     constructor(splicer) {
         super(splicer.model, splicer.animations, splicer.mixer, ["Cube050"], "Power On (DC)");
+
+        this.animationActionController.onCompleted = () => {
+            Application.splicer.children.screen.powerOnVideo.play();
+        };
     }
 
     /**
@@ -487,8 +517,12 @@ class PowerSwitchElement extends AnimatedSplicerElement {
         return this.isOn() ? "Выключить сварочный аппарат" : "Включить сварочный аппарат";
     }
 
-    set tooltip(value) {
-        return;
+    set tooltip(value) {}
+
+    checkDependencies() {
+        if (!super.checkDependencies()) return false;
+
+        return this.isOff();
     }
 }
 
@@ -587,13 +621,25 @@ export default class Splicer extends InteractiveElement {
 
         this._revealElectrodeAction1 = makeAction("Reveal Electrode 1");
         this._revealElectrodeAction2 = makeAction("Reveal Electrode 2");
+    }
 
-        this.revealElectrode();
+    _playAction(action, timeScale) {
+        action.timeScale = timeScale ?? 1;
+        action.reset();
+        if (action.timeScale < 0) {
+            action.time = 2;
+        }
+        action.play();
     }
 
     revealElectrode() {
-        this._revealElectrodeAction1.play();
-        this._revealElectrodeAction2.play();
+        this._playAction(this._revealElectrodeAction1);
+        this._playAction(this._revealElectrodeAction2);
+    }
+
+    hideElectrode() {
+        this._playAction(this._revealElectrodeAction1, -1);
+        this._playAction(this._revealElectrodeAction2, -1);
     }
 
     update() {

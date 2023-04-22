@@ -1,35 +1,30 @@
 import Application from "./Application";
 
 export default class SpliceProcess {
-    constructor() {
+    constructor(screen) {
         this.active = false;
-        this.videoElement = Application.videoElement;
+        this.video = screen.spliceVideo;
+        this.screen = screen;
         this.onVideoEnded = () => {
             this.reset();
             Application.state.onSpliceCompleted();
         };
 
-        this.videoElement.addEventListener("ended", this.onVideoEnded);
+        this.video.domElement.addEventListener("ended", this.onVideoEnded);
     }
 
     dispose() {
-        this.videoElement.removeEventListener("ended", this.onVideoEnded);
+        this.video.domElement.removeEventListener("ended", this.onVideoEnded);
     }
 
     start() {
         this.active = true;
-        this.videoElement.currentTime = 0;
-        this.videoElement.play();
-
-        // placeholder for now
-        setTimeout(function() {
-            Application.state.onSpliceCompleted();
-        }, 5000);
+        this.screen.startSpliceAnimation();
     }
 
     reset() {
-        this.videoElement.currentTime = 0;
-        this.videoElement.pause();
+        this.video.seek(0);
+        this.video.pause();
         this.active = false;
     }
 }

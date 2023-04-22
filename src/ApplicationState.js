@@ -104,6 +104,25 @@ export default class ApplicationState {
         }
     }
 
+    /**
+     * Позволяет контролиорвать, можно включить сварочный аппарат
+     * @return {boolean} true, если можно
+     */
+    canTurnOn() {
+        return false;
+    }
+
+    /**
+     * Позволяет контролиорвать, можно выключить сварочный аппарат
+     * @return {boolean} true, если можно
+     */
+    canTurnOff() {
+        return false;
+    }
+
+    /** Вызывается при включении сварочного аппарата */
+    onPowerOn() {}
+
     /** Вызывается при правильном размещении левого волокна */
     onLeftFiberPlaced() {}
 
@@ -253,10 +272,6 @@ export default class ApplicationState {
     onHeatingCompleted() {}
 }
 
-function _instructToLiftClamps() {
-    Application.instructions.setText("Поднимите зажимы для волокна");
-}
-
 /** Исходное состояние */
 export class InitialState extends ApplicationState {
     /**
@@ -264,7 +279,35 @@ export class InitialState extends ApplicationState {
      * @param {ApplicationState} [previousState] - Предыдущее состояние приложения
      */
     constructor(previousState) {
-        super("initial", previousState);
+        super("initial", previousState)
+    }
+
+    canTurnOn() {
+        return true;
+    }
+
+    canOpenLid() {
+        return false;
+    }
+
+    onPowerOn() {
+        Application.changeState(new SplicerOnState(this));
+        Application.instructions.setText("Откройте крышку сварочного аппарата");
+    }
+}
+
+function _instructToLiftClamps() {
+    Application.instructions.setText("Поднимите зажимы для волокна");
+}
+
+/** Состояние, в котором сварочный аппарат включен */
+export class SplicerOnState extends ApplicationState {
+    /**
+     * Создает экземпляр SplicerOnState.
+     * @param {ApplicationState} [previousState] - Предыдущее состояние приложения
+     */
+    constructor(previousState) {
+        super("splicer_on", previousState);
     }
 
     onLidOpened() { _instructToLiftClamps(); }
@@ -343,7 +386,7 @@ export class CanPlaceLeftFiberState extends ApplicationState {
 
     onLeftFiberClampDown() {
         Application.instructions.setText("Поднимите зажимы для волокна");
-        Application.changeState(new InitialState(this));
+        Application.changeState(new SplicerOnState(this));
     }
 }
 
@@ -364,7 +407,7 @@ export class CanPlaceRightFiberState extends ApplicationState {
 
     onRightFiberClampDown() {
         Application.instructions.setText("Поднимите зажимы для волокна");
-        Application.changeState(new InitialState(this));
+        Application.changeState(new SplicerOnState(this));
     }
 }
 
@@ -397,7 +440,7 @@ export class RightFiberPlacedState extends ApplicationState {
             Application.changeState(new CanPlaceLeftFiberState(this));
         } else {
             Application.instructions.setText("Поднимите зажимы с левой стороны");
-            Application.changeState(new InitialState(this));
+            Application.changeState(new SplicerOnState(this));
         }
     }
 }
@@ -431,7 +474,7 @@ export class LeftFiberPlacedState extends ApplicationState {
             Application.changeState(new CanPlaceRightFiberState(this));
         } else {
             Application.instructions.setText("Поднимите зажимы с правой стороны");
-            Application.changeState(new InitialState(this));
+            Application.changeState(new SplicerOnState(this));
         }
     }
 }

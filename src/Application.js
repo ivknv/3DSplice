@@ -57,7 +57,6 @@ function parseURLHashParameters() {
  * @property {SplashScreen}         splashScreen   - Объект для управления стартовым экраном
  * @property {Help}                 help           - Объект экрана помощи
  * @property {HelpButton}           helpButton     - Объект кнопки для показа помощи
- * @property {HTMLElement}          videoElement   - HTML-элемент видео для экрана сварочного аппарата
  * @property {HTMLElement}          domElement     - Главный HTML-элемент приложения
  */
 class _Application {
@@ -98,7 +97,6 @@ class _Application {
         this.fusedFiber = null;
 
         this.instructions = new Instructions();
-        this.videoElement = null;
         this.facade = null;
         this.splashScreen = null;
         this.help = null;
@@ -256,8 +254,6 @@ class _Application {
         this.rightFiber.addToApplication();
         this.leftFiber.addToApplication();
         this.spliceProtectionCase.addToApplication();
-
-        this.splicer.children.screen.setVideo(this.videoTexture);
     }
 
     /**
@@ -270,11 +266,6 @@ class _Application {
         this.helpButton = new HelpButton();
         this.mouseHandler = new MouseHandler();
 
-        this.videoElement = document.querySelector("#screen-video");
-        this.videoTexture = new THREE.VideoTexture(this.videoElement);
-        this.videoTexture.flipY = false;
-
-        this.spliceProcess = new SpliceProcess();
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
         await this.loadModels();
@@ -283,9 +274,11 @@ class _Application {
 
         this.setupInteractiveElements();
 
+        this.spliceProcess = new SpliceProcess(this.splicer.children.screen);
+
         this.stats.showPanel(0);
 
-        this.instructions.setText("Откройте крышку сварочного аппарата");
+        this.instructions.setText("Включите сварочный аппарат");
 
         Application.stats.domElement.style.right = "0px";
         Application.stats.domElement.style.removeProperty("left");

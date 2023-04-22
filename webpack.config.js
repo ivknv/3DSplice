@@ -44,6 +44,11 @@ const rules = [
             loader: path.resolve(__dirname, "loaders", "gltf-loader.js")
         }
     },
+    {
+        test: /\.mp4$/i,
+        exclude: /node_modules/,
+        type: "asset/inline"
+    },
     fontRule,
     jsRule
 ];
