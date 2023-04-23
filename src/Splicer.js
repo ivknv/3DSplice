@@ -491,7 +491,7 @@ class HeatButtonElement extends InteractiveElement {
 /** Переключатель питания */
 class PowerSwitchElement extends AnimatedSplicerElement {
     constructor(splicer) {
-        super(splicer.model, splicer.animations, splicer.mixer, ["Cube050"], "Power On (DC)");
+        super(splicer.model, splicer.animations, splicer.mixer, ["Cube050"], "Power On (AC)");
 
         this.animationActionController.onCompleted = () => {
             Application.splicer.children.screen.powerOnVideo.play();
