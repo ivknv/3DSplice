@@ -254,17 +254,6 @@ class ScreenElement extends AnimatedSplicerElement {
         this.powerOnVideo = new Video(powerOnVideo);
         this.spliceVideo = new Video(spliceVideo);
         this.setVideo(this.powerOnVideo.texture);
-
-        this._onPowerOn = () => {
-            Application.state.onPowerOn();
-        };
-
-        this.powerOnVideo.domElement.addEventListener("ended", this._onPowerOn);
-    }
-
-    dispose() {
-        super.dispose();
-        this.powerOnVideo.domElement.removeEventListener("ended", this._onPowerOn);
     }
 
     /**
@@ -300,6 +289,12 @@ class ScreenElement extends AnimatedSplicerElement {
     startSpliceAnimation() {
         this.setVideo(this.spliceVideo.texture);
         this.spliceVideo.play();
+    }
+
+    stopSpliceAnimation() {
+        this.setVideo(this.spliceVideo.texture);
+        this.spliceVideo.seek(0);
+        this.spliceVideo.pause();
     }
 }
 
@@ -622,6 +617,17 @@ export default class Splicer extends InteractiveElement {
 
         this._revealElectrodeAction1 = makeAction("Reveal Electrode 1");
         this._revealElectrodeAction2 = makeAction("Reveal Electrode 2");
+
+        this._onPowerOn = () => {
+            Application.state.onPowerOn();
+        };
+
+        this._onSpliceFinished = () => {
+            Application.spliceProcess.finish();
+        };
+
+        this.children.screen.powerOnVideo.domElement.addEventListener("ended", this._onPowerOn);
+        this.children.screen.spliceVideo.domElement.addEventListener("ended", this._onSpliceFinished);
     }
 
     _playAction(action, timeScale) {
@@ -651,5 +657,7 @@ export default class Splicer extends InteractiveElement {
     dispose() {
         super.dispose();
         this.heaterIndicator.dispose();
+        this.powerOnVideo.domElement.removeEventListener("ended", this._onPowerOn);
+        this.spliceVideo.domElement.removeEventListener("ended", this._onSpliceVideo);
     }
 }

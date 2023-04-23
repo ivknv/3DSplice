@@ -18,6 +18,7 @@ import Facade from "./Facade";
 import SplashScreen from "./SplashScreen";
 import Help from "./Help";
 import HelpButton from "./HelpButton";
+import HeatingProcess from "./HeatingProcess";
 
 /**
  * Данная функция извлекает параметры из URL вида #param1:value1;param2:value2
@@ -78,6 +79,7 @@ class _Application {
 
         this.state = new InitialState();
         this.spliceProcess = null;
+        this.heatingProcess = null;
 
         this.splicerAnimations = null;
         this.splicerModel = null;
@@ -275,6 +277,7 @@ class _Application {
         this.setupInteractiveElements();
 
         this.spliceProcess = new SpliceProcess(this.splicer.children.screen);
+        this.heatingProcess = new HeatingProcess();
 
         this.stats.showPanel(0);
 

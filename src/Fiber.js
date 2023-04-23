@@ -7,6 +7,7 @@ import * as Colors from "./colors";
 /**
  * Интерактивный элемент волокна.
  * @property {string} direction - Направление волокна: "left" или "right"
+ * @property {boolean} placed - Флаг, указывающий на то, что левое волокно было (правильно) размещено
  */
 export default class Fiber extends InteractiveElement {
     /**
@@ -44,6 +45,8 @@ export default class Fiber extends InteractiveElement {
         this.setDirection(direction);
 
         this.tooltip = "Переместить волокно";
+
+        this._placed = false;
     }
 
     addPadding() {
@@ -72,13 +75,35 @@ export default class Fiber extends InteractiveElement {
         return this;
     }
 
+    get placed() {
+        return this._placed;
+    }
+
     checkPlacement() {
         const tolerance = 0.0015;
 
+        let placed = false;
+
         if (this.direction === "left") {
-            Application.state.leftFiberPlaced = Math.abs(this.getTipPosition().x - this.maxX) < tolerance;
+            placed = Math.abs(this.getTipPosition().x - this.maxX) < tolerance;
         } else {
-            Application.state.rightFiberPlaced = Math.abs(this.getTipPosition().x - this.minX) < tolerance;
+            placed = Math.abs(this.getTipPosition().x - this.minX) < tolerance;
+        }
+
+        if (this._placed !== placed) {
+            this._placed = placed;
+
+            if (placed) {
+                if (this.direction === "left") {
+                    Application.state.onLeftFiberPlaced();
+                } else {
+                    Application.state.onRightFiberPlaced();
+                }
+            } else if (this.direction === "left") {
+                Application.state.onLeftFiberRemoved();
+            } else {
+                Application.state.onRightFiberRemoved();
+            }
         }
     }
 

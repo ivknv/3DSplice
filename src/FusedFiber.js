@@ -22,6 +22,7 @@ function makeKeyframeTrack(model, offsetY, offsetZ) {
 
 /**
  * Интерактивный элемент волокна, полученного в результате сварки.
+ * @property {boolean} placedInHeater - Флаг, указывающий на то, что волокно было помещено в нагреватель
  */
 export default class FusedFiber extends InteractiveElement {
     /**
@@ -73,10 +74,26 @@ export default class FusedFiber extends InteractiveElement {
         this.animationActionControllerRight.onCompleted = () => {
             Application.state.onFiberRemoved();
         };
+
+        this._placedInHeater = false;
+    }
+
+    get placedInHeater() {
+        return this._placedInHeater;
     }
 
     checkPlacement() {
-        Application.state.fiberPlacedInHeater = this.left.position.y > 0.0399 && this.left.position.y < 0.043;
+        const value = this.left.position.y > 0.0399 && this.left.position.y < 0.043;
+
+        if (this._placedInHeater !== value) {
+            this._placedInHeater = value;
+
+            if (value) {
+                Application.state.onFiberPlacedInHeater();
+            } else {
+                Application.state.onFiberRemovedFromHeater();
+            }
+        }
     }
 
     addPadding() {

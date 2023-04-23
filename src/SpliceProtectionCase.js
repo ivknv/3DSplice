@@ -30,7 +30,7 @@ export default class SpliceProtectionCase extends InteractiveElement {
         this.tooltip = "Переместить гильзу КДЗС";
 
         this.animationActionController.onCompleted = () => {
-            Application.state.onHeatingCompleted();
+            Application.heatingProcess.finish();
         };
 
         this.padding = model.getObjectByName("Cube").clone();
@@ -42,6 +42,8 @@ export default class SpliceProtectionCase extends InteractiveElement {
         this.objects.add(this.padding);
 
         group.add(this.padding);
+
+        this._centered = false;
     }
 
     setPosition(x, y, z) {
@@ -54,7 +56,17 @@ export default class SpliceProtectionCase extends InteractiveElement {
     }
 
     checkPlacement() {
-        Application.state.spliceProtectionPlaced = this.isCentered();
+        const value = this.isCentered();
+
+        if (this._centered !== value) {
+            this._centered = value;
+
+            if (value) {
+                Application.state.onSpliceProtectionPlaced();
+            } else {
+                Application.state.onSpliceProtectionRemoved();
+            }
+        }
     }
 
     onClick() {

@@ -1,30 +1,33 @@
 import Application from "./Application";
 
+/**
+ * Класс, позволяющий управлять процессом сварки.
+ *
+ * @property {boolean} fibersPlaced - Флаг, указывающий на то, что оба волокна были (правильно) размещены
+ * @property {boolean} active       - Флаг, указывающий на то, что сварка в процессе
+ */
 export default class SpliceProcess {
-    constructor(screen) {
+    constructor() {
         this.active = false;
-        this.video = screen.spliceVideo;
-        this.screen = screen;
-        this.onVideoEnded = () => {
-            this.reset();
-            Application.state.onSpliceCompleted();
-        };
-
-        this.video.domElement.addEventListener("ended", this.onVideoEnded);
     }
 
-    dispose() {
-        this.video.domElement.removeEventListener("ended", this.onVideoEnded);
-    }
+    dispose() {}
 
     start() {
+        if (!this.fibersPlaced) return;
+
         this.active = true;
-        this.screen.startSpliceAnimation();
+        Application.splicer.children.screen.startSpliceAnimation();
     }
 
-    reset() {
-        this.video.seek(0);
-        this.video.pause();
+    finish() {
+        Application.splicer.children.screen.stopSpliceAnimation();
+
         this.active = false;
+        Application.state.onSpliceCompleted();
+    }
+
+    get fibersPlaced() {
+        return Application.leftFiber.placed && Application.rightFiber.placed;
     }
 }
