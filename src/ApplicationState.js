@@ -765,5 +765,6 @@ export class HeatingCompletedState extends ApplicationState {
 
     onFiberRemovedFromHeater() {
         Application.instructions.setText("");
+        Application.startTestButton.show();
     }
 }

@@ -49,15 +49,13 @@
     transition: opacity 0.5s;
 }
 
-.facade-hidden, .splash-screen-hidden, .splash-screen-obscured, .help-hidden, .help-button-hidden {
-    opacity: 0 !important;
-    pointer-events: none;
-}
-
-#start-button, #hide-help-button {
+.blue-button-centered {
     display: block;
     margin: auto;
     max-width: 100%;
+}
+
+.blue-button {
     padding: 10px 24px;
     border-radius: 30px;
     background-color: #2571ff;
@@ -70,7 +68,7 @@
     line-height: 1;
 }
 
-#start-button:hover, #hide-help-button:hover {
+.blue-button:hover {
     background-color: #3983ff;
 }
 
@@ -88,7 +86,7 @@
     padding: 4px 24px;
 }
 
-#splash-screen h1, #help h1 {
+h1 {
     color: #fafafa;
     font-family: OpenSans, Helvetica, Arial;
     font-size: 36px;
@@ -96,21 +94,7 @@
     margin-bottom: 6px;
 }
 
-#help {
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    margin: auto;
-    max-width: 100%;
-    max-height: 100%;
-    z-index: 25;
-    transition: 0.3s opacity;
-    padding: 4px 24px;
-}
-
-#help h3 {
+h3 {
     font-family: OpenSans, Helvetica, Arial;
     font-weight: bold;
     font-size: 24px;
@@ -120,7 +104,18 @@
     margin-bottom: 4px;
 }
 
-#help p {
+h4 {
+    font-family: OpenSans, Helvetica, Arial;
+    font-weight: normal;
+    font-size: 14px;
+    color: #fafafa;
+    margin: auto;
+    max-width: 800px;
+    margin-bottom: 0px;
+    text-indent: 35px;
+}
+
+p {
     font-family: OpenSans, Helvetica, Arial;
     font-size: 14px;
     color: #fafafa;
@@ -128,6 +123,59 @@
     margin: auto;
     margin-bottom: 8px;
     line-height: 1.15;
+}
+
+#help, #theory {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    max-width: 100%;
+    overflow-y: scroll;
+    z-index: 25;
+    transition: 0.3s opacity;
+    padding: 4px 24px;
+}
+
+#theory h3 {
+    max-width: 800px;
+    text-indent: 35px;
+}
+
+#theory p {
+    line-height: 1.5;
+    max-width: 800px;
+    text-indent: 35px;
+    margin-bottom: 0px;
+}
+
+figure {
+    display: block;
+    max-width: 800px;
+    margin: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+figcaption {
+    font-family: OpenSans, Helvetica, Arial;
+    font-size: 14px;
+    color: #fafafa;
+    max-width: 800px;
+    margin: auto;
+    margin-bottom: 8px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+figure img {
+    display: block;
+    border-radius: 6px;
+    margin: auto;
+    max-width: 600px;
+    margin-bottom: 10px;
 }
 
 #help-button {

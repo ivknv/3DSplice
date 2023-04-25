@@ -19,6 +19,8 @@ import SplashScreen from "./SplashScreen";
 import Help from "./Help";
 import HelpButton from "./HelpButton";
 import HeatingProcess from "./HeatingProcess";
+import TheoryScreen from "./TheoryScreen";
+import StartTestButton from "./StartTestButton";
 
 /**
  * Данная функция извлекает параметры из URL вида #param1:value1;param2:value2
@@ -103,6 +105,8 @@ class _Application {
         this.splashScreen = null;
         this.help = null;
         this.helpButton = null;
+        this.theoryScreen = null;
+        this.startTestButton = new StartTestButton();
 
         this.onWindowResize = () => {
             const w = this.domElement.offsetWidth;
@@ -135,6 +139,8 @@ class _Application {
         }
 
         this.help?.dispose();
+        this.theoryScreen?.dispose();
+        this.startTestButton?.dispose();
         this.splashScreen?.dispose();
 
         this.controls?.dispose();
@@ -149,6 +155,7 @@ class _Application {
         this.resizeObserver = new ResizeObserver(this.onWindowResize);
 
         this.domElement.appendChild(this.instructions.domElement);
+        this.domElement.appendChild(this.startTestButton.domElement);
 
         // Автоматически подстраивать размер canvas под размер главного элемента
         this.resizeObserver.observe(this.domElement);
@@ -267,6 +274,7 @@ class _Application {
         this.help = new Help();
         this.helpButton = new HelpButton();
         this.mouseHandler = new MouseHandler();
+        this.theoryScreen = new TheoryScreen();
 
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
@@ -283,11 +291,11 @@ class _Application {
 
         this.instructions.setText("Включите сварочный аппарат");
 
-        Application.stats.domElement.style.right = "0px";
-        Application.stats.domElement.style.removeProperty("left");
+        this.stats.domElement.style.right = "0px";
+        this.stats.domElement.style.removeProperty("left");
 
-        Application.renderer.domElement.style.position = "absolute";
-        Application.renderer.domElement.style.zIndex = "1";
+        this.renderer.domElement.style.position = "absolute";
+        this.renderer.domElement.style.zIndex = "1";
     }
 
     /**

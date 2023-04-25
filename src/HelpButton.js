@@ -21,11 +21,13 @@ export default class HelpButton {
 
     /** Показывает кнопку. */
     show() {
-        this.domElement.classList.remove("help-button-hidden");
+        this.domElement.style.opacity = "";
+        this.domElement.style.pointerEvents = "auto";
     }
 
     /** Скрывает кнопку. */
     hide() {
-        this.domElement.classList.add("help-button-hidden");
+        this.domElement.style.opacity = "0";
+        this.domElement.style.pointerEvents = "auto";
     }
 }

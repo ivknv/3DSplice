@@ -18,17 +18,23 @@ export default class SplashScreen {
 
     /** Показывает экран. */
     show() {
-        this.domElement.classList.remove("splash-screen-obscured");
+        this.domElement.style.opacity = "";
+        this.domElement.style.pointerEvents = "auto";
+        this.domElement.dataset.hidden = "false";
     }
 
     /** Скрывает экран. */
     hide() {
-        this.domElement.classList.add("splash-screen-hidden");
+        this.domElement.style.opacity = "0";
+        this.domElement.style.pointerEvents = "none";
+        this.domElement.dataset.hidden = "true";
     }
 
     /** Делает экран невидимым (не то же самое, что скрытие). */
     obscure() {
-        this.domElement.classList.add("splash-screen-obscured");
+        this.domElement.style.opacity = "0";
+        this.domElement.style.pointerEvents = "none";
+        this.domElement.dataset.hidden = "false";
     }
 
     /**
@@ -36,7 +42,7 @@ export default class SplashScreen {
      * @return {boolean} признак скрытия экрана
      */
     isHidden() {
-        return this.domElement.classList.contains("splash-screen-hidden");
+        return this.domElement.dataset.hidden === "true";
     }
 }
 
@@ -48,9 +54,9 @@ class StartButton {
     constructor() {
         this.domElement = document.getElementById("start-button");
         this.onClick = () => {
-            Application.instructions.show();
-            Application.facade.hide();
             Application.splashScreen.hide();
+            Application.helpButton.hide();
+            Application.theoryScreen.show();
         };
 
         this.domElement.addEventListener("click", this.onClick);
@@ -59,15 +65,5 @@ class StartButton {
     /** Удаляет все обработчики событий. */
     dispose() {
         this.domElement.removeEventListener("click", this.onClick);
-    }
-
-    /** Показывает кнопку. */
-    show() {
-        this.domElement.classList.remove("start-button-hidden");
-    }
-
-    /** Скрывает кнопку. */
-    hide() {
-        this.domElement.classList.add("start-button-hidden");
     }
 }

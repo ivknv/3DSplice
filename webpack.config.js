@@ -49,6 +49,14 @@ const rules = [
         exclude: /node_modules/,
         type: "asset/inline"
     },
+    {
+        test: /\.(png|jpg)$/i,
+        type: "asset/inline"
+    },
+    {
+        test: /\.html$/i,
+        use: "html-loader"
+    },
     fontRule,
     jsRule
 ];

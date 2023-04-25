@@ -22,12 +22,15 @@ export default class Help {
         Application.splashScreen.obscure();
         Application.helpButton.hide();
 
-        this.domElement.classList.remove("help-hidden");
+        this.domElement.style.opacity = "";
+        this.domElement.style.pointerEvents = "auto";
     }
 
     /** Скрывает экран помощи. */
     hide() {
-        this.domElement.classList.add("help-hidden");
+        this.domElement.style.opacity = "0";
+        this.domElement.style.pointerEvents = "none";
+
         Application.splashScreen.show();
         Application.helpButton.show();
 

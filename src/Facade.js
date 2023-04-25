@@ -10,11 +10,13 @@ export default class Facade {
 
     /** Показывает заслон. */
     show() {
-        this.domElement.classList.remove("facade-hidden");
+        this.domElement.style.opacity = "";
+        this.domElement.style.pointerEvents = "auto";
     }
 
     /** Скрывает заслон. */
     hide() {
-        this.domElement.classList.add("facade-hidden");
+        this.domElement.style.opacity = "0";
+        this.domElement.style.pointerEvents = "none";
     }
 }
