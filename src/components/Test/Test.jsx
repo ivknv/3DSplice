@@ -38,8 +38,9 @@ export default function Test({visible = true}) {
 
         answers.forEach((value, key) => {
             const question = questions.current[key];
-            const correctAnswer = question.answer.map(i => question.options[i]);
-            if (value.every((a, i) => a === correctAnswer[i])) correctCount++;
+            if (value.every((x, i) => x === question.answer[i])) {
+                correctCount++;
+            }
         });
 
         return correctCount / questions.current.length;
