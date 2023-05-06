@@ -25,7 +25,7 @@
 
 #tooltip {
     position: fixed;
-    display: none;
+    display: inline-block;
     opacity: 0;
     transition: opacity 0.3s;
     z-index: 15;
@@ -37,6 +37,7 @@
     padding: 5px;
     border-radius: 3px;
     pointer-events: none;
+    user-select: none;
 }
 
 #facade {
@@ -115,17 +116,20 @@ h4 {
     text-indent: 35px;
 }
 
-p {
+p, label {
     font-family: OpenSans, Helvetica, Arial;
     font-size: 14px;
     color: #fafafa;
+}
+
+p {
     max-width: 600px;
     margin: auto;
     margin-bottom: 8px;
     line-height: 1.15;
 }
 
-#help, #theory {
+#help, #theory, #test {
     position: fixed;
     left: 0;
     top: 0;
@@ -149,6 +153,18 @@ p {
     max-width: 800px;
     text-indent: 35px;
     margin-bottom: 0px;
+}
+
+.question {
+    max-width: 600px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.question h3 {
+    margin: 0;
 }
 
 figure {
@@ -205,4 +221,50 @@ figure img {
     position: absolute;
     width: 100vw;
     height: 100vh;
+}
+
+input[type=text] {
+    border-radius: 3px;
+    border: none;
+    outline: none;
+    padding: 6px;
+    padding-left: 6px;
+    padding-right: 6px;
+    font-family: OpenSans, Helvetica, Arial;
+    font-size: 14px;
+    min-width: 300px;
+}
+
+.test-card {
+    background-color: rgba(40, 40, 40, 0.75);
+    padding: 16px;
+    border: 1px solid black;
+    border-radius: 8px;
+}
+
+.test-timer {
+    position: fixed;
+    right: 16px;
+    font-family: OpenSans;
+    font-size: 14px;
+    color: #fafafa;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 6px;
+    border-radius: 4px;
+}
+
+.test-results {
+    display: flex;
+    flex-direction: column;
+    color: #fafafa;
+    font-family: OpenSans;
+    font-size: 14px;
+    align-items: flex-start;
+    max-width: 500px;
+    width: 100%;
+    gap: 3px;
+}
+
+.test-results h3 {
+    margin: 0;
 }

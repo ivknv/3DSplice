@@ -1,0 +1,115 @@
+import React, {useEffect, useRef, useState} from "react";
+import {shuffleArray} from "../../common";
+import _questions from "./TestQuestions";
+import TestForm from "./TestForm";
+import Questions from "./Questions";
+import TestResults from "./TestResults";
+
+function prepareQuestions() {
+    const questions = _questions.map(q => {
+        const newQuestion = new Object();
+        Object.assign(newQuestion, q)
+
+        newQuestion.answer = newQuestion.answer.map(index => q.options[index]);
+        newQuestion.answer.sort();
+
+        newQuestion.options = Array.from(q.options);
+        shuffleArray(newQuestion.options);
+
+        return newQuestion;
+    });
+
+    shuffleArray(questions);
+
+    return questions;
+}
+
+export default function Test({visible = true}) {
+    const [testFinished, setTestFinished] = useState(false);
+    const [score, setScore] = useState(0);
+    const [nameEntered, setNameEntered] = useState(false);
+    const identity = useRef(new Object());
+    const answers = new Map();
+
+    const questions = useRef(null);
+
+    const checkAnswers = () => {
+        let correctCount = 0;
+
+        answers.forEach((value, key) => {
+            const question = questions.current[key];
+            const correctAnswer = question.answer.map(i => question.options[i]);
+            if (value.every((a, i) => a === correctAnswer[i])) correctCount++;
+        });
+
+        return correctCount / questions.current.length;
+    };
+
+    const startedTime = useRef(0);
+    const finishedTime = useRef(0);
+
+    const startTest = () => {
+        setTestFinished(false);
+        setScore(0);
+        setNameEntered(true);
+        startedTime.current = Date.now();
+
+        questions.current = prepareQuestions();
+    };
+
+    const restartTest = () => {
+        setTestFinished(false);
+        setNameEntered(false);
+    }
+
+    const finishTest = () => {
+        setScore(checkAnswers());
+        setTestFinished(true);
+        finishedTime.current = Date.now();
+    };
+
+    return (
+        <section
+            id="test"
+            style={{
+                opacity: visible ? "" : 0,
+                pointerEvents: visible ? "auto" : "none",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "12px"
+            }}>
+            <h1>Тест по сварочным аппаратам</h1>
+            {(() => {
+                if (!testFinished) {
+                    if (!nameEntered) {
+                        return (
+                            <TestForm
+                                identity={identity.current}
+                                onSubmitted={startTest}
+                            />
+                        );
+                    } else {
+                        return (
+                            <Questions
+                                questions={questions.current}
+                                answerStore={answers}
+                                onFinished={finishTest}
+                            />
+                        );
+                    }
+                } else {
+                    return (
+                        <TestResults
+                            onStarted={restartTest}
+                            onTamper={restartTest}
+                            score={score}
+                            identity={identity.current}
+                            time={Math.round((finishedTime.current - startedTime.current) / 1000)}
+                        />
+                    );
+                }
+            })()}
+        </section>
+    );
+}

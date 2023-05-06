@@ -24,6 +24,7 @@ export default class AnimationActionController {
         this.action.loop = THREE.LoopOnce;
         this.onCompleted = function() {}
         this.onReset = function() {}
+        this.scale = 1;
 
         this.onAnimationFinished = event => {
             if (event.action !== this.action) return;
@@ -89,7 +90,7 @@ export default class AnimationActionController {
     /** Включает анимацию в прямом направлении, если это возможно */
     playForward() {
         if (this.canPlayForward()) {
-            this.action.timeScale = 1;
+            this.action.timeScale = 1 * this.scale;
 
             if (this.state != "playing_back") this.action.reset();
 
@@ -101,7 +102,7 @@ export default class AnimationActionController {
     /** Включает анимацию в обратном направлении, если это возможно */
     playBack() {
         if (this.canPlayBack()) {
-            this.action.timeScale = -1;
+            this.action.timeScale = -1 * this.scale;
 
             if (this.state == "completed") {
                 this.action.reset();

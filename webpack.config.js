@@ -9,7 +9,7 @@ const fontRule = {
 };
 
 const jsRule = {
-    test: /\.js$/i,
+    test: /\.(js|jsx)$/i,
     use: {
         loader: "babel-loader",
         options: {
@@ -25,7 +25,8 @@ const jsRule = {
                             proposals: true
                         }
                     }
-                ]
+                ],
+                "@babel/preset-react"
             ]
         }
     }
@@ -62,7 +63,7 @@ const rules = [
 ];
 
 let config = {
-    entry: "./src/index.js",
+    entry: "./src/index.jsx",
     output: {
         filename: "[name].js",
         path: path.resolve(__dirname, "dist"),
@@ -85,6 +86,7 @@ let config = {
         new HtmlWebpackPlugin({template: "./src/index.html"})
     ],
     module: {rules: rules},
+    resolve: {extensions: [".js", ".jsx"]},
     devServer: {
         static: {
             directory: path.join(__dirname, "src", "static")
@@ -100,7 +102,8 @@ let config = {
 module.exports = (env, argv) => {
     if (argv.mode === "development") {
         fontRule.type = "asset/resource";
-        rules.splice(rules.findIndex(x => { return x === jsRule; }), 1);
+
+        jsRule.exclude = /node_modules/;
     } else {
         config.plugins.push(new HtmlInlineScriptPlugin());
     }
