@@ -236,7 +236,7 @@ input[type=text] {
 }
 
 .test-card {
-    background-color: rgba(40, 40, 40, 0.75);
+    background-color: #222;
     padding: 16px;
     border: 1px solid black;
     border-radius: 8px;

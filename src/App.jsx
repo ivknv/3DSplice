@@ -69,6 +69,8 @@ export default function App() {
                 <Simulator
                     hashParameters={parseURLHashParameters()}
                     startTest={() => {
+                        setHelpVisible(false);
+                        setHelpButtonVisible(false);
                         setFacadeVisible(true);
                         setTestVisible(true);
                     }}
