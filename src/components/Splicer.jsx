@@ -55,13 +55,13 @@ export default function Splicer(props) {
             <Video
                 src={PowerOnVideo}
                 onCreated={texture => powerOnVideo.current = texture}
-                play={video === powerOnVideo.current}
+                play={(video ?? false) && video === powerOnVideo.current}
                 onEnded={() => appState.state.onPowerOn()}
             />
             <Video
                 src={SpliceVideo}
                 onCreated={texture => spliceVideo.current = texture}
-                play={video === spliceVideo.current}
+                play={(video ?? false) && video === spliceVideo.current}
                 resetAfterEnd={true}
                 onEnded={() => appState.state.onSpliceCompleted()}
             />
