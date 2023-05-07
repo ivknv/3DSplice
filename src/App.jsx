@@ -60,6 +60,8 @@ export default function App() {
                 console.assert(context.current.state !== undefined, `Application state (${stateName}) is undefined`);
             }
         };
+
+        blockMediaSessionActions();
     }, []);
 
     return (
@@ -110,4 +112,17 @@ export default function App() {
             </section>
         </AppContext.Provider>
     );
+}
+
+function blockMediaSessionActions() {
+    const actions = [
+        "play", "pause", "stop", "seekbackward", "seekforward", "seekto",
+        "nexttrack", "previoustrack"
+    ];
+
+    const handler = () => {};
+
+    for (const action of actions) {
+        navigator.mediaSession.setActionHandler(action, handler)
+    }
 }
