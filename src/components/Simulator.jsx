@@ -6,7 +6,7 @@ import {clamp} from "../common";
 import * as Colors from "../colors"
 import * as THREE from "three";
 import Splicer from "./Splicer";
-import {OrbitControls} from "@react-three/drei";
+import {OrbitControls, Stats} from "@react-three/drei";
 import MouseHandler from "./MouseHandler";
 import Fiber from "./Fiber";
 import {GLTFScope, GLTFModel} from "../gltf";
@@ -39,6 +39,9 @@ export default function Simulator({hashParameters = new Map(), ...props}) {
 
     return (
         <GLTFScope>
+            {hashParameters.get("stats") === "true" &&
+                <Stats showPanel={0} className="stats" />
+            }
             <GLTFModel name="splicer" data={SplicerModel} />
             <GLTFModel name="fiber" data={FiberModel} />
             <GLTFModel name="spliceProtection" data={SpliceProtectionModel} />
@@ -162,18 +165,18 @@ function Scene({onLoaded, onScenarioCompleted}) {
 
 function setupRendererParameters(hashParameters) {
     const rendererParameters = {
-        antialias: hashParameters["antialias"] !== "false",
-        depth: hashParameters["depth"] !== "false",
-        stencil: hashParameters["stencil"] !== "false",
-        preserveDrawingBuffer: hashParameters["preserveDrawingBuffer"] !== "false"
+        antialias: hashParameters.get("antialias") !== "false",
+        depth: hashParameters.get("depth") !== "false",
+        stencil: hashParameters.get("stencil") !== "false",
+        preserveDrawingBuffer: hashParameters.get("preserveDrawingBuffer") !== "false"
     };
 
-    if (["highp", "mediump", "lowp"].indexOf(hashParameters["precision"]) !== -1) {
-        rendererParameters.precision = hashParameters["precision"];
+    if (["highp", "mediump", "lowp"].indexOf(hashParameters.get("precision")) !== -1) {
+        rendererParameters.precision = hashParameters.get("precision");
     }
 
-    if (["high-performance", "low-power", "default"].indexOf(hashParameters["powerPreference"]) !== -1) {
-        rendererParameters.powerPreference = hashParameters["powerPreference"];
+    if (["high-performance", "low-power", "default"].indexOf(hashParameters.get("powerPreference")) !== -1) {
+        rendererParameters.powerPreference = hashParameters.get("powerPreference");
     }
 
     return rendererParameters;
@@ -181,7 +184,7 @@ function setupRendererParameters(hashParameters) {
 
 function getDpr(hashParameters) {
     return clamp(
-        parseFloat(hashParameters["pixelRatio"] || window.devicePixelRatio),
+        parseFloat(hashParameters.get("pixelRatio") || window.devicePixelRatio),
         0.1,
         window.devicePixelRatio);
 }
@@ -189,8 +192,8 @@ function getDpr(hashParameters) {
 function setupRenderer({gl}, hashParameters) {
     gl.toneMapping = THREE.ReinhardToneMapping;
     gl.toneMappingExposure = 0.7;
-    gl.physicallyCorrectLights = hashParameters["physicallyCorrectLights"] !== "false";
-    gl.localClippingEnabled = hashParameters["localClippingEnabled"] === "true";
+    gl.physicallyCorrectLights = hashParameters.get("physicallyCorrectLights") !== "false";
+    gl.localClippingEnabled = hashParameters.get("localClippingEnabled") === "true";
 }
 
 function Lights() {

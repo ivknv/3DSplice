@@ -25,7 +25,7 @@ function parseURLHashParameters() {
 
     for (const keyValuePair of keyValuePairs) {
         const [key, value] = keyValuePair.split(":");
-        parameters[key] = value;
+        parameters.set(key, value);
     }
 
     return parameters;

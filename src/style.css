@@ -280,3 +280,10 @@ input[type=text] {
 .question h3 {
     user-select: none;
 }
+
+.stats {
+    position: fixed;
+    display: flex;
+    flex-direction: row-reverse;
+    right: 0;
+}
