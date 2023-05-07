@@ -268,3 +268,11 @@ input[type=text] {
 .test-results h3 {
     margin: 0;
 }
+
+.question label {
+    user-select: none;
+}
+
+.question h3 {
+    user-select: none;
+}
