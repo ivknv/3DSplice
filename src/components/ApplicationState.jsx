@@ -248,7 +248,12 @@ export default function ApplicationState(props) {
                 if (props.onHeatPressed) return props.onHeatPressed();
             },
 
-            /** Вызывается после завершения процесса термоусадки гильзы КДЗС */
+            /** Вызывается после завершения процесса охлаждения гильзы КДЗС */
+            onCoolingCompleted() {
+                if (props.onCoolingCompleted) return props.onCoolingCompleted();
+            },
+
+            /** Вызывается после завершения процесса нагрева гильзы КДЗС */
             onHeatingCompleted() {
                 if (props.onHeatingCompleted) return props.onHeatingCompleted();
             },

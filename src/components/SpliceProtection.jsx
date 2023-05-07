@@ -8,6 +8,9 @@ import {useFrame, useThree} from "@react-three/fiber";
 import {useApp} from "../App";
 import * as Colors from "../colors";
 
+const HEATING_DURATION = 120; // seconds
+const COOLING_DURATION = 30; // seconds
+
 class SpliceProtectionState {
     constructor(app, group, animations, fiber, pointer, camera) {
         this.app = app;
@@ -25,18 +28,28 @@ class SpliceProtectionState {
         this.mixer = new THREE.AnimationMixer(group.current);
         this.animationController = new AnimationActionController.fromAnimationName(
             animations, this.mixer, "Shrink");
-        this.animationController.scale = 0.2;
+
+        // Animation is normally played at 24 FPS and has a duration of 60 frames
+        this.animationController.scale = 1 / HEATING_DURATION * 60 / 24;
 
         this.placed = false;
         this.held = false;
 
         this.animationController.onCompleted = () => {
             this.app.state.onHeatingCompleted();
+            clearTimeout(this.timeoutId);
+
+            this.timeoutId = setTimeout(() => {
+                this.app.state.onCoolingCompleted();
+            }, COOLING_DURATION * 1000);
         };
+
+        this.timeoutId = null;
     }
 
     dispose() {
         this.animationController.dispose();
+        clearTimeout(this.timeoutId);
     }
 
     get position() {

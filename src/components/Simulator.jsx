@@ -104,7 +104,7 @@ function Scene({onLoaded, onScenarioCompleted}) {
     const [spliceCompleted, setSpliceCompleted] = useState(false);
     const [canExtractFusedFiber, setCanExtractFusedFiber] = useState(false);
     const [canMoveSpliceProtection, setCanMoveSpliceProtection] = useState(false);
-    const [heaterActive, setHeaterActive] = useState(false);
+    const [heaterState, setHeaterState] = useState("inactive");
     const [shrinkSpliceProtection, setShrinkSpliceProtection] = useState(false);
     const appState = useApp();
 
@@ -128,17 +128,18 @@ function Scene({onLoaded, onScenarioCompleted}) {
                 extractFusedFiber={() => setCanExtractFusedFiber(true)}
                 onFiberRemoved={() => setCanMoveSpliceProtection(true)}
                 onHeatingStarted={() => {
-                    setHeaterActive(true);
+                    setHeaterState("heating");
                     setShrinkSpliceProtection(true);
                 }}
-                onHeatingCompleted={() => setHeaterActive(false)}
+                onHeatingCompleted={() => setHeaterState("cooling")}
+                onCoolingCompleted={() => setHeaterState("inactive")}
                 onFiberRemovedFromHeater={() => {
                     if (onScenarioCompleted) onScenarioCompleted();
                 }}
             />
             <OrbitControls enableDamping={false} />
             <MouseHandler>
-                <Splicer heaterActive={heaterActive} />
+                <Splicer heaterState={heaterState} />
                 <FusedFiber active={spliceCompleted} canExtract={canExtractFusedFiber}>
                     <Fiber
                         direction="left"

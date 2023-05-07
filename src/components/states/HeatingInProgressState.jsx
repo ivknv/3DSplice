@@ -13,6 +13,9 @@ export default function HeatingInProgressState(props) {
             canLiftHeaterClamps={() => false}
             onHeatingCompleted={() => {
                 if (props.onHeatingCompleted) props.onHeatingCompleted();
+            }}
+            onCoolingCompleted={() => {
+                if (props.onCoolingCompleted) props.onCoolingCompleted();
                 setInstructions("Волокно можно извлечь");
                 setState("heating_completed");
             }}

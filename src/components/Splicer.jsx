@@ -80,7 +80,7 @@ export default function Splicer(props) {
             }} />
             <ResetButtonElement/>
             <HeatButtonElement/>
-            <HeaterIndicator active={props.heaterActive ?? false} />
+            <HeaterIndicator state={props.heaterState ?? "inactive"} />
             <PowerSwitchElement onToggle={() => {
                 setVideo(powerOnVideo.current);
             }}
@@ -590,28 +590,30 @@ function PowerSwitchElement(props) {
     );
 }
 
-function HeaterIndicator({active = false}) {
+function HeaterIndicator({state = ""}) {
     const {model} = useSplicer();
     const intervalId = useRef(null);
-    const flashing = useRef(false);
+    const blinking = useRef(false);
     const object = useRef(null);
     const initialColor = useRef(null);
     const activeColor = useRef(null);
 
-    const startFlashing = () => {
-        if (intervalId.current !== null) stopFlashing();
+    const setColor = color => object.current.material.color.set(color);
+
+    const startBlinking = () => {
+        if (intervalId.current !== null) stopBlinking();
 
         intervalId.current = setInterval(() => {
-            const color = flashing.current ? initialColor.current : activeColor.current;
-            object.current.material.color.set(color);
-            flashing.current = !flashing.current;
+            const color = blinking.current ? initialColor.current : activeColor.current;
+            setColor(color);
+            blinking.current = !blinking.current;
         }, 1000);
     }
 
-    const stopFlashing = () => {
+    const stopBlinking = () => {
         clearInterval(intervalId.current);
         intervalId.current = null;
-        object.current.material.color.set(initialColor.current);
+        setColor(initialColor.current);
     }
 
     useEffect(() => {
@@ -619,16 +621,23 @@ function HeaterIndicator({active = false}) {
         activeColor.current = new THREE.Color("orange");
         initialColor.current = object.current.material.color.clone();
 
-        return stopFlashing;
+        return stopBlinking;
     }, []);
 
     useEffect(() => {
-        if (active) {
-            startFlashing();
-        } else {
-            stopFlashing();
+        if (state === "cooling") {
+            startBlinking();
+            return;
         }
-    }, [active]);
+
+        stopBlinking();
+
+        if (state === "heating") {
+            setColor(activeColor.current);
+        } else {
+            setColor(initialColor.current);
+        }
+    }, [state]);
 
     return null;
 }

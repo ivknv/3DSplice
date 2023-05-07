@@ -37,7 +37,10 @@ export default function States(props) {
             <SpliceProtectionPlacedState/>
             <ReadyToPlaceFiberInHeaterState/>
             <ReadyToHeatState onHeatingStarted={props.onHeatingStarted} />
-            <HeatingInProgressState onHeatingCompleted={props.onHeatingCompleted} />
+            <HeatingInProgressState
+                onHeatingCompleted={props.onHeatingCompleted}
+                onCoolingCompleted={props.onCoolingCompleted}
+            />
             <HeatingCompletedState onFiberRemovedFromHeater={props.onFiberRemovedFromHeater} />
             <CanCloseHeaterState/>
         </>
