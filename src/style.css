@@ -16,8 +16,7 @@
     display: none;
     position: absolute;
     z-index: 10;
-    left: 6px;
-    top: 6px;
+    margin: 6px;
     color: #f5f5f5;
     font-size: 17px;
     font-family: OpenSans, Helvetica, sans-serif, Arial;
@@ -194,8 +193,8 @@ figure img {
     display: block;
     border-radius: 6px;
     margin: auto;
-    max-width: 600px;
     margin-bottom: 10px;
+    max-width: 100%;
 }
 
 #help-button {
