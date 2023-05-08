@@ -96,10 +96,10 @@ export default function Simulator({hashParameters = new Map(), ...props}) {
                         dpr={dpr}
                         frameloop={hashParameters.get("frameloop") || "demand"}
                         camera={{
-                            fov: 20,
+                            fov: 55,
                             near: 0.025,
                             far: 1000,
-                            position: [0.5, 1, 0.5]
+                            position: [0.5 * 0.55, 1 * 0.33, 0.5 * 0.33]
                         }}
                         onCreated={state => setupRenderer(state, hashParameters)}
                         scene={{background: new THREE.Color(Colors.CLEAR)}}
