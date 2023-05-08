@@ -94,7 +94,7 @@ export default function Simulator({hashParameters = new Map(), ...props}) {
                     <Canvas
                         gl={rendererParameters}
                         dpr={dpr}
-                        frameloop="demand"
+                        frameloop={hashParameters.get("frameloop") || "demand"}
                         camera={{
                             fov: 20,
                             near: 0.025,
