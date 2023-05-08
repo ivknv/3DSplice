@@ -140,6 +140,14 @@ export default function MouseHandler(props) {
 
     useFrame(update);
 
+    useEffect(() => {
+        const onPointerDown = () => update();
+
+        window.addEventListener("pointerdown", onPointerDown);
+
+        return () => window.removeEventListener("pointerdown", onPointerDown);
+    });
+
     return (
         <MouseContext.Provider value={state.current}>
             <group
