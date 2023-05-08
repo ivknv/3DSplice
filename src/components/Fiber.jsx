@@ -7,6 +7,7 @@ import InteractiveElement from "./InteractiveElement";
 import * as Colors from "../colors";
 import * as THREE from "three";
 import {useApp} from "../App";
+import {usePointerMove} from "./Simulator";
 
 class FiberState {
     constructor(app, model, group, camera, pointer) {
@@ -136,7 +137,7 @@ export default function Fiber(props) {
     const fiberState = useRef(null);
     const appState = useApp();
 
-    const {camera, pointer} = useThree();
+    const {camera, invalidate, pointer} = useThree();
 
     const setObjectName = () => {
         if (!group.current) return;
@@ -149,6 +150,7 @@ export default function Fiber(props) {
         fiberState.current?.setDirection(props.direction ?? "right");
         setObjectName();
     }, [props.direction]);
+
     useEffect(() => {
         if (!fiberState.current) return;
 
@@ -157,6 +159,7 @@ export default function Fiber(props) {
         }
         fiberState.current.updateRotation();
     }, [props.position]);
+
     useEffect(() => {
         setActive(props.active ?? true);
     }, [props.active]);
@@ -192,12 +195,13 @@ export default function Fiber(props) {
         fiberState.current.updateRotation();
     }, []);
 
-    useFrame(() => {
+    const pointerHandler = usePointerMove(() => {
         const state = fiberState.current;
-        if (!active || !state) return;
-        if (state.held) state.syncWithMouse();
+
+        state.syncWithMouse();
         state.updateRotation();
-    });
+        invalidate();
+    }, false);
 
     const splicer = useSplicer();
 
@@ -222,6 +226,8 @@ export default function Fiber(props) {
             state.clickPoint = state.projectMouseOntoFiber();
 
             state.held = true;
+
+            pointerHandler.setActive(true);
         } else {
             reset();
         }
@@ -235,6 +241,8 @@ export default function Fiber(props) {
 
         setHighlightColor(Colors.HIGHLIGHT);
         state.held = false;
+
+        pointerHandler.setActive(false);
     };
 
     return (

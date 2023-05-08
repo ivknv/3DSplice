@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef, useMemo} from "react";
-import {useFrame} from "@react-three/fiber";
+import {useFrame, useThree} from "@react-three/fiber";
 import {useModel} from "../gltf";
 import InteractiveElement from "./InteractiveElement";
 import AnimationActionController from "../AnimationActionController";
@@ -8,6 +8,7 @@ import {useApp} from "../App";
 import PowerOnVideo from "../videos/power_on.mp4";
 import SpliceVideo from "../videos/splice.mp4";
 import Video from "./Video";
+import {useRenderDispatcher} from "./RenderDispatcher";
 
 const BASE_ANIMATION_SPEED = 5;
 
@@ -33,6 +34,8 @@ export default function Splicer(props) {
 
     const [video, setVideo] = useState(null);
 
+    const dispatcher = useRenderDispatcher();
+
     useMemo(() => {
         appState.splicer = {
             model: model.current,
@@ -44,8 +47,10 @@ export default function Splicer(props) {
         setMixer(appState.splicer.mixer);
     }, []);
 
-    useFrame((_, delta) => {
-        if (mixer) mixer.update(delta);
+    useFrame(() => {
+        if (!mixer) return;
+
+        mixer.update(dispatcher.delta);
     });
 
     if (!mixer) return null;
@@ -153,15 +158,23 @@ function SplicerElement(props) {
 
 function AnimatedSplicerElement(props) {
     const controller = useRef(null);
-    const {animations, mixer, children} = useSplicer();
+    const splicer = useSplicer();
+    const {animations, mixer, children} = splicer;
+
+    const dispatcher = useRenderDispatcher();
 
     useMemo(() => {
         controller.current = AnimationActionController.fromAnimationName(animations, mixer, props.animation);
         controller.current.onCompleted = () => {
             if (props.onAnimationCompleted) props.onAnimationCompleted();
+
+            dispatcher.end();
         };
+
         controller.current.onReset = () => {
             if (props.onAnimationReset) props.onAnimationReset();
+
+            dispatcher.end();
         };
     }, []);
 
@@ -190,6 +203,7 @@ function AnimatedSplicerElement(props) {
 
     const onClick = () => {
         if (checkDependencies()) {
+            dispatcher.begin();
             controller.current.toggle();
 
             if (props.onClick) props.onClick();
@@ -598,7 +612,12 @@ function HeaterIndicator({state = ""}) {
     const initialColor = useRef(null);
     const activeColor = useRef(null);
 
-    const setColor = color => object.current.material.color.set(color);
+    const {invalidate} = useThree();
+
+    const setColor = color => {
+        object.current.material.color.set(color);
+        invalidate();
+    };
 
     const startBlinking = () => {
         if (intervalId.current !== null) stopBlinking();

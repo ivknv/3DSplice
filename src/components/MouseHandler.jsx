@@ -1,5 +1,5 @@
 import React, {createContext, useContext, useEffect, useMemo, useRef, useState} from "react";
-import {useFrame} from "@react-three/fiber";
+import {useFrame, useThree} from "@react-three/fiber";
 import {useCursor} from "@react-three/drei";
 import {useTooltip} from "./Tooltip";
 
@@ -14,6 +14,8 @@ const DRAG_TRESHOLD = 4;
 export default function MouseHandler(props) {
     const currentHover = useRef(null);
     const state = useRef(null);
+
+    const {raycaster, invalidate} = useThree();
 
     useMemo(() => {
         currentHover.current = {element: null, materials: new Map()};
@@ -33,17 +35,24 @@ export default function MouseHandler(props) {
                 }
             },
             loseFocus() {
-                if (!this.focus) return;
+                if (!this.focus) {
+                    return;
+                }
 
                 this.focus.onFocusLoss();
                 this.focus = null;
             },
             update() {
                 const element = currentHover.current.element;
-                if (!element) return;
+                if (!element) {
+                    invalidate();
+                    return;
+                }
 
                 updateTooltip(element, undefined, undefined);
                 element.objects.forEach(x => x.material.color.set(element.highlightColor));
+
+                invalidate();
             }
         };
     }, []);
@@ -70,6 +79,8 @@ export default function MouseHandler(props) {
         element.hovered = true;
         state.current.hovered = element;
         setHover(true);
+
+        invalidate();
     };
 
     const unsetElementHover = () => {
@@ -81,6 +92,8 @@ export default function MouseHandler(props) {
         currentHover.current.element = null;
         state.current.hovered = null;
         setHover(false);
+
+        invalidate();
     };
 
     const loseFocus = () => state.current.loseFocus();
@@ -96,7 +109,7 @@ export default function MouseHandler(props) {
         }
     };
 
-    useFrame(({raycaster}) => {
+    const update = () => {
         if (!groupRef.current) return;
 
         const intersection = raycaster.intersectObjects(groupRef.current.children);
@@ -108,16 +121,32 @@ export default function MouseHandler(props) {
         } else {
             updateTooltip(null, undefined, undefined);
         }
-    });
+    };
+
+    const onPointerMove = event => {
+        event.stopPropagation();
+
+        tooltip.setX(event.clientX + 16);
+        tooltip.setY(event.clientY + 16);
+        update();
+    };
+
+    const onPointerEnter = onPointerMove;
+
+    const onPointerLeave = event => {
+        event.stopPropagation();
+        update();
+    };
+
+    useFrame(update);
 
     return (
         <MouseContext.Provider value={state.current}>
             <group
                 ref={groupRef}
-                onPointerMove={event => {
-                    tooltip.setX(event.clientX + 16);
-                    tooltip.setY(event.clientY + 16);
-                }}
+                onPointerMove={onPointerMove}
+                onPointerEnter={onPointerEnter}
+                onPointerLeave={onPointerLeave}
                 onClick={event => {
                     event.stopPropagation();
 

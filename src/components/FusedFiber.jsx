@@ -6,6 +6,8 @@ import {useFrame, useThree} from "@react-three/fiber";
 import InteractiveElement from "./InteractiveElement";
 import {clamp, projectMouseOntoPlane} from "../common";
 import * as Colors from "../colors";
+import {useRenderDispatcher} from "./RenderDispatcher";
+import {usePointerMove} from "./Simulator";
 
 function makeKeyframeTrack(model, offsetY, offsetZ) {
     return new THREE.VectorKeyframeTrack(
@@ -23,10 +25,11 @@ function makeKeyframeTrack(model, offsetY, offsetZ) {
 }
 
 class FusedFiberState {
-    constructor(app, group, pointer, camera) {
+    constructor(app, group, pointer, camera, renderDispatcher) {
         this.app = app;
         this.group = group;
         this.fibers = [];
+        this.dispatcher = renderDispatcher;
         this.pointer = pointer;
         this.camera = camera;
 
@@ -67,10 +70,8 @@ class FusedFiberState {
         }
     }
 
-    update(delta) {
-        this.mixer.update(delta);
-
-        if (this.held) this.syncWithMouse();
+    update() {
+        this.mixer.update(this.dispatcher.delta);
         this.updateRotation();
     }
 
@@ -83,6 +84,7 @@ class FusedFiberState {
         this.initialAngles = fibers.map(f => f.rotation.z);
 
         this.animationController.onCompleted = () => {
+            this.dispatcher.end();
             this.app.state.onFiberRemoved();
         };
     }
@@ -111,6 +113,11 @@ class FusedFiberState {
     isAnimationCompleted() {
         return this.animationController.state === "completed";
     }
+
+    startAnimation() {
+        this.dispatcher.begin();
+        this.animationController.playForward();
+    }
 }
 
 export default function FusedFiber(props) {
@@ -122,11 +129,14 @@ export default function FusedFiber(props) {
 
     const appState = useApp();
 
+    const {invalidate, pointer, camera} = useThree();
+    const renderDispatcher = useRenderDispatcher();
+
     useEffect(() => {
         setActive(props.active ?? false);
 
         if (props.active && !fiberState.current) {
-            fiberState.current = new FusedFiberState(appState, group, pointer, camera);
+            fiberState.current = new FusedFiberState(appState, group, pointer, camera, renderDispatcher);
             fiberState.current.setFibers(appState.fibers);
             setReady(true);
         }
@@ -138,16 +148,21 @@ export default function FusedFiber(props) {
 
     useEffect(() => {
         if (props.canExtract) {
-            fiberState.current.animationController.playForward();
+            fiberState.current.startAnimation();
         }
     }, [props.canExtract]);
 
-    const {pointer, camera} = useThree();
-
-    useFrame((_, delta) => {
+    useFrame(() => {
         if (!active || !ready) return;
-        fiberState.current.update(delta);
+        fiberState.current.update();
     });
+
+    const pointerHandler = usePointerMove(() => {
+        const state = fiberState.current;
+
+        state.syncWithMouse();
+        invalidate();
+    }, false);
 
     const onClick = () => {
         const state = fiberState.current;
@@ -162,6 +177,8 @@ export default function FusedFiber(props) {
             state.originalPosition.copy(state.position);
             state.clickPoint = state.projectMouseOntoFiber();
             state.held = true;
+
+            pointerHandler.setActive(true);
         } else {
             reset();
         }
@@ -178,6 +195,7 @@ export default function FusedFiber(props) {
         }
 
         state.held = false;
+        pointerHandler.setActive(false);
     };
 
     return (

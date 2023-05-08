@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import {Canvas} from "@react-three/fiber";
 import TooltipScope from "./Tooltip";
 import Instructions from "./Instructions";
@@ -18,6 +18,32 @@ import SpliceProtectionModel from "../models/splice_protection_case.gltf";
 import SpliceProtection from "./SpliceProtection";
 import {useApp} from "../App";
 import States from "./states/States";
+import RenderDispatcher from "./RenderDispatcher";
+
+export function usePointerMove(callback, active) {
+    const app = useApp();
+
+    const handler = {
+        callback: callback,
+        setActive(active) {
+            if (active) {
+                app.pointerMoveCallbacks.add(this.callback);
+            } else {
+                app.pointerMoveCallbacks.delete(this.callback);
+            }
+        },
+    };
+
+    useEffect(() => {
+        if (active ?? true) {
+            app.pointerMoveCallbacks.add(callback);
+        }
+
+        return () => app.pointerMoveCallbacks.delete(callback);
+    }, []);
+
+    return handler;
+}
 
 export default function Simulator({hashParameters = new Map(), ...props}) {
     const [rendererParameters, setRendererParameters] = useState(new Object());
@@ -26,6 +52,7 @@ export default function Simulator({hashParameters = new Map(), ...props}) {
     const [instructions, setInstructions] = useState("Включите сварочный аппарат");
     const [testButtonVisible, setTestButtonVisible] = useState(false);
     const appState = useApp();
+    const container = useRef(null);
 
     useEffect(() => {
         setRendererParameters(setupRendererParameters(hashParameters));
@@ -35,6 +62,17 @@ export default function Simulator({hashParameters = new Map(), ...props}) {
     useMemo(() => {
         appState.instructions = instructions;
         appState.setInstructions = setInstructions;
+        appState.pointerMoveCallbacks = new Set();
+    }, []);
+
+    useEffect(() => {
+        const onPointerMove = event => {
+            appState.pointerMoveCallbacks.forEach(f => f(event));
+        };
+
+        container.current.addEventListener("pointermove", onPointerMove);
+
+        return () => container.current.removeEventListener("pointermove", onPointerMove);
     }, []);
 
     return (
@@ -46,12 +84,17 @@ export default function Simulator({hashParameters = new Map(), ...props}) {
             <GLTFModel name="fiber" data={FiberModel} />
             <GLTFModel name="spliceProtection" data={SpliceProtectionModel} />
 
-            <div className="application-container" style={{opacity: opacity, transition: "opacity 1.5s"}}>
+            <div
+                className="application-container"
+                style={{opacity: opacity, transition: "opacity 1.5s"}}
+                ref={container}
+            >
                 <Instructions text={instructions} visible={true}/>
                 <TooltipScope visible={false}>
                     <Canvas
                         gl={rendererParameters}
                         dpr={dpr}
+                        frameloop="demand"
                         camera={{
                             fov: 20,
                             near: 0.025,
@@ -122,7 +165,7 @@ function Scene({onLoaded, onScenarioCompleted}) {
     if (!loaded) return null;
 
     return (
-        <>
+        <RenderDispatcher>
             <States
                 onSpliceCompleted={() => setSpliceCompleted(true)}
                 extractFusedFiber={() => setCanExtractFusedFiber(true)}
@@ -160,7 +203,7 @@ function Scene({onLoaded, onScenarioCompleted}) {
                 />
             </MouseHandler>
             <Lights/>
-        </>
+        </RenderDispatcher>
     );
 }
 

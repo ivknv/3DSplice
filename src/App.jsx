@@ -1,4 +1,4 @@
-import React, {useState, useRef, useMemo, createContext, useContext} from "react";
+import React, {useState, useRef, useMemo, createContext, useContext, useEffect} from "react";
 import SplashScreen from "./components/SplashScreen";
 import Help from "./components/Help";
 import HelpButton from "./components/HelpButton";
@@ -40,6 +40,7 @@ export default function App() {
     const [testVisible, setTestVisible] = useState(false);
 
     const context = useRef(null);
+    const main = useRef(null);
 
     useMemo(() => {
         context.current = {
@@ -66,7 +67,7 @@ export default function App() {
 
     return (
         <AppContext.Provider value={context.current}>
-            <section id="main" style={{display: "none"}}>
+            <section id="main" style={{display: "none"}} ref={main}>
                 <Facade visible={facadeVisible}/>
                 <Simulator
                     hashParameters={parseURLHashParameters()}

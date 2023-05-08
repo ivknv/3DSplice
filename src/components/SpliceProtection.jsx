@@ -7,16 +7,19 @@ import {clamp, projectMouseOntoPlane} from "../common";
 import {useFrame, useThree} from "@react-three/fiber";
 import {useApp} from "../App";
 import * as Colors from "../colors";
+import {useRenderDispatcher} from "./RenderDispatcher";
+import {usePointerMove} from "./Simulator";
 
 const HEATING_DURATION = 120; // seconds
 const COOLING_DURATION = 30; // seconds
 
 class SpliceProtectionState {
-    constructor(app, group, animations, fiber, pointer, camera) {
+    constructor(app, group, animations, fiber, pointer, camera, renderDispatcher) {
         this.app = app;
         this.group = group;
         this.originalPosition = new THREE.Vector3();
         this.clickPoint = new THREE.Vector3();
+        this.dispatcher = renderDispatcher;
 
         this.fiber = fiber;
         this.box = new THREE.Box3().setFromObject(fiber);
@@ -42,6 +45,8 @@ class SpliceProtectionState {
             this.timeoutId = setTimeout(() => {
                 this.app.state.onCoolingCompleted();
             }, COOLING_DURATION * 1000);
+
+            this.dispatcher.end();
         };
 
         this.timeoutId = null;
@@ -110,6 +115,7 @@ class SpliceProtectionState {
     }
 
     shrink() {
+        this.dispatcher.begin();
         this.animationController.playForward();
     }
 
@@ -138,12 +144,13 @@ export default function SpliceProtection(props) {
         padding.current = model.getObjectByName("Cube").clone();
     }, []);
 
-    const {camera, pointer} = useThree();
+    const {camera, invalidate, pointer} = useThree();
+    const renderDispatcher = useRenderDispatcher();
 
     useEffect(() => {
         const fiber = appState.fibers.find(x => x.name === "rightFiber");
         spliceProtectionState.current = new SpliceProtectionState(
-            appState, group, animations, fiber, pointer, camera);
+            appState, group, animations, fiber, pointer, camera, renderDispatcher);
         spliceProtectionState.current.setPosition(props.initialPosition);
 
         return () => {
@@ -160,11 +167,19 @@ export default function SpliceProtection(props) {
         if (props.shrink) spliceProtectionState.current.shrink();
     }, [props.shrink])
 
-    useFrame((_, delta) => {
+    useFrame(() => {
         if (!spliceProtectionState.current) return;
 
-        spliceProtectionState.current.update(delta);
+        spliceProtectionState.current.update(renderDispatcher.delta);
     });
+
+    const pointerHandler = usePointerMove(() => {
+        const state = spliceProtectionState.current;
+
+        state.syncWithMouse();
+        state.updateRotation();
+        invalidate();
+    }, false);
 
     const onClick = () => {
         const state = spliceProtectionState.current;
@@ -178,6 +193,7 @@ export default function SpliceProtection(props) {
             state.clickPoint.copy(state.projectMouseOntoModel());
 
             state.held = true;
+            pointerHandler.setActive(true);
         } else {
             reset();
         }
@@ -192,9 +208,11 @@ export default function SpliceProtection(props) {
             state.syncWithMouse();
             state.updateRotation();
             state.checkPlacement();
+            invalidate();
         }
 
         state.held = false;
+        pointerHandler.setActive(false);
     };
 
     return (
