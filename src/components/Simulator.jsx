@@ -6,7 +6,7 @@ import {clamp} from "../common";
 import * as Colors from "../colors"
 import * as THREE from "three";
 import Splicer from "./Splicer";
-import {AdaptiveDpr, OrbitControls, PerformanceMonitor, Stats, usePerformanceMonitor} from "@react-three/drei";
+import {AdaptiveDpr, OrbitControls, Stats} from "@react-three/drei";
 import MouseHandler from "./MouseHandler";
 import Fiber from "./Fiber";
 import {GLTFScope, GLTFModel} from "../gltf";
@@ -74,7 +74,7 @@ export default function Simulator({hashParameters = new Map(), ...props}) {
     }, []);
 
     const dpr = getDpr(hashParameters);
-    const minDpr = getMinDpr(hashParameters);
+    const minDpr = Math.min(getMinDpr(hashParameters), dpr);
 
     return (
         <GLTFScope>
@@ -102,8 +102,8 @@ export default function Simulator({hashParameters = new Map(), ...props}) {
                             position: [0.5 * 0.55, 1 * 0.33, 0.5 * 0.33]
                         }}
                         performance={{
-                            min: Math.min(minDpr, dpr),
-                            max: Math.max(dpr, minDpr)
+                            min: minDpr,
+                            max: dpr
                         }}
                         onCreated={state => setupRenderer(state, hashParameters)}
                         scene={{background: new THREE.Color(Colors.CLEAR)}}
