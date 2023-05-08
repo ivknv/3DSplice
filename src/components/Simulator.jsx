@@ -1,12 +1,12 @@
 import React, {useEffect, useMemo, useRef, useState} from "react";
-import {Canvas} from "@react-three/fiber";
+import {Canvas, useThree} from "@react-three/fiber";
 import TooltipScope from "./Tooltip";
 import Instructions from "./Instructions";
 import {clamp} from "../common";
 import * as Colors from "../colors"
 import * as THREE from "three";
 import Splicer from "./Splicer";
-import {OrbitControls, Stats} from "@react-three/drei";
+import {AdaptiveDpr, OrbitControls, PerformanceMonitor, Stats, usePerformanceMonitor} from "@react-three/drei";
 import MouseHandler from "./MouseHandler";
 import Fiber from "./Fiber";
 import {GLTFScope, GLTFModel} from "../gltf";
@@ -48,7 +48,6 @@ export function usePointerMove(callback, active) {
 export default function Simulator({hashParameters = new Map(), ...props}) {
     const [rendererParameters, setRendererParameters] = useState(new Object());
     const [opacity, setOpacity] = useState(0);
-    const [dpr, setDpr] = useState(window.devicePixelRatio);
     const [instructions, setInstructions] = useState("Включите сварочный аппарат");
     const [testButtonVisible, setTestButtonVisible] = useState(false);
     const appState = useApp();
@@ -56,7 +55,6 @@ export default function Simulator({hashParameters = new Map(), ...props}) {
 
     useEffect(() => {
         setRendererParameters(setupRendererParameters(hashParameters));
-        setDpr(getDpr(hashParameters));
     }, [hashParameters]);
 
     useMemo(() => {
@@ -74,6 +72,9 @@ export default function Simulator({hashParameters = new Map(), ...props}) {
 
         return () => container.current.removeEventListener("pointermove", onPointerMove);
     }, []);
+
+    const dpr = getDpr(hashParameters);
+    const minDpr = getMinDpr(hashParameters);
 
     return (
         <GLTFScope>
@@ -93,13 +94,16 @@ export default function Simulator({hashParameters = new Map(), ...props}) {
                 <TooltipScope visible={false}>
                     <Canvas
                         gl={rendererParameters}
-                        dpr={dpr}
                         frameloop={hashParameters.get("frameloop") || "demand"}
                         camera={{
                             fov: 55,
                             near: 0.025,
                             far: 1000,
                             position: [0.5 * 0.55, 1 * 0.33, 0.5 * 0.33]
+                        }}
+                        performance={{
+                            min: Math.min(minDpr, dpr),
+                            max: Math.max(dpr, minDpr)
                         }}
                         onCreated={state => setupRenderer(state, hashParameters)}
                         scene={{background: new THREE.Color(Colors.CLEAR)}}
@@ -151,6 +155,8 @@ function Scene({onLoaded, onScenarioCompleted}) {
     const [shrinkSpliceProtection, setShrinkSpliceProtection] = useState(false);
     const appState = useApp();
 
+    const {regress} = useThree().performance;
+
     useAllLoaded(() => {
         setLoaded(true);
         onLoaded();
@@ -180,7 +186,10 @@ function Scene({onLoaded, onScenarioCompleted}) {
                     if (onScenarioCompleted) onScenarioCompleted();
                 }}
             />
-            <OrbitControls enableDamping={false} />
+            <OrbitControls
+                enableDamping={false}
+                onChange={regress}
+            />
             <MouseHandler>
                 <Splicer heaterState={heaterState} />
                 <FusedFiber active={spliceCompleted} canExtract={canExtractFusedFiber}>
@@ -203,6 +212,7 @@ function Scene({onLoaded, onScenarioCompleted}) {
                 />
             </MouseHandler>
             <Lights/>
+            <AdaptiveDpr/>
         </RenderDispatcher>
     );
 }
@@ -228,7 +238,14 @@ function setupRendererParameters(hashParameters) {
 
 function getDpr(hashParameters) {
     return clamp(
-        parseFloat(hashParameters.get("pixelRatio") || window.devicePixelRatio),
+        parseFloat(hashParameters.get("dpr") || window.devicePixelRatio),
+        0.1,
+        window.devicePixelRatio);
+}
+
+function getMinDpr(hashParameters) {
+    return clamp(
+        parseFloat(hashParameters.get("minDpr") || window.devicePixelRatio),
         0.1,
         window.devicePixelRatio);
 }
