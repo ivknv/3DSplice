@@ -237,6 +237,7 @@ export default function Fiber(props) {
         const state = fiberState.current;
 
         state.syncWithMouse();
+        state.updateRotation();
         state.checkPlacement();
 
         setHighlightColor(Colors.HIGHLIGHT);
