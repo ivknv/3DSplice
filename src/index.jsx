@@ -6,8 +6,10 @@ import "./fonts/OpenSans-Regular.ttf";
 import App from "./App"
 
 function main() {
-    const root = ReactDOM.createRoot(document.getElementById("root"));
-    root.render(<App/>);
+    document.addEventListener("DOMContentLoaded", () => {
+        const root = ReactDOM.createRoot(document.getElementById("root"));
+        root.render(<App/>);
+    });
 }
 
 main();
