@@ -1,6 +1,6 @@
 import React, {createContext, useContext, useEffect, useMemo, useRef, useState} from "react";
 import {useFrame, useThree} from "@react-three/fiber";
-import {useCursor} from "@react-three/drei";
+import {useSimulatorCursor} from "./Simulator";
 import {useTooltip} from "./Tooltip";
 
 const MouseContext = createContext(null);
@@ -60,7 +60,7 @@ export default function MouseHandler(props) {
     const groupRef = useRef(null);
 
     const [hover, setHover] = useState(false);
-    useCursor(hover, "pointer", "auto");
+    useSimulatorCursor(hover, "pointer", "auto");
 
     const tooltip = useTooltip();
 

@@ -1,4 +1,5 @@
-import React, {useRef, useEffect} from "react";
+import React, {useRef, useEffect, useState} from "react";
+import {useHideOnTransition} from "../common";
 import Figure1 from "../images/1.png"
 import Figure2 from "../images/2.png"
 import Figure3 from "../images/3.png"
@@ -12,15 +13,28 @@ import Figure10 from "../images/10.png"
 
 export default function Theory({visible = true, goNext}) {
     const theory = useRef(null);
-
+    const [display, setDisplay] = useState(visible ? "block" : "none");
+    
     useEffect(() => {
         theory.current.scroll(0, 0);
-    }, []);
+    }, [display]);
+    
+    useEffect(() => {
+        if (visible) {
+            setDisplay("block");
+        }
+    }, [visible]);
+    
+    useHideOnTransition(
+        () => theory.current,
+        () => setDisplay("none"),
+        () => setDisplay("block"));
 
     return (
         <section
             id="theory"
             style={{
+                display: display,
                 opacity: visible ? "" : 0,
                 pointerEvents: visible ? "auto" : "none"
             }}

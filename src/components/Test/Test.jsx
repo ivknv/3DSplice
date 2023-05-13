@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useState} from "react";
+import {useHideOnTransition} from "../../common";
 import {shuffleArray} from "../../common";
 import _questions from "./TestQuestions";
 import TestForm from "./TestForm";
@@ -30,6 +31,18 @@ export default function Test({visible = true}) {
     const [nameEntered, setNameEntered] = useState(false);
     const identity = useRef(new Object());
     const answers = new Map();
+
+    const section = useRef(null);
+    const [display, setDisplay] = useState(visible ? "flex" : "none");
+
+    useHideOnTransition(
+        () => section.current,
+        () => setDisplay("none"),
+        () => setDisplay("flex"));
+
+    useEffect(() => {
+        if (visible) setDisplay("flex");
+    }, [visible]);
 
     const questions = useRef(null);
 
@@ -73,14 +86,16 @@ export default function Test({visible = true}) {
         <section
             id="test"
             style={{
+                display: display,
                 opacity: visible ? "" : 0,
                 pointerEvents: visible ? "auto" : "none",
-                display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 gap: "12px"
-            }}>
-            <h1>Тест по сварочным аппаратам</h1>
+            }}
+            ref={section}
+        >
+            <h1>Тест по сварочному аппарату Fujikura FSM-30S</h1>
             {(() => {
                 if (!testFinished) {
                     if (!nameEntered) {

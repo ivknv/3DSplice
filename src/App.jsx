@@ -34,10 +34,10 @@ function parseURLHashParameters() {
 export default function App() {
     const [facadeVisible, setFacadeVisible] = useState(true);
     const [theoryVisible, setTheoryVisible] = useState(false);
-    const [splashScreenVisible, setSplashScreenVisible] = useState(true);
+    const [splashScreenVisible, setSplashScreenVisible] = useState(false);
     const [helpButtonVisible, setHelpButtonVisible] = useState(false);
     const [helpVisible, setHelpVisible] = useState(false);
-    const [testVisible, setTestVisible] = useState(false);
+    const [testVisible, setTestVisible] = useState(true);
 
     const context = useRef(null);
     const main = useRef(null);

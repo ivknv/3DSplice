@@ -1,13 +1,28 @@
-import React from "react";
+import React, {useEffect, useRef, useState} from "react";
+import {useHideOnTransition} from "../common";
 
 export default function Help({visible = true, goNext}) {
+    const section = useRef(null);
+    const [display, setDisplay] = useState(visible ? "block" : "none");
+    
+    useEffect(() => {
+        if (visible) setDisplay("block");
+    }, [visible]);
+
+    useHideOnTransition(
+        () => section.current,
+        () => setDisplay("none"),
+        () => setDisplay("block"));
+
     return (
         <section
             id="help"
             style={{
+                display: display,
                 opacity: visible ? "" : 0,
                 pointerEvents: visible ? "auto" : "none"
             }}
+            ref={section}
         >
             <h1>Как пользоваться?</h1>
             <h3>Взаимодействие с 3D-объектами</h3>

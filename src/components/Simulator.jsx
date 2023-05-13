@@ -2,7 +2,7 @@ import React, {useEffect, useMemo, useRef, useState} from "react";
 import {Canvas, useThree} from "@react-three/fiber";
 import TooltipScope from "./Tooltip";
 import Instructions from "./Instructions";
-import {clamp} from "../common";
+import {clamp, useHideOnTransition} from "../common";
 import * as Colors from "../colors"
 import * as THREE from "three";
 import Splicer from "./Splicer";
@@ -45,6 +45,17 @@ export function usePointerMove(callback, active) {
     return handler;
 }
 
+export function useSimulatorCursor(value, cursor, defaultCursor) {
+    const app = useApp();
+    useEffect(() => {
+        if (value) {
+            app.setSimulatorCursor(cursor);
+        } else {
+            app.setSimulatorCursor(defaultCursor ?? "");
+        }
+    }, [value]);
+}
+
 export default function Simulator({hashParameters = new Map(), ...props}) {
     const [rendererParameters, setRendererParameters] = useState(new Object());
     const [opacity, setOpacity] = useState(0);
@@ -61,6 +72,9 @@ export default function Simulator({hashParameters = new Map(), ...props}) {
         appState.instructions = instructions;
         appState.setInstructions = setInstructions;
         appState.pointerMoveCallbacks = new Set();
+        appState.setSimulatorCursor = cursor => {
+            container.current.style.cursor = cursor;
+        };
     }, []);
 
     useEffect(() => {
@@ -101,6 +115,7 @@ export default function Simulator({hashParameters = new Map(), ...props}) {
                             far: 1000,
                             position: [0.5 * 0.55, 1 * 0.33, 0.5 * 0.33]
                         }}
+                        dpr={dpr}
                         performance={{
                             min: minDpr,
                             max: dpr
@@ -122,10 +137,23 @@ export default function Simulator({hashParameters = new Map(), ...props}) {
 
 function StartTestButton(props) {
     const [hidden, setHidden] = useState(false);
+    const [display, setDisplay] = useState(props.visible ? "block" : "none");
+    const button = useRef(null);
+    
+    useEffect(() => {
+        if (props.visible) setDisplay("block");
+    }, [props.visible]);
+
+    useHideOnTransition(
+        () => button.current,
+        () => setDisplay("none"),
+        () => setDisplay("block"));
+
     return (
         <button
             className="blue-button"
             style={{
+                display: display,
                 position: "fixed",
                 left: 0,
                 right: 0,
@@ -140,6 +168,7 @@ function StartTestButton(props) {
                 setHidden(true);
                 if (props.startTest) props.startTest();
             }}
+            ref={button}
         >
             Приступить к тесту
         </button>

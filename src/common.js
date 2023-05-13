@@ -1,16 +1,8 @@
 import * as THREE from "three";
+import {useEffect} from "react";
 
 export function clamp(x, a, b) {
     return Math.max(Math.min(x, b), a);
-}
-
-export function override(method, newMethod) {
-    return (...args) => newMethod(method, ...args);
-}
-
-export function overrideMethod(object, methodName, newMethod) {
-    const method = object[methodName];
-    object[methodName] = override(method, newMethod);
 }
 
 export function projectMouseOntoPlane(planePosition, mousePosition, coordinate, camera) {
@@ -35,4 +27,25 @@ export function shuffleArray(array) {
         const randomIndex = Math.floor(Math.random() * (i + 1));
         [array[i], array[randomIndex]] = [array[randomIndex], array[i]];
     }
+}
+
+export function useTransitionEnd(callback, elementFactory) {
+    useEffect(() => {
+        const element = elementFactory();
+
+        element.addEventListener("transitionend", callback);
+
+        return () => element.removeEventListener("transitionend", callback);
+    }, []);
+}
+
+export function useHideOnTransition(elementFactory, hide, show) {
+    useTransitionEnd(event => {
+        const opacity = event.target.style.opacity;
+        if (opacity !== "" && opacity <= 0.01) {
+            hide();
+        } else if (opacity >= 0.99) {
+            show();
+        }
+    }, elementFactory);
 }

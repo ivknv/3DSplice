@@ -89,7 +89,7 @@ class SpliceProtectionState {
     }
 
     projectMouseOntoModel() {
-        return projectMouseOntoPlane(this.position, this.pointer, "y", this.camera);
+        return projectMouseOntoPlane(this.position, this.pointer, "z", this.camera);
     }
 
     updateRotation() {

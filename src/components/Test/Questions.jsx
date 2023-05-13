@@ -20,7 +20,7 @@ function Question(props) {
                 <img
                     src={props.figure}
                     style={{
-                        maxWidth: "300px",
+                        maxWidth: "100%",
                         maxHeight: "300px",
                         alignSelf: "center",
                         marginTop: "8px",
