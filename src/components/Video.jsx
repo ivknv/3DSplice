@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import * as THREE from "three";
 import {useRenderDispatcher} from "./RenderDispatcher";
 
@@ -8,15 +8,17 @@ export default function Video(props) {
 
     const dispatcher = useRenderDispatcher();
 
-    useEffect(() => {
+    useMemo(() => {
         domElement.current = document.createElement("video");
         domElement.current.muted = true;
         domElement.current.style.display = "none";
-        domElement.current.src = props.src;
+        domElement.current.src = props.src ?? "";
         domElement.current.playbackRate = 1;
         texture.current = new THREE.VideoTexture(domElement.current);
         texture.current.flipY = false;
+    }, []);
 
+    useEffect(() => {
         const onEnded = () => {
             if (props.resetAfterEnd) {
                 domElement.current.currentTime = 0;
@@ -51,6 +53,10 @@ export default function Video(props) {
             domElement.current.pause();
         }
     }, [props.play]);
+
+    useEffect(() => {
+        domElement.current.src = props.src ?? "";
+    }, [props.src]);
 
     return null;
 }

@@ -5,10 +5,9 @@ import InteractiveElement from "./InteractiveElement";
 import AnimationActionController from "../AnimationActionController";
 import * as THREE from "three";
 import {useApp} from "../App";
-import PowerOnVideo from "../videos/power_on.mp4";
-import SpliceVideo from "../videos/splice.mp4";
 import Video from "./Video";
 import {useRenderDispatcher} from "./RenderDispatcher";
+import {useVideo} from "./Simulator";
 
 const BASE_ANIMATION_SPEED = 5;
 
@@ -29,8 +28,11 @@ export default function Splicer(props) {
     const animations = useRef(gltf.animations);
     const appState = useApp();
 
-    const powerOnVideo = useRef(null);
-    const spliceVideo = useRef(null);
+    const powerOnVideo = useVideo("powerOn");
+    const spliceVideo = useVideo("splice");
+
+    const powerOnTexture = useRef(null);
+    const spliceTexture = useRef(null);
 
     const [video, setVideo] = useState(null);
 
@@ -58,15 +60,15 @@ export default function Splicer(props) {
     return (
         <primitive object={model.current} position={[0, -0.07, 0]}>
             <Video
-                src={PowerOnVideo}
-                onCreated={texture => powerOnVideo.current = texture}
-                play={(video ?? false) && video === powerOnVideo.current}
+                src={powerOnVideo}
+                onCreated={texture => powerOnTexture.current = texture}
+                play={(video ?? false) && video === powerOnTexture.current}
                 onEnded={() => appState.state.onPowerOn()}
             />
             <Video
-                src={SpliceVideo}
-                onCreated={texture => spliceVideo.current = texture}
-                play={(video ?? false) && video === spliceVideo.current}
+                src={spliceVideo}
+                onCreated={texture => spliceTexture.current = texture}
+                play={(video ?? false) && video === spliceTexture.current}
                 resetAfterEnd={true}
                 onEnded={() => appState.state.onSpliceCompleted()}
             />
@@ -81,13 +83,13 @@ export default function Splicer(props) {
             <HeaterMainLidElement/>
             <HeaterClampsElement/>
             <SetButtonElement onPressed={() => {
-                setVideo(spliceVideo.current);
+                setVideo(spliceTexture.current);
             }} />
             <ResetButtonElement/>
             <HeatButtonElement/>
             <HeaterIndicator state={props.heaterState ?? "inactive"} />
             <PowerSwitchElement onToggle={() => {
-                setVideo(powerOnVideo.current);
+                setVideo(powerOnTexture.current);
             }}
         />
         </primitive>

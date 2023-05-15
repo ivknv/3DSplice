@@ -13,13 +13,18 @@ export function useGLTFData(callback, data) {
     const model = useRef(null);
 
     useEffect(() => {
+        if (!data) {
+            model.current = null;
+            return;
+        };
+
         parseGLTF(data).then(gltf => {
             model.current = gltf.scene.children[0];
             callback(gltf);
         });
 
         return () => model.current?.dispose();
-    }, []);
+    }, [data]);
 }
 
 const GLTFContext = createContext(null);

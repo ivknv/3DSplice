@@ -10,11 +10,8 @@ import {AdaptiveDpr, OrbitControls, Stats} from "@react-three/drei";
 import MouseHandler from "./MouseHandler";
 import Fiber from "./Fiber";
 import {GLTFScope, GLTFModel} from "../gltf";
-import {useAllLoaded} from "./LoaderScope";
+import {useAllLoaded, useLoad} from "./LoaderScope";
 import FusedFiber from "./FusedFiber";
-import SplicerModel from "../models/fujikura_fsm-30s.gltf";
-import FiberModel from "../models/fiber_optic_patch_cord.gltf";
-import SpliceProtectionModel from "../models/splice_protection_case.gltf";
 import SpliceProtection from "./SpliceProtection";
 import {useApp} from "../App";
 import States from "./states/States";
@@ -56,6 +53,26 @@ export function useSimulatorCursor(value, cursor, defaultCursor) {
     }, [value]);
 }
 
+export function useVideo(name) {
+    return useApp().videos[name];
+}
+
+function VideoLoader() {
+    const app = useApp();
+    const [startLoadingVideos, finalizeLoadingVideos] = useLoad();
+
+    useEffect(() => {
+        startLoadingVideos();
+
+        import("./videos").then(module => {
+            app.videos.splice = module.SpliceVideo;
+            app.videos.powerOn = module.PowerOnVideo;
+
+            finalizeLoadingVideos();
+        });
+    }, []);
+}
+
 export default function Simulator({hashParameters = new Map(), ...props}) {
     const [rendererParameters, setRendererParameters] = useState(new Object());
     const [opacity, setOpacity] = useState(0);
@@ -63,6 +80,10 @@ export default function Simulator({hashParameters = new Map(), ...props}) {
     const [testButtonVisible, setTestButtonVisible] = useState(false);
     const appState = useApp();
     const container = useRef(null);
+
+    const [splicerModel, setSplicerModel] = useState(null);
+    const [fiberModel, setFiberModel] = useState(null);
+    const [spliceProtectionModel, setSpliceProtectionModel] = useState(null);
 
     useEffect(() => {
         setRendererParameters(setupRendererParameters(hashParameters));
@@ -75,6 +96,19 @@ export default function Simulator({hashParameters = new Map(), ...props}) {
         appState.setSimulatorCursor = cursor => {
             container.current.style.cursor = cursor;
         };
+        appState.videos = new Object();
+
+        import("../models/fujikura_fsm-30s.gltf").then(module => {
+            setSplicerModel(module.default);
+        });
+
+        import("../models/fiber_optic_patch_cord.gltf").then(module => {
+            setFiberModel(module.default);
+        });
+
+        import("../models/splice_protection_case.gltf").then(module => {
+            setSpliceProtectionModel(module.default);
+        });
     }, []);
 
     useEffect(() => {
@@ -95,9 +129,10 @@ export default function Simulator({hashParameters = new Map(), ...props}) {
             {hashParameters.get("stats") === "true" &&
                 <Stats showPanel={0} className="stats" />
             }
-            <GLTFModel name="splicer" data={SplicerModel} />
-            <GLTFModel name="fiber" data={FiberModel} />
-            <GLTFModel name="spliceProtection" data={SpliceProtectionModel} />
+            <GLTFModel name="splicer" data={splicerModel} />
+            <GLTFModel name="fiber" data={fiberModel} />
+            <GLTFModel name="spliceProtection" data={spliceProtectionModel} />
+            <VideoLoader/>
 
             <div
                 className="application-container"
