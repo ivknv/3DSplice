@@ -1,0 +1,30 @@
+{
+    "parser": "@babel/eslint-parser",
+    "extends": ["eslint:recommended", "plugin:react/recommended"],
+    "env": {"browser": true, "es6": true},
+    "parserOptions": {
+        "requireConfigFile": false,
+        "babelOptions": {
+            "presets": [
+                [
+                    "@babel/preset-env",
+                    {
+                        "useBuiltIns": "entry",
+                        "targets": {"browsers": [">0.25%, not dead"]},
+                        "corejs": {
+                            "version": 3,
+                            "proposals": true
+                        }
+                    }
+                ],
+                "@babel/preset-react"
+            ]
+        }
+    },
+    "settings": {
+        "react": {
+            "version": "detect"
+        }
+    },
+    "rules": {}
+}

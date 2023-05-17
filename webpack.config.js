@@ -1,6 +1,7 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const HtmlInlineScriptPlugin = require("html-inline-script-webpack-plugin");
+const ESLintPlugin = require("eslint-webpack-plugin");
 
 const fontRule = {
     test: /\.(woff|woff2|eot|ttf|otf)$/i,
@@ -83,7 +84,8 @@ let config = {
         maxAssetSize: 5000000
     },
     plugins: [
-        new HtmlWebpackPlugin({template: "./src/index.html"})
+        new HtmlWebpackPlugin({template: "./src/index.html"}),
+        new ESLintPlugin()
     ],
     module: {rules: rules},
     resolve: {extensions: [".js", ".jsx"]},
