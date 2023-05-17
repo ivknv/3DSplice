@@ -4,7 +4,7 @@ import StartTestButton from "./StartTestButton";
 export default function TestResults(props) {
     const results = useRef(null);
     useEffect(() => {
-        const observer = new MutationObserver(mutation => {
+        const observer = new MutationObserver(() => {
             if (props.onTamper) props.onTamper();
         });
 

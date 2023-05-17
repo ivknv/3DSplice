@@ -1,4 +1,4 @@
-import React, {useState, useRef, useMemo, createContext, useContext, useEffect} from "react";
+import React, {useState, useRef, useMemo, createContext, useContext} from "react";
 import SplashScreen from "./components/SplashScreen";
 import Help from "./components/Help";
 import HelpButton from "./components/HelpButton";

@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef, useMemo} from "react";
-import {useThree, useFrame} from "@react-three/fiber";
+import {useThree} from "@react-three/fiber";
 import {useModel} from "../gltf";
 import {useSplicer} from "./Splicer";
 import {clamp, projectMouseOntoPlane} from "../common";

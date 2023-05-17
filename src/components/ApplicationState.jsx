@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import {useEffect} from "react";
 import {useApp} from "../App";
 
 export default function ApplicationState(props) {

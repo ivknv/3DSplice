@@ -16,7 +16,7 @@ export function useGLTFData(callback, data) {
         if (!data) {
             model.current = null;
             return;
-        };
+        }
 
         parseGLTF(data).then(gltf => {
             model.current = gltf.scene.children[0];
