@@ -13,22 +13,22 @@ import Figure10 from "../images/10.png"
 
 export default function Theory({visible = true, goNext}) {
     const theory = useRef(null);
-    const [display, setDisplay] = useState(visible ? "block" : "none");
-    
+    const [display, setDisplay] = useState(visible ? "flex" : "none");
+
     useEffect(() => {
         theory.current.scroll(0, 0);
     }, [display]);
-    
+
     useEffect(() => {
         if (visible) {
-            setDisplay("block");
+            setDisplay("flex");
         }
     }, [visible]);
-    
+
     useHideOnTransition(
         () => theory.current,
         () => setDisplay("none"),
-        () => setDisplay("block"));
+        () => setDisplay("flex"));
 
     return (
         <section
@@ -364,7 +364,13 @@ export default function Theory({visible = true, goNext}) {
                     сэвилен расплавляется и уплотняется вокруг оптического волокна. Несущий металлический элемент надёжно защищает оптическое волокно от изгиба внутри термоусаживаемой трубки.
                 </p>
             </section>
-            <br/>
+            <section style={{maxWidth: "800px", width: "100%"}}>
+                <h3>Руководство по эксплуатации Fujikura FSM-30S</h3>
+                <a target="_blank" href="./FUJIKURA_FSM-30S_user_guide.pdf">
+                    Руководство по эксплуатации Fujikura FSM-30S
+                </a>
+            </section>
+            <div style={{margin: "8px"}}></div>
             <button
                 className="blue-button blue-button-centered"
                 id="finish-theory-button"
