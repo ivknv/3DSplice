@@ -40,7 +40,7 @@ export default function Help({visible = true, goNext}) {
             <div style={{margin: "8px"}}></div>
             <a
                 target="_blank"
-                href="./FUJIKURA_FSM-30S_user_guide.pdf"
+                href="./assets/FUJIKURA_FSM-30S_user_guide.pdf"
                 style={{
                     alignSelf: "flex-start",
                 }}

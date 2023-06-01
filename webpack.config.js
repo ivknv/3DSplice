@@ -6,7 +6,7 @@ const ESLintPlugin = require("eslint-webpack-plugin");
 const fontRule = {
     test: /\.(woff|woff2|eot|ttf|otf)$/i,
     exclude: /node_modules/,
-    type: "asset/inline"
+    type: "asset/resource"
 };
 
 const jsRule = {
@@ -53,7 +53,7 @@ const rules = [
     },
     {
         test: /\.(png|jpg)$/i,
-        type: "asset/inline"
+        type: "asset/resource"
     },
     {
         test: /\.html$/i,
@@ -66,7 +66,8 @@ const rules = [
 let config = {
     entry: "./src/index.jsx",
     output: {
-        filename: "[name].js",
+        filename: "js/[name].js",
+        assetModuleFilename: "assets/[hash][ext][query]",
         path: path.resolve(__dirname, "dist"),
         environment: {
             arrowFunction: false,

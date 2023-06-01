@@ -361,7 +361,7 @@ export default function Theory({visible = true, goNext}) {
             </section>
             <section style={{maxWidth: "800px", width: "100%"}}>
                 <h3>Руководство по эксплуатации Fujikura FSM-30S</h3>
-                <a target="_blank" href="./FUJIKURA_FSM-30S_user_guide.pdf">
+                <a target="_blank" href="./assets/FUJIKURA_FSM-30S_user_guide.pdf">
                     Руководство по эксплуатации Fujikura FSM-30S
                 </a>
             </section>
