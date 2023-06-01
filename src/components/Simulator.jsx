@@ -309,7 +309,7 @@ function getDpr(hashParameters) {
 
 function getMinDpr(hashParameters) {
     return clamp(
-        parseFloat(hashParameters.get("minDpr") || window.devicePixelRatio),
+        parseFloat(hashParameters.get("minDpr") || 0.3),
         0.1,
         window.devicePixelRatio);
 }
