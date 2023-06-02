@@ -139,7 +139,7 @@ p {
     bottom: 0;
     margin: auto;
     max-width: 100%;
-    overflow-y: scroll;
+    overflow-y: auto;
     z-index: 25;
     transition: 0.3s opacity;
     padding: 4px 12px;

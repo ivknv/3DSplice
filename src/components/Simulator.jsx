@@ -185,28 +185,33 @@ function StartTestButton(props) {
         () => setDisplay("block"));
 
     return (
-        <button
-            className="blue-button"
+        <div
             style={{
-                display: display,
                 position: "fixed",
                 left: 0,
                 right: 0,
-                margin: "auto",
-                bottom: "20vh",
-                zIndex: 15,
-                opacity: (!hidden && props.visible) ? 1 : 0,
-                pointerEvents: (!hidden && props.visible) ? "auto" : "none",
-                transition: "opacity 0.5s"
+                bottom: "20vh"
             }}
-            onClick={() => {
-                setHidden(true);
-                if (props.startTest) props.startTest();
-            }}
-            ref={button}
         >
-            Приступить к тесту
-        </button>
+            <button
+                className="blue-button"
+                style={{
+                    display: display,
+                    margin: "auto",
+                    zIndex: 15,
+                    opacity: (!hidden && props.visible) ? 1 : 0,
+                    pointerEvents: (!hidden && props.visible) ? "auto" : "none",
+                    transition: "opacity 0.5s"
+                }}
+                onClick={() => {
+                    setHidden(true);
+                    if (props.startTest) props.startTest();
+                }}
+                ref={button}
+            >
+                Приступить к тесту
+            </button>
+        </div>
     );
 }
 
